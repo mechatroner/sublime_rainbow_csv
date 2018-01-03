@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>tsv</string>
+	</array>
+	<key>name</key>
+	<string>tsv syntax</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>comment</string>
+				</dict>
+				<key>4</key>
+				<dict>
+					<key>name</key>
+					<string>string</string>
+				</dict>
+				<key>5</key>
+				<dict>
+					<key>name</key>
+					<string>variable.parameter</string>
+				</dict>
+				<key>6</key>
+				<dict>
+					<key>name</key>
+					<string>constant.numeric</string>
+				</dict>
+				<key>7</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.type</string>
+				</dict>
+				<key>8</key>
+				<dict>
+					<key>name</key>
+					<string>markup.bold</string>
+				</dict>
+				<key>9</key>
+				<dict>
+					<key>name</key>
+					<string>invalid</string>
+				</dict>
+			</dict>
+			<key>match</key>
+			<string>(?:[^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)</string>
+			<key>name</key>
+			<string>rainbow.first</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.tsv</string>
+	<key>uuid</key>
+	<string>ca13e332-04ef-1340-9a6b-9b99aae1c418</string>
+</dict>
+</plist>
