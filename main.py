@@ -18,25 +18,30 @@ def ensure_color_scheme():
 #        ensure_color_scheme()
 
 
+def is_rainbow_view(view_settings):
+    syntax = view_settings.get('syntax')
+    return syntax.find('csv.tmLanguage') != -1 or syntax.find('tsv.tmLanguage') != -1
+
+
 class RainbowEventListener(sublime_plugin.EventListener):
     def on_load(self, view):
         settings = view.settings()
-        syntax = settings.get('syntax')
-        if syntax.find('csv.tmLanguage') == -1 and syntax.find('tsv.tmLanguage') == -1:
+        if not is_rainbow_view(settings):
             return
         print("EventListener on_load triggered")
         ensure_color_scheme()
 
 
-#class ViewRainbowEventListener(sublime_plugin.ViewEventListener):
-#
-#    @classmethod
-#    def is_applicable(cls, settings):
-#        return True
-#        #syntax = settings.get('syntax')
-#        #return syntax.find('csv.tmLanguage') != -1 or syntax.find('tsv.tmLanguage') != -1
-#
-#    def on_load(self, view):
-#        print("ViewEventListener on_load triggered")
-#        ensure_color_scheme()
+class ViewRainbowEventListener(sublime_plugin.ViewEventListener):
+    @classmethod
+    def is_applicable(cls, settings):
+        return is_rainbow_view(settings)
+
+    def on_hover(self, point, hover_zone):
+        if hover_zone == sublime.HOVER_TEXT:
+            # FIXME use view.show_popup() instead
+            self.view.set_status('rainbow_csv_hover', 'hovering!')
+        else:
+            self.view.set_status('rainbow_csv_hover', '')
+        #print("hovering")
 
