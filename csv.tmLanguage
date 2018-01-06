@@ -56,7 +56,7 @@
 				<key>9</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbow10</string>
+					<string>variable.language.rainbow10</string>
 				</dict>
 			</dict>
 			<key>match</key>

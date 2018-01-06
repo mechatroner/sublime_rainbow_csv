@@ -10,16 +10,16 @@ import xml.dom.minidom
 
 
 color_entries = list()
-color_entries.append(('rainbow1', '#FF0000', 'bold'))
-color_entries.append(('keyword.rainbow2', '#00FF00', 'bold'))
-color_entries.append(('entity.name.rainbow3', '#0000FF', 'bold'))
-color_entries.append(('comment.rainbow4', '#FFF200', 'bold'))
-color_entries.append(('string.rainbow5', '#E900FF', 'bold'))
-color_entries.append(('entity.name.tag.rainbow6', '#FF0000', None))
-color_entries.append(('storage.type.rainbow7', '#00FF00', None))
-color_entries.append(('support.rainbow8', '#0000FF', None))
-color_entries.append(('markup.bold.rainbow9', '#FFF200', None))
-color_entries.append(('invalid.rainbow10', '#E900FF', None))
+color_entries.append(('rainbow1', '#FF0000', None))
+color_entries.append(('keyword.rainbow2', '#00FF00', None))
+color_entries.append(('entity.name.rainbow3', '#3D87FF', None))
+color_entries.append(('comment.rainbow4', '#FFF200', None))
+color_entries.append(('string.rainbow5', '#E900FF', None))
+color_entries.append(('entity.name.tag.rainbow6', '#FF7700', None))
+color_entries.append(('storage.type.rainbow7', '#00FFF2', None))
+color_entries.append(('support.rainbow8', '#FF00DC', None))
+color_entries.append(('markup.bold.rainbow9', '#6756FF', None))
+color_entries.append(('variable.language.rainbow10', '#FFFFFF', None))
 
 
 def remove_blanks_from_xml(xml_str):
