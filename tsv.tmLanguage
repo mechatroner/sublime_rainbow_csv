@@ -62,7 +62,7 @@
 			<key>match</key>
 			<string>(?:[^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)([^\t]*\t?)</string>
 			<key>name</key>
-			<string>rainbow.first</string>
+			<string>rainbow1</string>
 		</dict>
 	</array>
 	<key>scopeName</key>
