@@ -10,15 +10,17 @@ import xml.dom.minidom
 
 
 color_entries = list()
-color_entries.append(('rainbow1', '#FF0000', None))
-color_entries.append(('keyword.rainbow2', '#00FF00', None))
-color_entries.append(('entity.name.rainbow3', '#3D87FF', None))
-color_entries.append(('comment.rainbow4', '#FFF200', None))
-color_entries.append(('string.rainbow5', '#E900FF', None))
-color_entries.append(('entity.name.tag.rainbow6', '#FF7700', None))
-color_entries.append(('storage.type.rainbow7', '#00FFF2', None))
-color_entries.append(('support.rainbow8', '#FF00DC', None))
-color_entries.append(('markup.bold.rainbow9', '#6756FF', None))
+
+# colors were taken from here: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+color_entries.append(('rainbow1', '#E6194B', None))
+color_entries.append(('keyword.rainbow2', '#3CB44B', None))
+color_entries.append(('entity.name.rainbow3', '#FFE119', None))
+color_entries.append(('comment.rainbow4', '#0082C8', None))
+color_entries.append(('string.rainbow5', '#FABEBE', None))
+color_entries.append(('entity.name.tag.rainbow6', '#46F0F0', None))
+color_entries.append(('storage.type.rainbow7', '#F032E6', None))
+color_entries.append(('support.rainbow8', '#008080', None))
+color_entries.append(('constant.language.rainbow9', '#F58231', None))
 color_entries.append(('variable.language.rainbow10', '#FFFFFF', None))
 
 
