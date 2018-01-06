@@ -9,15 +9,30 @@ import copy
 import xml.dom.minidom
 
 
+color_entries = list()
+color_entries.append(('rainbow1', '#FF0000', 'bold'))
+color_entries.append(('keyword.rainbow2', '#00FF00', 'bold'))
+color_entries.append(('entity.name.rainbow3', '#0000FF', 'bold'))
+color_entries.append(('comment.rainbow4', '#FFF200', 'bold'))
+color_entries.append(('string.rainbow5', '#E900FF', 'bold'))
+color_entries.append(('entity.name.tag.rainbow6', '#FF0000', None))
+color_entries.append(('storage.type.rainbow7', '#00FF00', None))
+color_entries.append(('support.rainbow8', '#0000FF', None))
+color_entries.append(('markup.bold.rainbow9', '#FFF200', None))
+color_entries.append(('invalid.rainbow10', '#E900FF', None))
+
+
 def remove_blanks_from_xml(xml_str):
     lines = xml_str.split('\n')
     lines = [l.strip() for l in lines]
     lines = [l for l in lines if len(l)]
     return ''.join(lines)
 
+
 def parse_xml_str(xml_str):
     xml_str = remove_blanks_from_xml(xml_str)
     return ET.fromstring(xml_str)
+
 
 def pretty_print(root):
     xml_str = ET.tostring(root)
@@ -33,7 +48,7 @@ def add_plist_entry(root, key, value):
     root.append(cur)
 
 
-def make_color_entry(scope, color, font = None):
+def make_color_entry(scope, color, font):
     result = ET.Element('dict')
     add_plist_entry(result, 'name', 'rainbow csv ' + scope)
     add_plist_entry(result, 'scope', scope)
@@ -56,7 +71,8 @@ def convert_colorscheme(root):
     if len(array_elem) != 1:
         return None
     array_elem = array_elem[0]
-    array_elem.append(make_color_entry('rainbow1', '#FF0000', 'bold'))
+    for entry in color_entries:
+        array_elem.append(make_color_entry(*entry))
     return root
 
 

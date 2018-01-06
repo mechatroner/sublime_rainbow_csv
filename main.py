@@ -8,8 +8,10 @@ import sublime_plugin
 
 class ExampleCommand(sublime_plugin.TextCommand):
     def run(self, edit):
+        pass
         #self.view.insert(edit, 0, "Hello, World!")
-        print("hello")
+        #print("hello")
+
         preferences = sublime.load_settings("csv.sublime-settings")
-        preferences.set("color_scheme", "Packages/Color Scheme - Default/Sixteen.tmTheme")
+        preferences.set("color_scheme", "Packages/rainbow_csv/Rainbow.tmTheme")
         sublime.save_settings("csv.sublime-settings")
