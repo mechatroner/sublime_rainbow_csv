@@ -66,29 +66,6 @@ def smart_split(src, dlm, policy, preserve_quotes):
     return split_quoted_str(src, dlm, preserve_quotes)
 
 
-#def unquote_field(field):
-#    if len(field) < 2:
-#        return field
-#    if field[0] == '"' and field[-1] == '"':
-#        candidate = field[1:-1]
-#        if candidate.count('"') == candidate.count('""') * 2:
-#            return candidate.replace('""', '"')
-#    return field
-#
-#
-#def unquote_fields(fields):
-#    return [unquote_field(f) for f in fields]
-
-
-
-    #let col_num = 0
-    #let cpos = len(fields[col_num]) 
-    #while kb_pos > cpos && col_num + 1 < len(fields)
-    #    let col_num = col_num + 1
-    #    let cpos = cpos + 1 + len(fields[col_num])
-    #endwhile
-
-
 def get_field_by_line_position(fields, query_pos):
     if not len(fields):
         return None
@@ -100,17 +77,16 @@ def get_field_by_line_position(fields, query_pos):
     return col_num
 
 
-
-
 def ensure_color_scheme():
-    print("setting color theme")
-    preferences = sublime.load_settings("csv.sublime-settings")
-    preferences.set("color_scheme", "Packages/rainbow_csv/Rainbow.tmTheme")
-    sublime.save_settings("csv.sublime-settings")
-
-    preferences = sublime.load_settings("tsv.sublime-settings")
-    preferences.set("color_scheme", "Packages/rainbow_csv/Rainbow.tmTheme")
-    sublime.save_settings("tsv.sublime-settings")
+    pass
+    #print("setting color theme")
+    #settings = sublime.load_settings("csv.sublime-settings")
+    #settings.set("color_scheme", "Packages/rainbow_csv/Rainbow.tmTheme")
+    #sublime.save_settings("csv.sublime-settings")
+    #
+    #settings = sublime.load_settings("tsv.sublime-settings")
+    #settings.set("color_scheme", "Packages/rainbow_csv/Rainbow.tmTheme")
+    #sublime.save_settings("tsv.sublime-settings")
 
 
 #class ExampleCommand(sublime_plugin.TextCommand):
@@ -145,14 +121,6 @@ class ViewRainbowEventListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
         return is_rainbow_view(settings)
-
-    #def on_hover(self, point, hover_zone):
-    #    if hover_zone == sublime.HOVER_TEXT:
-    #        # FIXME use view.show_popup() instead
-    #        self.view.set_status('rainbow_csv_hover', 'hovering!')
-    #    else:
-    #        self.view.set_status('rainbow_csv_hover', '')
-    #    #print("hovering")
 
     def on_hover(self, point, hover_zone):
         if hover_zone == sublime.HOVER_TEXT:
