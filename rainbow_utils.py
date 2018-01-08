@@ -104,11 +104,8 @@ def guess_if_header(potential_header, sampled_records):
     required_extremes_count = 1 if num_fields <= 3 else int(math.ceil(num_fields * 0.333))
     found_extremes = 0
     for c in range(num_fields):
-        minl = len(sampled_records[0][c])
-        maxl = len(sampled_records[0][c])
-        for sr in sampled_records:
-            minl = min(minl, len(sampled_records))
-            maxl = max(maxl, len(sampled_records))
+        minl = min([len(sr[c]) for sr in sampled_records])
+        maxl = max([len(sr[c]) for sr in sampled_records])
         if len(potential_header[c]) > maxl * 2:
             found_extremes += 1
         if len(potential_header[c]) * 2 < minl:
