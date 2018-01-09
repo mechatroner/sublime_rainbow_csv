@@ -7,7 +7,7 @@
 		<string>tsv</string>
 	</array>
 	<key>name</key>
-	<string>tsv syntax</string>
+	<string>tsv</string>
 	<key>patterns</key>
 	<array>
 		<dict>
