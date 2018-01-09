@@ -30,7 +30,6 @@ def get_file_line_count(view):
 def guess_document_header(view, delim, policy):
     num_lines = get_file_line_count(view)
     head_count = 10
-    #FIXME test with small files (< 10 lines/ < 20 lines), same for vscode
     sampled_lines = []
     if num_lines <= head_count * 2:
         for lnum in range(1, num_lines):
@@ -40,14 +39,15 @@ def guess_document_header(view, delim, policy):
             sampled_lines.append(get_line_text(view, lnum))
         for lnum in range(num_lines - head_count, num_lines):
             sampled_lines.append(get_line_text(view, lnum))
-        while len(sampled_lines) and not len(sampled_lines[-1]):
-            sampled_lines.pop()
-        if len(sampled_lines) < 10:
-            return None
-        sampled_records = [smart_split(l, delim, policy, False)[0] for l in sampled_lines]
-        potential_header = smart_split(get_line_text(view, 0), delim, policy, False)[0]
-        has_header = guess_if_header(potential_header, sampled_records)
-        return potential_header if has_header else None
+
+    while len(sampled_lines) and not len(sampled_lines[-1]):
+        sampled_lines.pop()
+    if len(sampled_lines) < 10:
+        return None
+    sampled_records = [smart_split(l, delim, policy, False)[0] for l in sampled_lines]
+    potential_header = smart_split(get_line_text(view, 0), delim, policy, False)[0]
+    has_header = guess_if_header(potential_header, sampled_records)
+    return potential_header if has_header else None
         
 
 class ViewRainbowEventListener(sublime_plugin.ViewEventListener):
