@@ -7,7 +7,7 @@
 		<string>tsv</string>
 	</array>
 	<key>name</key>
-	<string>tsv</string>
+	<string>TSV (Rainbow)</string>
 	<key>patterns</key>
 	<array>
 		<dict>

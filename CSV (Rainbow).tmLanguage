@@ -7,7 +7,7 @@
 		<string>csv</string>
 	</array>
 	<key>name</key>
-	<string>csv</string>
+	<string>CSV (Rainbow)</string>
 	<key>patterns</key>
 	<array>
 		<dict>

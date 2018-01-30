@@ -6,9 +6,9 @@ from .rainbow_utils import *
 
 def get_view_delim(view_settings):
     syntax = view_settings.get('syntax')
-    if syntax.find('csv.tmLanguage') != -1: 
+    if syntax.find('CSV (Rainbow).tmLanguage') != -1: 
         return ','
-    if syntax.find('tsv.tmLanguage') != -1:
+    if syntax.find('TSV (Rainbow).tmLanguage') != -1:
         return '\t'
     return None
 
