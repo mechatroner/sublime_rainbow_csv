@@ -2,7 +2,7 @@
 
 #### Main features
 
-* Highlight columns in *.csv and *.tsv in different rainbow colors.
+* Highlight columns in *.csv and *.tsv files in different rainbow colors.
 * Provide info about column on mouse hover.
 
 ![screenshot](https://i.imgur.com/UtGKbEg.png)
