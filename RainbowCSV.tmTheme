@@ -693,6 +693,19 @@
 					<string>#FFFFFF</string>
 				</dict>
 			</dict>
+			<dict>
+				<key>name</key>
+				<string>rainbow csv invalid.rainbowerror</string>
+				<key>scope</key>
+				<string>invalid.rainbowerror</string>
+				<key>settings</key>
+				<dict>
+					<key>background</key>
+					<string>#FF0000</string>
+					<key>foreground</key>
+					<string>#FFFFFF</string>
+				</dict>
+			</dict>
 		</array>
 	</dict>
 </plist>
