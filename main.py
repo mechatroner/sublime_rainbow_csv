@@ -50,7 +50,52 @@ def guess_document_header(view, delim, policy):
     return potential_header if has_header else None
         
 
-class ViewRainbowEventListener(sublime_plugin.ViewEventListener):
+
+def is_plain_text(view):
+    syntax = view.settings().get('syntax')
+    return syntax.find('Text/Plain') != -1
+
+
+class DisableCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        pass
+        print('disabling...')
+        #self.view.insert(edit, 0, "Hello, World!")
+
+
+class EnableStandardCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        pass
+        print('enabling standard...')
+        #self.view.insert(edit, 0, "Hello, World!")
+
+
+class EnableSimpleCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        pass
+        print('enabling standard...')
+        #self.view.insert(edit, 0, "Hello, World!")
+
+
+class RainbowAutodetectListener(sublime_plugin.EventListener):
+    def on_load(self, view):
+        if not is_plain_text(view):
+            return
+        #FIXME now run autodetection and set the right syntax
+        
+
+        #syntax = view.settings().get('syntax')
+        #if syntax.find('Text/Plain') == -1:
+        #    return
+        #print("loaded!")
+        #file_path = view.file_name()
+        #print( "file_path:", file_path, "\tsyntax:", syntax) #FOR_DEBUG
+        ## plain syntaxes:
+        ##file_path: /home/snow/university_ranking.txt 	syntax: Packages/Text/Plain text.tmLanguage
+        ##file_path: /home/snow/movies.ksv 	syntax: Packages/Text/Plain text.tmLanguage
+
+
+class RainbowHoverListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
         return is_rainbow_view(settings)
