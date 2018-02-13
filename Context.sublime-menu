@@ -1,0 +1,12 @@
+[
+    {
+        "caption": "Rainbow CSV",
+        "id": "rainbow_csv",
+        "children":
+        [
+            { "command": "enable_standard", "caption": "Enable Standard" },
+            { "command": "enable_simple", "caption": "Enable Simple" },
+            { "command": "disable", "caption": "Disable" }
+        ]
+    }
+]
