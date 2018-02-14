@@ -1,3 +1,4 @@
+import os
 import sublime
 import sublime_plugin
 
@@ -70,10 +71,49 @@ class EnableStandardCommand(sublime_plugin.TextCommand):
         #self.view.insert(edit, 0, "Hello, World!")
 
 
+def name_normalize(delim):
+    if delim == '/':
+        return 'slash'
+    if delim == '\t':
+        return 'tab'
+    if delim == ' ':
+        return 'space'
+    return '[{}]'.format(delim)
+
+
+def get_grammar_basename(delim, policy):
+    if delim == '\t' and policy == 'simple':
+        return 'TSV (Rainbow)'
+    if delim == ',' and policy == 'quoted':
+        return 'CSV (Rainbow)'
+    simple_delims = ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\t'
+    standard_delims = '\t|,;'
+    if policy == 'simple' and simple_delims.find(delim) == -1:
+        return None
+    if policy == 'quoted' and standard_delims.find(delim) == -1:
+        return None
+    policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
+    return 'Rainbow {} {}.tmLanguage'.format(name_normalize(delim), policy_map[policy])
+
+
+
 class EnableSimpleCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        pass
-        print('enabling standard...')
+        selection = self.view.sel()
+        if len(selection) != 1:
+            sublime.error_message('Error. Too many cursors/selections.')
+            return
+        region = selection[0]
+        selection_text = self.view.substr(region)
+        if len(selection_text) != 1:
+            sublime.error_message('Error. Exactly one separator character should be selected.')
+            return
+        #print( "selection_text:", selection_text) #FOR_DEBUG
+        grammar_basename =  get_grammar_basename(selection_text, 'simple')
+        if grammar_basename is None:
+            sublime.error_message('Error. Unable to use this character as a separator.')
+            return
+        self.view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
         #self.view.insert(edit, 0, "Hello, World!")
 
 
