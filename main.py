@@ -69,9 +69,9 @@ def name_normalize(delim):
 
 def get_grammar_basename(delim, policy):
     if delim == '\t' and policy == 'simple':
-        return 'TSV (Rainbow)'
+        return 'TSV (Rainbow).tmLanguage'
     if delim == ',' and policy == 'quoted':
-        return 'CSV (Rainbow)'
+        return 'CSV (Rainbow).tmLanguage'
     simple_delims = ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\t'
     standard_delims = '\t|,;'
     if policy == 'simple' and simple_delims.find(delim) == -1:
@@ -92,7 +92,7 @@ def do_enable_rainbow(view, policy):
     if len(selection_text) != 1:
         sublime.error_message('Error. Exactly one separator character should be selected.')
         return
-    grammar_basename =  get_grammar_basename(selection_text, policy)
+    grammar_basename = get_grammar_basename(selection_text, policy)
     if grammar_basename is None:
         if policy == 'quoted':
             sublime.error_message('Error. Unable to use this character with "Standard" dialect. Try "Simple" instead.')
@@ -102,7 +102,7 @@ def do_enable_rainbow(view, policy):
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax') 
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
-        print( "pre_rainbow_syntax:", pre_rainbow_syntax) #FOR_DEBUG
+        #print( "pre_rainbow_syntax:", pre_rainbow_syntax) #FOR_DEBUG
     view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
 
 
