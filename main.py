@@ -54,21 +54,7 @@ def guess_document_header(view, delim, policy):
 
 def is_plain_text(view):
     syntax = view.settings().get('syntax')
-    return syntax.find('Text/Plain') != -1
-
-
-class DisableCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        pass
-        print('disabling...')
-        #self.view.insert(edit, 0, "Hello, World!")
-
-
-class EnableStandardCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        pass
-        print('enabling standard...')
-        #self.view.insert(edit, 0, "Hello, World!")
+    return syntax.find('Plain text.tmLanguage') != -1
 
 
 def name_normalize(delim):
@@ -96,25 +82,47 @@ def get_grammar_basename(delim, policy):
     return 'Rainbow {} {}.tmLanguage'.format(name_normalize(delim), policy_map[policy])
 
 
+def do_enable_rainbow(view, policy):
+    selection = view.sel()
+    if len(selection) != 1:
+        sublime.error_message('Error. Too many cursors/selections.')
+        return
+    region = selection[0]
+    selection_text = view.substr(region)
+    if len(selection_text) != 1:
+        sublime.error_message('Error. Exactly one separator character should be selected.')
+        return
+    grammar_basename =  get_grammar_basename(selection_text, policy)
+    if grammar_basename is None:
+        if policy == 'quoted':
+            sublime.error_message('Error. Unable to use this character with "Standard" dialect. Try "Simple" instead.')
+        else:
+            sublime.error_message('Error. Unable to use this character as a separator.')
+        return
+    if view.settings().get('pre_rainbow_syntax', None) is None:
+        pre_rainbow_syntax = view.settings().get('syntax') 
+        view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
+        print( "pre_rainbow_syntax:", pre_rainbow_syntax) #FOR_DEBUG
+    view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
+
+
+class EnableStandardCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        do_enable_rainbow(self.view, 'quoted')
+
 
 class EnableSimpleCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        selection = self.view.sel()
-        if len(selection) != 1:
-            sublime.error_message('Error. Too many cursors/selections.')
+        do_enable_rainbow(self.view, 'simple')
+
+
+class DisableCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        pre_rainbow_syntax = self.view.settings().get('pre_rainbow_syntax', None)
+        if pre_rainbow_syntax is None:
             return
-        region = selection[0]
-        selection_text = self.view.substr(region)
-        if len(selection_text) != 1:
-            sublime.error_message('Error. Exactly one separator character should be selected.')
-            return
-        #print( "selection_text:", selection_text) #FOR_DEBUG
-        grammar_basename =  get_grammar_basename(selection_text, 'simple')
-        if grammar_basename is None:
-            sublime.error_message('Error. Unable to use this character as a separator.')
-            return
-        self.view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
-        #self.view.insert(edit, 0, "Hello, World!")
+        self.view.set_syntax_file(pre_rainbow_syntax)
+        self.view.settings().erase('pre_rainbow_syntax')
 
 
 class RainbowAutodetectListener(sublime_plugin.EventListener):
