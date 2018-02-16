@@ -87,31 +87,20 @@ def guess_if_header(potential_header, sampled_records):
         if len(sr) != num_fields:
             return False
 
-    # all sampled lines has a number in a column and potential header doesn't - header
-    number_re = '^-?[0-9]+(?:[.,][0-9]+)?$'
+
+    # all sampled lines do not have any letters in a column and potential header does - header
+    optimistic_name_re = '^"?[a-zA-Z]{3,}'
+    pessimistic_name_re = '[a-zA-Z]'
     for c in range(num_fields):
-        if re.match(number_re, potential_header[c]):
+        if re.match(optimistic_name_re, potential_header[c]) is None:
             continue
         all_numbers = True
         for sr in sampled_records:
-            if not re.match(number_re, sr[c]):
+            if re.match(pessimistic_name_re, sr[c]) is not None:
                 all_numbers = False
                 break
         if all_numbers:
             return True
-
-    # at least N columns 2 times longer than MAX or 2 times smaller than MIN - header
-    required_extremes_count = 1 if num_fields <= 3 else int(math.ceil(num_fields * 0.333))
-    found_extremes = 0
-    for c in range(num_fields):
-        minl = min([len(sr[c]) for sr in sampled_records])
-        maxl = max([len(sr[c]) for sr in sampled_records])
-        if len(potential_header[c]) > maxl * 2:
-            found_extremes += 1
-        if len(potential_header[c]) * 2 < minl:
-            found_extremes += 1
-    if found_extremes >= required_extremes_count:
-        return True
 
     return False
 

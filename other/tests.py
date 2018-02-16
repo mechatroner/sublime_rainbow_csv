@@ -31,7 +31,7 @@ class TestHeaderGuessing(unittest.TestCase):
         header = ['type', 'story']
         sampled_entries = [['fairytale', 'Once upon a time there was a beautiful girl who lived...'], ['romance', 'She looked outside her window and saw an approaching ship']]
         is_header = rainbow_utils.guess_if_header(header, sampled_entries)
-        self.assertTrue(is_header)
+        self.assertTrue(not is_header)
 
 
     def test_run4(self):
@@ -48,3 +48,8 @@ class TestHeaderGuessing(unittest.TestCase):
         self.assertTrue(not is_header);
 
 
+    def test_run6(self):
+        header = ['"name"', '"age"']
+        sampled_entries = [['Dima', '29.0'], ['Alice', '1.5'], ['future generation', '-20.0']]
+        is_header = rainbow_utils.guess_if_header(header, sampled_entries)
+        self.assertTrue(is_header)
