@@ -21,101 +21,51 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbowerror</string>
+					<string>keyword.rainbow2</string>
 				</dict>
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>keyword.rainbow2</string>
+					<string>entity.name.rainbow3</string>
 				</dict>
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbowerror</string>
+					<string>comment.rainbow4</string>
 				</dict>
 				<key>5</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.rainbow3</string>
+					<string>string.rainbow5</string>
 				</dict>
 				<key>6</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbowerror</string>
+					<string>entity.name.tag.rainbow6</string>
 				</dict>
 				<key>7</key>
 				<dict>
 					<key>name</key>
-					<string>comment.rainbow4</string>
+					<string>storage.type.rainbow7</string>
 				</dict>
 				<key>8</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbowerror</string>
+					<string>support.rainbow8</string>
 				</dict>
 				<key>9</key>
 				<dict>
 					<key>name</key>
-					<string>string.rainbow5</string>
+					<string>constant.language.rainbow9</string>
 				</dict>
 				<key>10</key>
 				<dict>
 					<key>name</key>
-					<string>invalid.rainbowerror</string>
-				</dict>
-				<key>11</key>
-				<dict>
-					<key>name</key>
-					<string>entity.name.tag.rainbow6</string>
-				</dict>
-				<key>12</key>
-				<dict>
-					<key>name</key>
-					<string>invalid.rainbowerror</string>
-				</dict>
-				<key>13</key>
-				<dict>
-					<key>name</key>
-					<string>storage.type.rainbow7</string>
-				</dict>
-				<key>14</key>
-				<dict>
-					<key>name</key>
-					<string>invalid.rainbowerror</string>
-				</dict>
-				<key>15</key>
-				<dict>
-					<key>name</key>
-					<string>support.rainbow8</string>
-				</dict>
-				<key>16</key>
-				<dict>
-					<key>name</key>
-					<string>invalid.rainbowerror</string>
-				</dict>
-				<key>17</key>
-				<dict>
-					<key>name</key>
-					<string>constant.language.rainbow9</string>
-				</dict>
-				<key>18</key>
-				<dict>
-					<key>name</key>
-					<string>invalid.rainbowerror</string>
-				</dict>
-				<key>19</key>
-				<dict>
-					<key>name</key>
 					<string>variable.language.rainbow10</string>
-				</dict>
-				<key>20</key>
-				<dict>
-					<key>name</key>
-					<string>invalid.rainbowerror</string>
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?(?:((?:"(?:[^"]*"")*[^"]*"(?:\t|$))|(?:[^"\t]*(?:\t|$)))|(.+$))?</string>
+			<string>((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?((?:"(?:[^"]*"")*[^"]*"\t?)|(?:[^\t]*\t?))?</string>
 			<key>name</key>
 			<string>rainbowline</string>
 		</dict>
