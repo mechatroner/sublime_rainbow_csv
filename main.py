@@ -45,25 +45,32 @@ def get_file_line_count(view):
     return view.rowcol(view.size())[0] + 1
 
 
-def guess_document_header(view, delim, policy):
+def sample_lines(view):
     num_lines = get_file_line_count(view)
     head_count = 10
     sampled_lines = []
     if num_lines <= head_count * 2:
-        for lnum in range(1, num_lines):
+        for lnum in range(num_lines):
             sampled_lines.append(get_line_text(view, lnum))
     else:
-        for lnum in range(1, head_count):
+        for lnum in range(head_count):
             sampled_lines.append(get_line_text(view, lnum))
         for lnum in range(num_lines - head_count, num_lines):
             sampled_lines.append(get_line_text(view, lnum))
 
     while len(sampled_lines) and not len(sampled_lines[-1]):
         sampled_lines.pop()
+    return sampled_lines
+
+
+def guess_document_header(view, delim, policy):
+    sampled_lines = sample_lines(view)
     if len(sampled_lines) < 10:
         return None
-    sampled_records = [smart_split(l, delim, policy, False)[0] for l in sampled_lines]
-    potential_header = smart_split(get_line_text(view, 0), delim, policy, False)[0]
+    header_line = sampled_lines[0]
+    body_lines = sampled_lines[1:]
+    sampled_records = [smart_split(l, delim, policy, False)[0] for l in body_lines]
+    potential_header = smart_split(header_line, delim, policy, False)[0]
     has_header = guess_if_header(potential_header, sampled_records)
     return potential_header if has_header else None
         
@@ -153,22 +160,31 @@ class DisableCommand(sublime_plugin.TextCommand):
         do_disable_rainbow(self.view)
 
 
+def is_delimited_table(sampled_lines, delim, policy):
+    if len(sampled_lines) < 2:
+        return False
+    num_fields = None
+    for sl in sampled_lines:
+        fields, warning = smart_split(sl, delim, policy, True)
+        if warning or len(fields) < 2:
+            return False
+        if num_fields is None:
+            num_fields = len(fields)
+        if num_fields != len(fields):
+            return False
+    return True
+
+
 class RainbowAutodetectListener(sublime_plugin.EventListener):
     def on_load(self, view):
         if not is_plain_text(view):
             return
-        #FIXME now run autodetection and set the right syntax
-        
-
-        #syntax = view.settings().get('syntax')
-        #if syntax.find('Text/Plain') == -1:
-        #    return
-        #print("loaded!")
-        #file_path = view.file_name()
-        #print( "file_path:", file_path, "\tsyntax:", syntax) #FOR_DEBUG
-        ## plain syntaxes:
-        ##file_path: /home/snow/university_ranking.txt 	syntax: Packages/Text/Plain text.tmLanguage
-        ##file_path: /home/snow/movies.ksv 	syntax: Packages/Text/Plain text.tmLanguage
+        sampled_lines = sample_lines(view)
+        autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
+        for delim, policy in autodetection_dialects:
+            if is_delimited_table(sampled_lines, delim, policy):
+                do_enable_rainbow(view, delim, policy)
+                break
 
 
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
