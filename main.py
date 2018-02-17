@@ -1,21 +1,38 @@
 import os
+import re
+
 import sublime
 import sublime_plugin
 
 from .rainbow_utils import *
 
 
-def get_view_delim(view_settings):
+def get_view_rainbow_params(view_settings):
     syntax = view_settings.get('syntax')
     if syntax.find('CSV (Rainbow).tmLanguage') != -1: 
-        return ','
+        return (',', 'quoted')
     if syntax.find('TSV (Rainbow).tmLanguage') != -1:
-        return '\t'
-    return None
+        return ('\t', 'simple')
+    syntax_basename = os.path.basename(syntax)
+    rgx = r'^Rainbow (.*) ((?:Simple)|(?:Standard))\.tmLanguage$'
+    match_obj = re.match(rgx, syntax_basename)
+    if match_obj is None:
+        return (None, None)
+    delim_part = match_obj.group(1)
+    dialect_part = match_obj.group(2)
+    if len(delim_part) == 3 and delim_part[0] == '[' and delim_part[2] == ']':
+        delim = delim_part[1]
+    else:
+        delim = {'tab': '\t', 'space': ' ', 'slash': '/'}.get(delim_part)
+    dialect = {'Simple': 'simple', 'Standard': 'quoted'}.get(dialect_part)
+    if delim is None or dialect is None:
+        return (None, None)
+    return (delim, dialect)
+
 
 
 def is_rainbow_view(view_settings):
-    return get_view_delim(view_settings) is not None
+    return get_view_rainbow_params(view_settings)[0] is not None
 
 
 def get_line_text(view, lnum):
@@ -150,8 +167,9 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
 
     def on_hover(self, point, hover_zone):
         if hover_zone == sublime.HOVER_TEXT:
-            delim = get_view_delim(self.view.settings())
-            policy = 'quoted' if delim == ',' else 'simple'
+            delim, policy = get_view_rainbow_params(self.view.settings())
+            if delim is None:
+                return
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
             line_text = self.view.substr(self.view.line(point))
