@@ -7,32 +7,32 @@ import sublime_plugin
 from .rainbow_utils import *
 
 
-def get_view_rainbow_params(view_settings):
-    syntax = view_settings.get('syntax')
-    if syntax.find('CSV (Rainbow).tmLanguage') != -1: 
-        return (',', 'quoted')
-    if syntax.find('TSV (Rainbow).tmLanguage') != -1:
-        return ('\t', 'simple')
-    syntax_basename = os.path.basename(syntax)
-    rgx = r'^Rainbow (.*) ((?:Simple)|(?:Standard))\.tmLanguage$'
-    match_obj = re.match(rgx, syntax_basename)
-    if match_obj is None:
-        return (None, None)
-    delim_part = match_obj.group(1)
-    dialect_part = match_obj.group(2)
-    if len(delim_part) == 3 and delim_part[0] == '[' and delim_part[2] == ']':
-        delim = delim_part[1]
-    else:
-        delim = {'tab': '\t', 'space': ' ', 'slash': '/'}.get(delim_part)
-    dialect = {'Simple': 'simple', 'Standard': 'quoted'}.get(dialect_part)
-    if delim is None or dialect is None:
-        return (None, None)
-    return (delim, dialect)
+#def get_view_rainbow_params(view_settings):
+#    syntax = view_settings.get('syntax')
+#    if syntax.find('CSV (Rainbow).tmLanguage') != -1: 
+#        return (',', 'quoted')
+#    if syntax.find('TSV (Rainbow).tmLanguage') != -1:
+#        return ('\t', 'simple')
+#    syntax_basename = os.path.basename(syntax)
+#    rgx = r'^Rainbow (.*) ((?:Simple)|(?:Standard))\.tmLanguage$'
+#    match_obj = re.match(rgx, syntax_basename)
+#    if match_obj is None:
+#        return (None, None)
+#    delim_part = match_obj.group(1)
+#    dialect_part = match_obj.group(2)
+#    if len(delim_part) == 3 and delim_part[0] == '[' and delim_part[2] == ']':
+#        delim = delim_part[1]
+#    else:
+#        delim = {'tab': '\t', 'space': ' ', 'slash': '/'}.get(delim_part)
+#    dialect = {'Simple': 'simple', 'Standard': 'quoted'}.get(dialect_part)
+#    if delim is None or dialect is None:
+#        return (None, None)
+#    return (delim, dialect)
 
 
 
-def is_rainbow_view(view_settings):
-    return get_view_rainbow_params(view_settings)[0] is not None
+#def is_rainbow_view(view_settings):
+#    return view_settings.get('rainbow_delim', None) is not None
 
 
 def get_line_text(view, lnum):
@@ -99,17 +99,8 @@ def get_grammar_basename(delim, policy):
     return 'Rainbow {} {}.tmLanguage'.format(name_normalize(delim), policy_map[policy])
 
 
-def do_enable_rainbow(view, policy):
-    selection = view.sel()
-    if len(selection) != 1:
-        sublime.error_message('Error. Too many cursors/selections.')
-        return
-    region = selection[0]
-    selection_text = view.substr(region)
-    if len(selection_text) != 1:
-        sublime.error_message('Error. Exactly one separator character should be selected.')
-        return
-    grammar_basename = get_grammar_basename(selection_text, policy)
+def do_enable_rainbow(view, delim, policy):
+    grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
             sublime.error_message('Error. Unable to use this character with "Standard" dialect. Try "Simple" instead.')
@@ -119,27 +110,47 @@ def do_enable_rainbow(view, policy):
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax') 
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
-        #print( "pre_rainbow_syntax:", pre_rainbow_syntax) #FOR_DEBUG
+        view.settings().set('rainbow_delim', delim)
+        view.settings().set('rainbow_policy', policy)
     view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
+
+
+def do_disable_rainbow(view):
+    pre_rainbow_syntax = view.settings().get('pre_rainbow_syntax', None)
+    if pre_rainbow_syntax is None:
+        return
+    self.view.set_syntax_file(pre_rainbow_syntax)
+    self.view.settings().erase('pre_rainbow_syntax')
+    self.view.settings().erase('rainbow_delim')
+    self.view.settings().erase('rainbow_policy')
+
+
+def enable_generic_command(view, policy):
+    selection = view.sel()
+    if len(selection) != 1:
+        sublime.error_message('Error. Too many cursors/selections.')
+        return
+    region = selection[0]
+    selection_text = view.substr(region)
+    if len(selection_text) != 1:
+        sublime.error_message('Error. Exactly one separator character should be selected.')
+        return
+    do_enable_rainbow(view, selection_text, policy)
 
 
 class EnableStandardCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        do_enable_rainbow(self.view, 'quoted')
+        enable_generic_command(self.view, 'quoted')
 
 
 class EnableSimpleCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        do_enable_rainbow(self.view, 'simple')
+        enable_generic_command(self.view, 'simple')
 
 
 class DisableCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        pre_rainbow_syntax = self.view.settings().get('pre_rainbow_syntax', None)
-        if pre_rainbow_syntax is None:
-            return
-        self.view.set_syntax_file(pre_rainbow_syntax)
-        self.view.settings().erase('pre_rainbow_syntax')
+        do_disable_rainbow(self.view)
 
 
 class RainbowAutodetectListener(sublime_plugin.EventListener):
@@ -163,11 +174,12 @@ class RainbowAutodetectListener(sublime_plugin.EventListener):
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
-        return is_rainbow_view(settings)
+        return settings.get('rainbow_delim', None) is not None
 
     def on_hover(self, point, hover_zone):
         if hover_zone == sublime.HOVER_TEXT:
-            delim, policy = get_view_rainbow_params(self.view.settings())
+            delim = self.view.settings().get('rainbow_delim')
+            policy = self.view.settings().get('rainbow_policy')
             if delim is None:
                 return
             # lnum and cnum are 0-based
