@@ -128,10 +128,26 @@ def is_plain_text(view):
 
 
 def name_normalize(delim):
+    # same order as in https://stackoverflow.com/a/31976060/2898283
+    # TODO use dict instead of this
+    if delim == '<':
+        return 'less-than'
+    if delim == '>':
+        return 'greater-than'
+    if delim == ':':
+        return 'colon'
+    if delim == '"':
+        return 'double-quote'
     if delim == '/':
         return 'slash'
     if delim == '\\':
         return 'backslash'
+    if delim == '|':
+        return 'pipe'
+    if delim == '?':
+        return 'question-mark'
+    if delim == '*':
+        return 'asterisk'
     if delim == '\t':
         return 'tab'
     if delim == ' ':
@@ -144,7 +160,7 @@ def get_grammar_basename(delim, policy):
         return 'TSV (Rainbow).tmLanguage'
     if delim == ',' and policy == 'quoted':
         return 'CSV (Rainbow).tmLanguage'
-    simple_delims = ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\t'
+    simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     standard_delims = '\t|,;'
     if policy == 'simple' and simple_delims.find(delim) == -1:
         return None
