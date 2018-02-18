@@ -4,10 +4,10 @@
 <dict>
 	<key>fileTypes</key>
 	<array>
-		<string>rbcsm42</string>
+		<string>rbcsm60</string>
 	</array>
 	<key>name</key>
-	<string>Rainbow [*] Simple</string>
+	<string>Rainbow less-than Simple</string>
 	<key>patterns</key>
 	<array>
 		<dict>
@@ -65,14 +65,14 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)([^\*]*\*?)</string>
+			<string>([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)([^&lt;]*&lt;?)</string>
 			<key>name</key>
 			<string>rainbowline</string>
 		</dict>
 	</array>
 	<key>scopeName</key>
-	<string>text.rbcsm42</string>
+	<string>text.rbcsm60</string>
 	<key>uuid</key>
-	<string>ca03e352-04ef-4340-9a6b-9b99aae1a042</string>
+	<string>ca03e352-04ef-4340-9a6b-9b99aae1a060</string>
 </dict>
 </plist>
