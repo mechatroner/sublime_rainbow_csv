@@ -7,32 +7,78 @@ import sublime_plugin
 from .rainbow_utils import *
 
 
-#def get_view_rainbow_params(view_settings):
-#    syntax = view_settings.get('syntax')
-#    if syntax.find('CSV (Rainbow).tmLanguage') != -1: 
-#        return (',', 'quoted')
-#    if syntax.find('TSV (Rainbow).tmLanguage') != -1:
-#        return ('\t', 'simple')
-#    syntax_basename = os.path.basename(syntax)
-#    rgx = r'^Rainbow (.*) ((?:Simple)|(?:Standard))\.tmLanguage$'
-#    match_obj = re.match(rgx, syntax_basename)
-#    if match_obj is None:
-#        return (None, None)
-#    delim_part = match_obj.group(1)
-#    dialect_part = match_obj.group(2)
-#    if len(delim_part) == 3 and delim_part[0] == '[' and delim_part[2] == ']':
-#        delim = delim_part[1]
-#    else:
-#        delim = {'tab': '\t', 'space': ' ', 'slash': '/'}.get(delim_part)
-#    dialect = {'Simple': 'simple', 'Standard': 'quoted'}.get(dialect_part)
-#    if delim is None or dialect is None:
-#        return (None, None)
-#    return (delim, dialect)
+user_home_dir = os.path.expanduser('~')
+table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
 
+def index_decode_delim(delim):
+    if delim == 'TAB':
+        return '\t'
+    return delim
 
-#def is_rainbow_view(view_settings):
-#    return view_settings.get('rainbow_delim', None) is not None
+
+def index_encode_delim(delim):
+    if delim == '\t':
+        return 'TAB'
+    return delim
+
+
+def try_read_index(index_path):
+    lines = []
+    try:
+        with open(index_path) as f:
+            lines = f.readlines()
+    except Exception:
+        return []
+    result = list()
+    for line in lines:
+        line = line.rstrip('\r\n')
+        if not len(line):
+            continue
+        record = line.split('\t')
+        result.append(record)
+    return result
+
+
+def write_index(records, index_path):
+    with open(index_path, 'w') as dst:
+        for record in records:
+            dst.write('\t'.join(record) + '\n')
+
+
+def get_index_record(index_path, key):
+    records = try_read_index(index_path)
+    for record in records:
+        if len(record) and record[0] == key:
+            return record
+    return None
+
+
+def load_rainbow_params(file_path):
+    record = get_index_record(table_index_path, file_path)
+    if record is not None and len(record) >= 3:
+        delim, policy = record[1:3]
+        delim = index_decode_delim(delim)
+        return (delim, policy)
+    return (None, None)
+
+
+def update_records(records, record_key, new_record):
+    for i in range(len(records)):
+        if len(records[i]) and records[i][0] == record_key:
+            records[i] = new_record
+            return
+    records.append(new_record)
+
+
+def save_rainbow_params(file_path, delim, policy):
+    records = try_read_index(table_index_path)
+    new_record = [file_path, index_encode_delim(delim), policy, '']
+    update_records(records, file_path, new_record)
+    if len(records) > 100:
+        records.pop(0)
+    write_index(records, table_index_path)
+
 
 
 def get_line_text(view, lnum):
@@ -120,16 +166,22 @@ def do_enable_rainbow(view, delim, policy):
         view.settings().set('rainbow_delim', delim)
         view.settings().set('rainbow_policy', policy)
     view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
+    file_path = view.file_name()
+    if file_path is not None:
+        save_rainbow_params(file_path, delim, policy)
 
 
 def do_disable_rainbow(view):
     pre_rainbow_syntax = view.settings().get('pre_rainbow_syntax', None)
     if pre_rainbow_syntax is None:
         return
-    self.view.set_syntax_file(pre_rainbow_syntax)
-    self.view.settings().erase('pre_rainbow_syntax')
-    self.view.settings().erase('rainbow_delim')
-    self.view.settings().erase('rainbow_policy')
+    view.set_syntax_file(pre_rainbow_syntax)
+    view.settings().erase('pre_rainbow_syntax')
+    view.settings().erase('rainbow_delim')
+    view.settings().erase('rainbow_policy')
+    file_path = view.file_name()
+    if file_path is not None:
+        save_rainbow_params(file_path, 'disabled', '')
 
 
 def enable_generic_command(view, policy):
@@ -175,16 +227,34 @@ def is_delimited_table(sampled_lines, delim, policy):
     return True
 
 
+def run_rainbow_init(view):
+    if view.settings().get('rainbow_inited') is not None:
+        return
+    view.settings().set('rainbow_inited', 1)
+    file_path = view.file_name()
+    if file_path is not None:
+        delim, policy = load_rainbow_params(file_path)
+        if delim == 'disabled':
+            return
+        if delim is not None:
+            do_enable_rainbow(view, delim, policy)
+            return
+    if not is_plain_text(view):
+        return
+    sampled_lines = sample_lines(view)
+    autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
+    for delim, policy in autodetection_dialects:
+        if is_delimited_table(sampled_lines, delim, policy):
+            do_enable_rainbow(view, delim, policy)
+            break
+
+
 class RainbowAutodetectListener(sublime_plugin.EventListener):
     def on_load(self, view):
-        if not is_plain_text(view):
-            return
-        sampled_lines = sample_lines(view)
-        autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
-        for delim, policy in autodetection_dialects:
-            if is_delimited_table(sampled_lines, delim, policy):
-                do_enable_rainbow(view, delim, policy)
-                break
+        run_rainbow_init(view)
+
+    def on_activated(self, view):
+        run_rainbow_init(view)
 
 
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
