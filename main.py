@@ -130,6 +130,8 @@ def is_plain_text(view):
 def name_normalize(delim):
     if delim == '/':
         return 'slash'
+    if delim == '\\':
+        return 'backslash'
     if delim == '\t':
         return 'tab'
     if delim == ' ':
