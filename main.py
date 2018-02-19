@@ -183,7 +183,7 @@ def do_enable_rainbow(view, delim, policy):
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_delim', delim)
         view.settings().set('rainbow_policy', policy)
-    view.set_syntax_file(os.path.join('Packages', 'rainbow_csv', 'custom_grammars', grammar_basename))
+    view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
     if file_path is not None:
         save_rainbow_params(file_path, delim, policy)
