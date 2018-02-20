@@ -1,8 +1,8 @@
 import os
 import re
 
-import sublime
 import sublime_plugin
+import sublime
 
 from .rainbow_utils import *
 
@@ -228,6 +228,35 @@ class EnableSimpleCommand(sublime_plugin.TextCommand):
 class DisableCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         do_disable_rainbow(self.view)
+
+
+#class EditQueryInputHandler(sublime_plugin.TextInputHandler):
+#    def __init__(self, view):
+#        self.view = view
+#
+#    def placeholder(self):
+#        return "Example: select top 10 a1, int(a2) / 10 where a3 != 'SELL' order by float(a4) desc"
+
+
+
+def on_done(input_line):
+    pass
+
+def on_change(input_line):
+    pass
+
+def on_cancel(input_line):
+    pass
+
+class RunQueryCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        pass #FIXME
+        #print('hello RunQueryCommand')
+        active_window = sublime.active_window()
+        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
+
+    #def input(self):
+    #    return EditQueryInputHandler(self.view)
 
 
 def is_delimited_table(sampled_lines, delim, policy):

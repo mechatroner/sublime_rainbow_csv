@@ -6,7 +6,8 @@
         [
             { "command": "enable_standard", "caption": "Enable Standard" },
             { "command": "enable_simple", "caption": "Enable Simple" },
-            { "command": "disable", "caption": "Disable" }
+            { "command": "disable", "caption": "Disable" },
+            { "command": "run_query", "caption": "Run SQL-like RBQL query" }
         ]
     }
 ]
