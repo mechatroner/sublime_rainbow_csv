@@ -250,9 +250,27 @@ def on_cancel(input_line):
 
 class RunQueryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        pass #FIXME
         #print('hello RunQueryCommand')
         active_window = sublime.active_window()
+        view = self.view
+        #TODO use Phantom to show column names and/or help message
+        cur_region = view.visible_region()
+        line_regions = view.split_by_newlines(cur_region)
+        print( "len(line_regions):", len(line_regions)) #FOR_DEBUG
+        middle_line = line_regions[len(line_regions) // 2]
+        # TODO phantoms are html string, so you can add documentation href links!
+        #phantoms = sublime.PhantomSet(view, 'rainbow_phantoms')
+        #phantoms = sublime.PhantomSet(view)
+        #info_phantom = sublime.Phantom(middle_line , '<span style="color:red">Hello World!</span>', sublime.LAYOUT_BLOCK)
+        #info_phantom = sublime.Phantom(middle_line, '<span style="color:red">Hello World!</span>', sublime.LAYOUT_BELOW)
+        #info_phantom = sublime.Phantom(middle_line, '<span style="color:red">Hello World!</span>', sublime.LAYOUT_INLINE)
+        #info_phantom = sublime.Phantom(middle_line, '<span>Hello World!</span>', sublime.LAYOUT_BELOW)
+        #phantoms.update([info_phantom])
+        point = middle_line.a
+        html_text = ''
+        for i in range(10):
+            html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(color_entries[i % 10][1], i + 1)
+        self.view.show_popup(html_text, location=point, max_width=1000)
         active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
 
     #def input(self):
