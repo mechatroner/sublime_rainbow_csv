@@ -4,7 +4,12 @@ import re
 import sublime_plugin
 import sublime
 
+
+import rainbow_csv.rainbow_utils as rainbow_utils
 from .rainbow_utils import *
+
+import rainbow_csv.rbql_core
+from rainbow_csv.rbql_core import rbql
 
 
 user_home_dir = os.path.expanduser('~')
@@ -115,9 +120,9 @@ def guess_document_header(view, delim, policy):
         return None
     header_line = sampled_lines[0]
     body_lines = sampled_lines[1:]
-    sampled_records = [smart_split(l, delim, policy, False)[0] for l in body_lines]
-    potential_header = smart_split(header_line, delim, policy, False)[0]
-    has_header = guess_if_header(potential_header, sampled_records)
+    sampled_records = [rainbow_utils.smart_split(l, delim, policy, False)[0] for l in body_lines]
+    potential_header = rainbow_utils.smart_split(header_line, delim, policy, False)[0]
+    has_header = rainbow_utils.guess_if_header(potential_header, sampled_records)
     return potential_header if has_header else None
         
 
@@ -231,7 +236,8 @@ class DisableCommand(sublime_plugin.TextCommand):
 
 
 def on_done(input_line):
-    pass
+    print( "input_line:", input_line) #FOR_DEBUG
+    print( "rbql.__version__:", rbql.__version__) #FOR_DEBUG
 
 
 def on_change(input_line):
@@ -254,7 +260,7 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         html_text = ''
         for i in range(10):
             #FIXME put column names in right positions
-            html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(color_entries[i % 10][1], i + 1)
+            html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(rainbow_utils.color_entries[i % 10][1], i + 1)
         self.view.show_popup(html_text, location=point, max_width=1000)
         active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
 
@@ -264,7 +270,7 @@ def is_delimited_table(sampled_lines, delim, policy):
         return False
     num_fields = None
     for sl in sampled_lines:
-        fields, warning = smart_split(sl, delim, policy, True)
+        fields, warning = rainbow_utils.smart_split(sl, delim, policy, True)
         if warning or len(fields) < 2:
             return False
         if num_fields is None:
@@ -318,14 +324,14 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
             line_text = self.view.substr(self.view.line(point))
-            hover_record, warning = smart_split(line_text, delim, policy, True)
+            hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
             if warning or not len(hover_record):
                 return
-            field_num = get_field_by_line_position(hover_record, cnum)
+            field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)
             header = guess_document_header(self.view, delim, policy)
             ui_text = 'col# {}'.format(field_num + 1)
             if header is not None and len(header) == len(hover_record):
                 column_name = header[field_num]
                 ui_text += ', "{}"'.format(column_name)
-            ui_hex_color = color_entries[field_num % 10][1]
+            ui_hex_color = rainbow_utils.color_entries[field_num % 10][1]
             self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point)

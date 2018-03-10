@@ -1,7 +1,7 @@
 import re
-import math
 
 # colors were taken from here: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+# TODO move into main
 color_entries = list()
 color_entries.append(('rainbow1', '#E6194B', None))
 color_entries.append(('keyword.rainbow2', '#3CB44B', None))
@@ -104,22 +104,3 @@ def guess_if_header(potential_header, sampled_records):
 
     return False
 
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--verbose', action='store_true', help='Run in verbose mode')
-    parser.add_argument('--num_iter', type=int, help='number of iterations option')
-    parser.add_argument('file_name', help='example of positional argument')
-    args = parser.parse_args()
-
-    num_iter = args.num_iter
-    file_name = args.file_name
-
-    for line in sys.stdin:
-        line = line.rstrip('\n')
-        fields = line.split('\t')
-
-
-if __name__ == '__main__':
-    main()
