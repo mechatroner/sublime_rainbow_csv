@@ -240,19 +240,21 @@ def on_done(input_line):
     print( "rbql.__version__:", rbql.__version__) #FOR_DEBUG
 
 
-def on_change(input_line):
-    pass
-
-
-def on_cancel(input_line):
-    #FIXME hide popup
-    pass
+def on_cancel():
+    active_window = sublime.active_window()
+    if not active_window:
+        return
+    active_view = active_window.active_view()
+    if not active_view:
+        return
+    active_view.hide_popup()
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
+    #FIXME add context condition to F5 key in Default.sublime-keymap
     def run(self, edit):
         active_window = sublime.active_window()
-        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
+        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, None, on_cancel)
 
         view = self.view
         cur_region = view.visible_region()
