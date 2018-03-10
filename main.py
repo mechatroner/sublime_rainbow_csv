@@ -252,6 +252,8 @@ def on_cancel(input_line):
 class RunQueryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         active_window = sublime.active_window()
+        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
+
         view = self.view
         cur_region = view.visible_region()
         line_regions = view.split_by_newlines(cur_region)
@@ -262,7 +264,6 @@ class RunQueryCommand(sublime_plugin.TextCommand):
             #FIXME put column names in right positions
             html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(rainbow_utils.color_entries[i % 10][1], i + 1)
         self.view.show_popup(html_text, location=point, max_width=1000)
-        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, on_change, on_cancel)
 
 
 def is_delimited_table(sampled_lines, delim, policy):
