@@ -133,7 +133,7 @@ def is_plain_text(view):
 
 
 def name_normalize(delim):
-    # same order as in https://stackoverflow.com/a/31976060/2898283
+    # Same order as in https://stackoverflow.com/a/31976060/2898283
     # TODO use dict instead of this
     if delim == '<':
         return 'less-than'
@@ -235,19 +235,45 @@ class DisableCommand(sublime_plugin.TextCommand):
         do_disable_rainbow(self.view)
 
 
+def get_active_view():
+    active_window = sublime.active_window()
+    if not active_window:
+        return None
+    active_view = active_window.active_view()
+    if not active_view:
+        return None
+    return active_view
+
+
 def on_done(input_line):
+    active_view = get_active_view()
+    if not active_view:
+        return
+    active_view.hide_popup()
+    active_view.settings().set('rbql_mode', False)
     print( "input_line:", input_line) #FOR_DEBUG
     print( "rbql.__version__:", rbql.__version__) #FOR_DEBUG
 
 
 def on_cancel():
-    active_window = sublime.active_window()
-    if not active_window:
-        return
-    active_view = active_window.active_view()
+    active_view = get_active_view()
     if not active_view:
         return
     active_view.hide_popup()
+    active_view.settings().set('rbql_mode', False)
+
+
+def show_column_names(view):
+    cur_region = view.visible_region()
+    line_regions = view.split_by_newlines(cur_region)
+    middle_line = line_regions[len(line_regions) // 2]
+    # FIXME use cursor line instead
+    point = middle_line.a
+    html_text = ''
+    for i in range(10):
+        #FIXME put column names in right positions
+        html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(rainbow_utils.color_entries[i % 10][1], i + 1)
+    view.show_popup(html_text, location=point, max_width=1000)
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
@@ -255,17 +281,8 @@ class RunQueryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         active_window = sublime.active_window()
         active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, None, on_cancel)
-
-        view = self.view
-        cur_region = view.visible_region()
-        line_regions = view.split_by_newlines(cur_region)
-        middle_line = line_regions[len(line_regions) // 2]
-        point = middle_line.a
-        html_text = ''
-        for i in range(10):
-            #FIXME put column names in right positions
-            html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(rainbow_utils.color_entries[i % 10][1], i + 1)
-        self.view.show_popup(html_text, location=point, max_width=1000)
+        self.view.settings().set('rbql_mode', True)
+        show_column_names(self.view)
 
 
 def is_delimited_table(sampled_lines, delim, policy):
@@ -286,7 +303,7 @@ def is_delimited_table(sampled_lines, delim, policy):
 def run_rainbow_init(view):
     if view.settings().get('rainbow_inited') is not None:
         return
-    view.settings().set('rainbow_inited', 1)
+    view.settings().set('rainbow_inited', True)
     file_path = view.file_name()
     if file_path is not None:
         delim, policy = load_rainbow_params(file_path)
@@ -319,6 +336,8 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
         return settings.get('rainbow_delim', None) is not None
 
     def on_hover(self, point, hover_zone):
+        if self.view.settings().get('rbql_mode', False):
+            return
         if hover_zone == sublime.HOVER_TEXT:
             delim = self.view.settings().get('rainbow_delim')
             policy = self.view.settings().get('rainbow_policy')
