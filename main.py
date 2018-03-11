@@ -134,29 +134,20 @@ def is_plain_text(view):
 
 def name_normalize(delim):
     # Same order as in https://stackoverflow.com/a/31976060/2898283
-    # TODO use dict instead of this
-    if delim == '<':
-        return 'less-than'
-    if delim == '>':
-        return 'greater-than'
-    if delim == ':':
-        return 'colon'
-    if delim == '"':
-        return 'double-quote'
-    if delim == '/':
-        return 'slash'
-    if delim == '\\':
-        return 'backslash'
-    if delim == '|':
-        return 'pipe'
-    if delim == '?':
-        return 'question-mark'
-    if delim == '*':
-        return 'asterisk'
-    if delim == '\t':
-        return 'tab'
-    if delim == ' ':
-        return 'space'
+    name_map = dict()
+    name_map['<'] = 'less-than'
+    name_map['>'] = 'greater-than'
+    name_map[':'] = 'colon'
+    name_map['"'] = 'double-quote'
+    name_map['/'] = 'slash'
+    name_map['\\'] = 'backslash'
+    name_map['|'] = 'pipe'
+    name_map['?'] = 'question-mark'
+    name_map['*'] = 'asterisk'
+    name_map['\t'] = 'tab'
+    name_map[' '] = 'space'
+    if delim in name_map:
+        return name_map[delim]
     return '[{}]'.format(delim)
 
 
