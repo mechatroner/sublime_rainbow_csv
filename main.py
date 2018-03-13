@@ -14,6 +14,8 @@ table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
 # FIXME implement CSVLint
 
+# FIXME get rid of all sys.path.insert() calls in rbql
+
 
 def index_decode_delim(delim):
     if delim == 'TAB':
@@ -242,6 +244,7 @@ def on_done(input_line):
     active_view = active_window.active_view()
     if not active_view:
         return
+    active_view.settings().set('rbql_previous_query', input_line)
     active_view.settings().set('rbql_mode', False)
     active_view.hide_popup()
     file_path = active_view.file_name()
@@ -267,7 +270,6 @@ def on_done(input_line):
         sublime.error_message('Unknown Error: Unable to find destination file')
         return
     if warnings is not None and len(warnings):
-        # FIXME TODO: test with multiple warnings
         warning_report = 'Warning!\n' + '\n'.join(warnings)
         sublime.message_dialog(warning_report)
     dst_view = active_window.open_file(dst_table_path)
@@ -301,8 +303,8 @@ class RunQueryCommand(sublime_plugin.TextCommand):
     #FIXME add context condition to F5 key in Default.sublime-keymap
     def run(self, edit):
         active_window = sublime.active_window()
-        #FIXME set panel content to the previous query
-        active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, None, on_cancel)
+        previous_query = self.view.settings().get('rbql_previous_query', '')
+        active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_done, None, on_cancel)
         #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. You can restore the query hover from manual hover exit callback
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view)
