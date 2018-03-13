@@ -87,7 +87,7 @@ def converged_execute(meta_language, src_table_path, rainbow_query, input_delim,
         dst_extension = delim_ext_map[out_delim] if out_delim in delim_ext_map else '.txt'
         dst_table_name = table_name + dst_extension
         dst_table_path = os.path.join(tmp_dir, dst_table_name)
-        assert meta_language in ['python', 'js']
+        assert meta_language in ['python', 'js'], 'Meta language must be "python" or "js"'
         if meta_language == 'python':
             exec_result = execute_python(src_table_path, rainbow_query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
         else:

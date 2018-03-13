@@ -4,14 +4,8 @@ import time
 import sublime_plugin
 import sublime
 
-
 import rainbow_csv.rainbow_utils as rainbow_utils
 import rainbow_csv.sublime_rbql as sublime_rbql
-#from .rainbow_utils import *
-
-# FIXME remove these 2 imports
-import rainbow_csv.rbql_core
-from rainbow_csv.rbql_core import rbql
 
 
 user_home_dir = os.path.expanduser('~')
@@ -250,20 +244,21 @@ def on_done(input_line):
         return
     active_view.settings().set('rbql_mode', False)
     active_view.hide_popup()
-    print( "input_line:", input_line) #FOR_DEBUG
-    print( "rbql.__version__:", rbql.__version__) #FOR_DEBUG
     file_path = active_view.file_name()
     if not file_path:
         # TODO create a temp file from unnamed buffer
         sublime.error_message('Error. Unable to run query for this buffer')
         return
-    # FIXME make rbql meta language configurable
     input_delim = active_view.settings().get('rainbow_delim')
     input_policy = active_view.settings().get('rainbow_policy')
-    # FIXME make output delim and policy configurable
-    output_delim = input_delim
-    output_policy = input_policy
-    query_result = sublime_rbql.converged_execute('python', file_path, input_line, input_delim, input_policy, output_delim, output_policy)
+    meta_language = active_view.settings().get('rbql_meta_language', 'python')
+    output_format = active_view.settings().get('rbql_output_format', 'input')
+    format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
+    if output_format not in format_map:
+        sublime.error_message('Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
+        return
+    output_delim, output_policy = format_map[output_format]
+    query_result = sublime_rbql.converged_execute(meta_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy)
     error_type, error_details, warnings, dst_table_path = query_result
     if error_type is not None:
         sublime.error_message('{}. {}'.format(error_type, error_details))
@@ -306,6 +301,7 @@ class RunQueryCommand(sublime_plugin.TextCommand):
     #FIXME add context condition to F5 key in Default.sublime-keymap
     def run(self, edit):
         active_window = sublime.active_window()
+        #FIXME set panel content to the previous query
         active_window.show_input_panel('Enter SQL-like RBQL query:', '', on_done, None, on_cancel)
         #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. You can restore the query hover from manual hover exit callback
         self.view.settings().set('rbql_mode', True)
