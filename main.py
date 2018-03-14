@@ -16,6 +16,10 @@ table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
 # FIXME get rid of all sys.path.insert() calls in rbql
 
+# FIXME find a place to put RBQL reference
+
+# TODO allow monocolumn tables. This could be complicated because you will need to make sure that F5 button would pass context check
+# Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
 def index_decode_delim(delim):
     if delim == 'TAB':
@@ -286,12 +290,9 @@ def on_cancel():
     active_view.hide_popup()
 
 
-def show_column_names(view):
-    cur_region = view.visible_region()
-    line_regions = view.split_by_newlines(cur_region)
-    middle_line = line_regions[len(line_regions) // 2]
-    # FIXME use cursor line instead
-    point = middle_line.a
+def show_names_for_line(view, line_region):
+    point = line_region.a
+    line_text = view.substr(line_region)
     html_text = ''
     for i in range(10):
         #FIXME put column names in right positions
@@ -299,13 +300,31 @@ def show_column_names(view):
     view.show_popup(html_text, location=point, max_width=1000)
 
 
+def show_column_names(view):
+    cur_region = view.visible_region()
+    line_regions = view.split_by_newlines(cur_region)
+    selection = view.sel()
+    info_line = line_regions[len(line_regions) // 2]
+    if len(selection):
+        selection = selection[0]
+        for lr in line_regions[:-5]:
+            if lr.a <= selection.a and lr.b >= selection.a:
+                info_line = lr
+    show_names_for_line(view, info_line)
+
+
 class RunQueryCommand(sublime_plugin.TextCommand):
     #FIXME add context condition to F5 key in Default.sublime-keymap
     def run(self, edit):
+        delim = self.view.settings().get('rainbow_delim')
+        policy = self.view.settings().get('rainbow_policy')
+        if delim is None or policy is None:
+            sublime.error_message('Error. You need to select a separator first')
+            return
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
         active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_done, None, on_cancel)
-        #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. You can restore the query hover from manual hover exit callback
+        #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. You can restore the query hover from manual hover exit callback. Also columns info disapears on hover.
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view)
 
