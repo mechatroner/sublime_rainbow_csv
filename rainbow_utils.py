@@ -1,6 +1,6 @@
 import re
 
-# colors were taken from here: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
+# Colors were taken from here: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
 # TODO move into main
 color_entries = list()
 color_entries.append(('rainbow1', '#E6194B', None))
@@ -15,10 +15,10 @@ color_entries.append(('constant.language.rainbow9', '#F58231', None))
 color_entries.append(('variable.language.rainbow10', '#FFFFFF', None))
 
 
-# taken from rbql_utils.py:
+# Taken from rbql_utils.py:
 def split_quoted_str(src, dlm, preserve_quotes=False):
     assert dlm != '"'
-    if src.find('"') == -1: #optimization for majority of lines
+    if src.find('"') == -1: # Optimization for majority of lines
         return (src.split(dlm), False)
     result = list()
     cidx = 0
@@ -76,19 +76,18 @@ def get_field_by_line_position(fields, query_pos):
 
 
 def guess_if_header(potential_header, sampled_records):
-    # single line - not header
+    # Single line - not header
     if len(sampled_records) < 1:
         return False
 
     num_fields = len(potential_header)
 
-    # different number of columns - not header
+    # Different number of columns - not header
     for sr in sampled_records:
         if len(sr) != num_fields:
             return False
 
-
-    # all sampled lines do not have any letters in a column and potential header does - header
+    # All sampled lines do not have any letters in a column and potential header does - header
     optimistic_name_re = '^"?[a-zA-Z]{3,}'
     pessimistic_name_re = '[a-zA-Z]'
     for c in range(num_fields):
@@ -103,4 +102,27 @@ def guess_if_header(potential_header, sampled_records):
             return True
 
     return False
+
+
+def generate_tab_statusline(tabstop_val, template_fields):
+    # If separator is not tab, tabstop_val must be set to 1
+    result = list()
+    space_deficit = 0
+    for nf in range(len(template_fields)):
+        available_space = (1 + len(template_fields[nf]) // tabstop_val) * tabstop_val
+        column_name = 'a{}'.format(nf + 1)
+        extra_len = available_space - len(column_name) - 1
+        if extra_len < 0:
+            space_deficit += abs(extra_len)
+            extra_len = 0
+        else:
+            regained = min(space_deficit, extra_len)
+            space_deficit -= regained
+            extra_len -= regained
+        space_filling = ' ' * (1 + extra_len)
+        if nf + 1 == len(template_fields):
+            space_filling = ''
+        result.append(column_name)
+        result.append(space_filling)
+    return result
 

@@ -53,3 +53,21 @@ class TestHeaderGuessing(unittest.TestCase):
         sampled_entries = [['Dima', '29.0'], ['Alice', '1.5'], ['future generation', '-20.0']]
         is_header = rainbow_utils.guess_if_header(header, sampled_entries)
         self.assertTrue(is_header)
+
+
+class TestStatuslineGeneration(unittest.TestCase):
+    def test_run1(self):
+        # 10,a,b,20000,5
+        # a1 a2 a3 a4  a5
+        test_stln = rainbow_utils.generate_tab_statusline(1, ['10', 'a', 'b', '20000', '5'])
+        test_stln_str = ''.join(test_stln)
+        canonic_stln = 'a1 a2 a3 a4  a5'
+        self.assertEqual(test_stln_str, canonic_stln)
+
+    def test_run2(self):
+        # 10  a   b   20000   5
+        # a1  a2  a3  a4      a5
+        test_stln = rainbow_utils.generate_tab_statusline(4, ['10', 'a', 'b', '20000', '5'])
+        test_stln_str = ''.join(test_stln)
+        canonic_stln = 'a1  a2  a3  a4      a5'
+        self.assertEqual(test_stln_str, canonic_stln)
