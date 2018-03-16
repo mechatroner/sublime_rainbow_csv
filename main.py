@@ -11,6 +11,7 @@ import rainbow_csv.sublime_rbql as sublime_rbql
 user_home_dir = os.path.expanduser('~')
 table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
+# FIXME implement feature to set table name
 
 # FIXME implement CSVLint
 
@@ -18,7 +19,7 @@ table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
 # FIXME find a place to put RBQL reference
 
-# TODO allow monocolumn tables. This could be complicated because you will need to make sure that F5 button would pass context check
+# TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
 def index_decode_delim(delim):
@@ -290,17 +291,23 @@ def on_cancel():
     active_view.hide_popup()
 
 
-def show_names_for_line(view, line_region):
+def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
+    fields, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
+    tab_stop = view.settings.get('tab_size', 4) if delim == '\t' else 1
+    status_labels = rainbow_utils.generate_tab_statusline(tab_stop, fields)
+    num_fields = len(status_labels) // 2
     html_text = ''
-    for i in range(10):
-        #FIXME put column names in right positions
-        html_text += '<span style="color:{}">a{}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'.format(rainbow_utils.color_entries[i % 10][1], i + 1)
+    for i in range(num_fields):
+        hex_color = rainbow_utils.color_entries[i % 10][1]
+        column_name = status_labels[i * 2]
+        space_filling = status_labels[i * 2 + 1].replace(' ', '&nbsp;')
+        html_text += '<span style="color:{}">{}{}</span>'.format(hex_color, column_name, space_filling)
     view.show_popup(html_text, location=point, max_width=1000)
 
 
-def show_column_names(view):
+def show_column_names(view, delim, policy):
     cur_region = view.visible_region()
     line_regions = view.split_by_newlines(cur_region)
     selection = view.sel()
@@ -310,7 +317,7 @@ def show_column_names(view):
         for lr in line_regions[:-5]:
             if lr.a <= selection.a and lr.b >= selection.a:
                 info_line = lr
-    show_names_for_line(view, info_line)
+    show_names_for_line(view, delim, policy, info_line)
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
@@ -324,9 +331,9 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
         active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_done, None, on_cancel)
-        #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. You can restore the query hover from manual hover exit callback. Also columns info disapears on hover.
+        #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. We can restore the query hover from manual hover exit callback. Also columns info disapears on hover.
         self.view.settings().set('rbql_mode', True)
-        show_column_names(self.view)
+        show_column_names(self.view, delim, policy)
 
 
 def is_delimited_table(sampled_lines, delim, policy):
