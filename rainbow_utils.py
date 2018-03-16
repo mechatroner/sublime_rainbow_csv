@@ -104,10 +104,11 @@ def guess_if_header(potential_header, sampled_records):
     return False
 
 
-def generate_tab_statusline(tabstop_val, template_fields):
+def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
     # If separator is not tab, tabstop_val must be set to 1
     result = list()
     space_deficit = 0
+    cur_len = 0
     for nf in range(len(template_fields)):
         available_space = (1 + len(template_fields[nf]) // tabstop_val) * tabstop_val
         column_name = 'a{}'.format(nf + 1)
@@ -120,9 +121,12 @@ def generate_tab_statusline(tabstop_val, template_fields):
             space_deficit -= regained
             extra_len -= regained
         space_filling = ' ' * (1 + extra_len)
-        if nf + 1 == len(template_fields):
-            space_filling = ''
+        if max_output_len is not None and cur_len + len(column_name) > max_output_len:
+            break
         result.append(column_name)
         result.append(space_filling)
+        cur_len += len(column_name) + len(space_filling)
+    if len(result):
+        result[-1] = ''
     return result
 

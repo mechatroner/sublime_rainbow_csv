@@ -71,3 +71,20 @@ class TestStatuslineGeneration(unittest.TestCase):
         test_stln_str = ''.join(test_stln)
         canonic_stln = 'a1  a2  a3  a4      a5'
         self.assertEqual(test_stln_str, canonic_stln)
+
+    def test_run3(self):
+        # 10  a   b   20000   5
+        # a1  a2
+        test_stln = rainbow_utils.generate_tab_statusline(4, ['10', 'a', 'b', '20000', '5'], 9)
+        test_stln_str = ''.join(test_stln)
+        canonic_stln = 'a1  a2'
+        self.assertEqual(test_stln_str, canonic_stln)
+
+
+    def test_run4(self):
+        # 10  a   b   20000   5
+        # a1  a2  a3
+        test_stln = rainbow_utils.generate_tab_statusline(4, ['10', 'a', 'b', '20000', '5'], 10)
+        test_stln_str = ''.join(test_stln)
+        canonic_stln = 'a1  a2  a3'
+        self.assertEqual(test_stln_str, canonic_stln)

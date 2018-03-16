@@ -295,8 +295,13 @@ def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
     fields, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
-    tab_stop = view.settings.get('tab_size', 4) if delim == '\t' else 1
-    status_labels = rainbow_utils.generate_tab_statusline(tab_stop, fields)
+    tab_stop = view.settings().get('tab_size', 4) if delim == '\t' else 1
+    layout_width_dip = view.layout_extent()[0]
+    font_char_width_dip = view.em_width()
+    max_status_width = layout_width_dip - 20
+    max_available_chars = max_status_width // font_char_width_dip
+
+    status_labels = rainbow_utils.generate_tab_statusline(tab_stop, fields, max_available_chars)
     num_fields = len(status_labels) // 2
     html_text = ''
     for i in range(num_fields):
@@ -304,7 +309,8 @@ def show_names_for_line(view, delim, policy, line_region):
         column_name = status_labels[i * 2]
         space_filling = status_labels[i * 2 + 1].replace(' ', '&nbsp;')
         html_text += '<span style="color:{}">{}{}</span>'.format(hex_color, column_name, space_filling)
-    view.show_popup(html_text, location=point, max_width=1000)
+    if len(html_text):
+        view.show_popup(html_text, location=point, max_width=max_status_width, max_height=100)
 
 
 def show_column_names(view, delim, policy):
