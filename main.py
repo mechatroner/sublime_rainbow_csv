@@ -11,13 +11,15 @@ import rainbow_csv.sublime_rbql as sublime_rbql
 user_home_dir = os.path.expanduser('~')
 table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
-# FIXME implement feature to set table name
-
-# FIXME implement CSVLint
 
 # FIXME get rid of all sys.path.insert() calls in rbql
 
 # FIXME find a place to put RBQL reference
+
+
+# TODO implement feature to set table name
+
+# TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
@@ -338,7 +340,6 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
         active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_done, None, on_cancel)
-        #FIXME we may still want to show regular hover in query mode, consider the case when there are lot of columns and query popup doesn't cover them all. So user will have to hover on them manually. We can restore the query hover from manual hover exit callback. Also columns info disapears on hover.
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
 
@@ -388,14 +389,23 @@ class RainbowAutodetectListener(sublime_plugin.EventListener):
         run_rainbow_init(view)
 
 
+def hover_hide_cb():
+    active_view = get_active_view()
+    if not active_view.settings().get('rbql_mode', False):
+        return
+    delim = active_view.settings().get('rainbow_delim')
+    policy = active_view.settings().get('rainbow_policy')
+    if delim is None or policy is None:
+        return
+    show_column_names(active_view, delim, policy)
+
+
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
         return settings.get('rainbow_delim', None) is not None
 
     def on_hover(self, point, hover_zone):
-        if self.view.settings().get('rbql_mode', False):
-            return
         if hover_zone == sublime.HOVER_TEXT:
             delim = self.view.settings().get('rainbow_delim')
             policy = self.view.settings().get('rainbow_policy')
@@ -414,4 +424,4 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 column_name = header[field_num]
                 ui_text += ', "{}"'.format(column_name)
             ui_hex_color = rainbow_utils.color_entries[field_num % 10][1]
-            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point)
+            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb)
