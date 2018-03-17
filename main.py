@@ -17,9 +17,9 @@ table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 # FIXME find a place to put RBQL reference
 
 
-# TODO implement feature to set table name
+# FIXME implement feature to set table name
 
-# TODO implement CSVLint
+# FIXME implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
@@ -187,6 +187,7 @@ def do_enable_rainbow(view, delim, policy):
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_delim', delim)
         view.settings().set('rainbow_policy', policy)
+        view.settings().set('rainbow_mode', True) # We use this as F5 key condition
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
     if file_path is not None:
@@ -201,6 +202,7 @@ def do_disable_rainbow(view):
     view.settings().erase('pre_rainbow_syntax')
     view.settings().erase('rainbow_delim')
     view.settings().erase('rainbow_policy')
+    view.settings().erase('rainbow_mode')
     file_path = view.file_name()
     if file_path is not None:
         save_rainbow_params(file_path, 'disabled', '')
@@ -300,8 +302,10 @@ def show_names_for_line(view, delim, policy, line_region):
     tab_stop = view.settings().get('tab_size', 4) if delim == '\t' else 1
     layout_width_dip = view.layout_extent()[0]
     font_char_width_dip = view.em_width()
-    max_status_width = layout_width_dip - 20
-    max_available_chars = max_status_width // font_char_width_dip
+    dip_reserve = 10
+    char_reserve = 2
+    max_status_width = layout_width_dip - dip_reserve
+    max_available_chars = max_status_width // font_char_width_dip - char_reserve
 
     status_labels = rainbow_utils.generate_tab_statusline(tab_stop, fields, max_available_chars)
     if not len(status_labels):
