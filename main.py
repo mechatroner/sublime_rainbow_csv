@@ -1,5 +1,6 @@
 import os
 import time
+from functools import partial
 
 import sublime_plugin
 import sublime
@@ -174,6 +175,20 @@ def get_grammar_basename(delim, policy):
     return 'Rainbow {} {}.tmLanguage'.format(name_normalize(delim), policy_map[policy])
 
 
+def idempotent_enable_rainbow(view, delim, policy, wait_time):
+    if wait_time > 10000:
+        return
+    done_loading_cb = partial(idempotent_enable_rainbow, view, delim, policy, wait_time * 2)
+    if view.is_loading():
+        sublime.set_timeout(done_loading_cb, wait_time)
+    else:
+        cur_delim = view.settings().get('rainbow_delim')
+        cur_policy = view.settings().get('rainbow_policy')
+        if cur_delim == delim and cur_policy == policy:
+            return
+        do_enable_rainbow(view, delim, policy)
+
+
 def do_enable_rainbow(view, delim, policy):
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
@@ -282,10 +297,8 @@ def on_done(input_line):
         warning_report = 'Warning!\n' + '\n'.join(warnings)
         sublime.message_dialog(warning_report)
     dst_view = active_window.open_file(dst_table_path)
-    # FIXME for some reason we have infinite loop here:
-    #while dst_view.is_loading():
-    #    time.sleep(0.05)
-    #do_enable_rainbow(dst_view, output_delim, output_policy)
+    idempotent_enable_rainbow(dst_view, output_delim, output_policy, 1)
+
 
 def on_cancel():
     active_view = get_active_view()
@@ -334,7 +347,6 @@ def show_column_names(view, delim, policy):
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
-    #FIXME add context condition to F5 key in Default.sublime-keymap
     def run(self, edit):
         delim = self.view.settings().get('rainbow_delim')
         policy = self.view.settings().get('rainbow_policy')
