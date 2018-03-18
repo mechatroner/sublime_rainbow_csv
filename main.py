@@ -12,15 +12,15 @@ import rainbow_csv.sublime_rbql as sublime_rbql
 user_home_dir = os.path.expanduser('~')
 table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 
-
 # FIXME get rid of all sys.path.insert() calls in rbql
 
-# FIXME find a place to put RBQL reference
-
+# FIXME test rbql with javascript
 
 # FIXME implement feature to set table name
 
 # FIXME implement CSVLint
+
+# TODO find a place to put RBQL help
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
