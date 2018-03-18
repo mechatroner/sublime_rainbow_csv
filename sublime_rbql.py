@@ -6,7 +6,6 @@ import subprocess
 import tempfile
 import time
 
-#import rbql
 import rainbow_csv.rbql_core
 from rainbow_csv.rbql_core import rbql
 
@@ -19,35 +18,26 @@ def execute_python(src_table_path, rainbow_query, input_delim, input_policy, out
     # Returns tuple: (error_type, error_details, warnings)
     warnings = []
     csv_encoding = rbql.default_csv_encoding
-    tmp_dir = tempfile.gettempdir()
-    module_name = 'vim_rb_convert_{}'.format(get_random_suffix())
-    meta_script_name = '{}.py'.format(module_name)
-    meta_script_path = os.path.join(tmp_dir, meta_script_name)
-    try:
-        rbql.parse_to_py([rainbow_query], meta_script_path, input_delim, input_policy, out_delim, out_policy, csv_encoding, None)
-    except rbql.RBParsingError as e:
-        rbql.remove_if_possible(meta_script_path)
-        return ('Parsing Error', str(e), warnings)
-
-    sys.path.insert(0, tmp_dir)
-    try:
-        rbconvert = rbql.dynamic_import(module_name)
-        warnings = None
-        with codecs.open(src_table_path, encoding=csv_encoding) as src, codecs.open(dst_table_path, 'w', encoding=csv_encoding) as dst:
-            warnings = rbconvert.rb_transform(src, dst)
-        if warnings is not None:
-            warnings = rbql.make_warnings_human_readable(warnings)
-        rbql.remove_if_possible(meta_script_path)
-        return (None, None, warnings)
-    except Exception as e:
-        error_msg = 'Error: Unable to use generated python module.\n'
-        error_msg += 'Original python exception:\n{}\n'.format(str(e))
+    with rbql.RbqlPyEnv() as worker_env:
+        meta_script_path = worker_env.module_path
         try:
-            with open(os.path.join(tmp_dir, 'last_rbql_exception'), 'w') as exc_dst:
-                traceback.print_exc(file=exc_dst)
-        except Exception:
-            pass
-        return ('Execution Error', error_msg, warnings)
+            rbql.parse_to_py([rainbow_query], meta_script_path, input_delim, input_policy, out_delim, out_policy, csv_encoding, None)
+        except rbql.RBParsingError as e:
+            worker_env.remove_env_dir()
+            return ('Parsing Error', str(e), warnings)
+        try:
+            rbconvert = worker_env.import_worker()
+            warnings = None
+            with codecs.open(src_table_path, encoding=csv_encoding) as src, codecs.open(dst_table_path, 'w', encoding=csv_encoding) as dst:
+                warnings = rbconvert.rb_transform(src, dst)
+            if warnings is not None:
+                warnings = rbql.make_warnings_human_readable(warnings)
+            worker_env.remove_env_dir()
+            return (None, None, warnings)
+        except Exception as e:
+            error_msg = 'Error: Unable to use generated python module.\n'
+            error_msg += 'Original python exception:\n{}\n'.format(str(e))
+            return ('Execution Error', error_msg, warnings)
 
 
 def execute_js(src_table_path, rainbow_query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
