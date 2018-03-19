@@ -11,16 +11,14 @@ import rainbow_csv.sublime_rbql as sublime_rbql
 
 user_home_dir = os.path.expanduser('~')
 table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
+table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
 
-# FIXME get rid of all sys.path.insert() calls in rbql
 
-# FIXME test rbql with javascript
+# FIXME make RBQL demo gif
 
-# FIXME implement feature to set table name
+# FIXME add documentation to README
 
-# FIXME implement CSVLint
-
-# TODO find a place to put RBQL help
+# TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
@@ -261,7 +259,25 @@ def get_active_view():
     return active_view
 
 
-def on_done(input_line):
+def on_set_table_name_done(input_line):
+    active_view = get_active_view()
+    if not active_view:
+        return
+    file_path = active_view.file_name()
+    if not file_path:
+        sublime.error_message('Error. Unable to set table name for this buffer')
+        return
+    table_name = input_line.strip()
+
+    records = try_read_index(table_names_path)
+    new_record = [table_name, file_path]
+    update_records(records, table_name, new_record)
+    if len(records) > 100:
+        records.pop(0)
+    write_index(records, table_names_path)
+
+
+def on_query_done(input_line):
     active_window = sublime.active_window()
     if not active_window:
         return
@@ -300,7 +316,7 @@ def on_done(input_line):
     idempotent_enable_rainbow(dst_view, output_delim, output_policy, 1)
 
 
-def on_cancel():
+def on_query_cancel():
     active_view = get_active_view()
     if not active_view:
         return
@@ -355,9 +371,15 @@ class RunQueryCommand(sublime_plugin.TextCommand):
             return
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
-        active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_done, None, on_cancel)
+        active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_query_done, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
+
+
+class SetTableNameCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        active_window = sublime.active_window()
+        active_window.show_input_panel('Set table name to use in RBQL JOIN queries:', '', on_set_table_name_done, None, None)
 
 
 def is_delimited_table(sampled_lines, delim, policy):
