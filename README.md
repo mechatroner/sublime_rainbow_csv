@@ -46,6 +46,7 @@ Default: _"python"_
 Allowed values: _"python"_, _"js"_  
 
 RBQL host language.  
+In order to use RBQL with Java Script (js) you need to have Node JS installed and added to your system path.  
 
 To use Java Script add this line to your settings file: `"rbql_meta_language": "js",`  
 
