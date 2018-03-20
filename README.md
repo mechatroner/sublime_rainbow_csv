@@ -4,6 +4,7 @@
 
 * Highlight columns in *.csv, *.tsv and other separated files in different rainbow colors.
 * Provide info about columns on mouse hover.
+* Execute SQL-like RBQL queries.
 
 ![screenshot](https://i.imgur.com/UtGKbEg.png)
 
@@ -17,17 +18,117 @@ Rainbow highlighting can also be manually enabled from Sublime context menu (see
 You can also disable rainbow highlighting and go back to the original file highlighting using the same context menu.
 This feature can be used to temporary rainbow-highlight even non-table files.
 
-Manual Rainbow Enabling/Disabling demo gif:
+Manual Rainbow Enabling/Disabling demo gif:  
 ![demo](https://i.imgur.com/7lSSMst.gif)
 
+Rainbow CSV also lets you execute SQL-like queries in RBQL language, see the demo gif below:  
+[!demo gif](https://i.imgur.com/UF6zM4i.gifv)
+
+To Run RBQL query press **<F5>** or select "Rainbow CSV" -> "Run RBQL query" option from the file context menu.  
 
 #### Difference between "Standard" and "Simple" dialects
 When manually enabling rainbow highlighting from the context menu, you have to choose between "Standard" and "Simple" dialect.
 * __Standard dialect__ will treat quoted separator as a single field. E.g. line `sell,"15,128",23%` will be treated as 3 columns, because the second comma is quoted. This dialect is used by Excel.
 * __Simple dialect__ doesn't care about double quotes: the number of highlighted fields is always N + 1 where N is the number of separators.
 
+### Key mappings
 
+|Key                       | Action                                             |
+|--------------------------|----------------------------------------------------|
+|**F5**                    | Start query editing for the current csv file       |
+
+
+### Configuration keys
+
+#### "rbql_meta_language"
+Type: _string_  
+Default: _"python"_  
+Allowed values: _"python"_, _"js"_  
+
+RBQL host language.  
+
+To use Java Script add this line to your settings file: `"rbql_meta_language": "js",`  
+
+
+#### "rbql_output_format"
+Type: _string_  
+Default: _"input"_  
+Allowed values: _"tsv"_, _"csv"_, _"input"_  
+
+Format of RBQL result set tables.  
+
+* input: same format as the input table
+* tsv: tab separated values.
+* csv: is Excel-compatible and allows quoted commas.
+
+Example: to always use "tsv" as output format add this line to your settings file: `"rbql_output_format": "tsv",`
 
 ### References
 
 * This Sublime Text plugin is an adaptation of Vim's rainbow_csv [plugin](https://github.com/mechatroner/rainbow_csv)
+
+
+# RBQL (RainBow Query Language) Description
+
+RBQL is a technology which provides SQL-like language that supports _SELECT_ and _UPDATE_ queries with Python or JavaScript expressions.
+
+### Main Features
+* Use Python or Java Script expressions inside _SELECT_, _UPDATE_, _WHERE_ and _ORDER BY_ statements
+* Result set of any query immediately becomes a first-class table on it's own.
+* Output entries appear in the same order as in input unless _ORDER BY_ is provided.
+* Input csv/tsv spreadsheet may contain varying number of entries (but select query must be written in a way that prevents output of missing values)
+* Works out of the box, no external dependencies.
+
+### Supported SQL Keywords (Keywords are case insensitive)
+
+* SELECT \[ TOP _N_ \] \[ DISTINCT [ COUNT ] \]
+* UPDATE \[ SET \]
+* WHERE
+* ORDER BY ... [ DESC | ASC ]
+* [ [ STRICT ] LEFT | INNER ] JOIN
+* GROUP BY
+* LIMIT _N_
+
+#### Keywords rules
+All keywords have the same meaning as in SQL queries. You can check them [online](https://www.w3schools.com/sql/default.asp)  
+But there are also two new keywords: _DISTINCT COUNT_ and _STRICT LEFT JOIN_:
+* _DISTINCT COUNT_ is like _DISTINCT_, but adds a new column to the "distinct" result set: number of occurences of the entry, similar to _uniq -c_ unix command.
+* _STRICT LEFT JOIN_ is like _LEFT JOIN_, but generates an error if any key in left table "A" doesn't have exactly one matching key in the right table "B".
+
+Some other rules:
+* _UPDATE SET_ is synonym to _UPDATE_, because in RBQL there is no need to specify the source table.
+* _UPDATE_ has the same semantic as in SQL, but it is actually a special type of _SELECT_ query.
+* _JOIN_ statements must have the following form: _<JOIN\_KEYWORD> (/path/to/table.tsv | table_name ) ON ai == bj_
+* _TOP_ and _LIMIT_ have identical semantic.
+
+### Special variables
+
+| Variable Name          | Variable Type | Variable Description                 |
+|------------------------|---------------|--------------------------------------|
+| _a1_, _a2_,..., _a{N}_   |string         | Value of i-th column                 |
+| _b1_, _b2_,..., _b{N}_   |string         | Value of i-th column in join table B |
+| _NR_                     |integer        | Line number (1-based)                |
+| _NF_                     |integer        | Number of fields in line             |
+
+### Aggregate functions and queries
+RBQL supports the following aggregate functions, which can also be used with _GROUP BY_ keyword:  
+_COUNT()_, _MIN()_, _MAX()_, _SUM()_, _AVG()_, _VARIANCE()_, _MEDIAN()_
+
+**Limitations:**
+* Aggregate function are CASE SENSITIVE and must be CAPITALIZED.
+* It is illegal to use aggregate functions inside Python (or JS) expressions. Although you can use expressions inside aggregate functions.
+  E.g. `MAX(float(a1) / 1000)` - legal; `MAX(a1) / 1000` - illegal.
+
+### Examples of RBQL queries
+
+#### With Python expressions
+
+* `select top 100 a1, int(a2) * 10, len(a4) where a1 == "Buy" order by int(a2)`
+* `select * order by random.random()` - random sort, this is an equivalent of bash command _sort -R_
+
+#### With JavaScript expressions
+
+* `select top 100 a1, a2 * 10, a4.length where a1 == "Buy" order by parseInt(a2)`
+* `select * order by Math.random()` - random sort, this is an equivalent of bash command _sort -R_
+
+

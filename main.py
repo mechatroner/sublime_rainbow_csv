@@ -14,10 +14,6 @@ table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
 
 
-# FIXME make RBQL demo gif
-
-# FIXME add documentation to README
-
 # TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
