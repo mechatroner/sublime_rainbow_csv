@@ -22,7 +22,7 @@ Manual Rainbow Enabling/Disabling demo gif:
 ![demo](https://i.imgur.com/7lSSMst.gif)
 
 Rainbow CSV also lets you execute SQL-like queries in RBQL language, see the demo gif below:  
-![demo gif](https://i.imgur.com/UF6zM4i.gifv)
+![demo gif](https://i.imgur.com/UF6zM4i.gif)
 
 To Run RBQL query press **<F5>** or select "Rainbow CSV" -> "Run RBQL query" option from the file context menu.  
 
