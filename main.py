@@ -286,7 +286,7 @@ def on_query_done(input_line):
     file_path = active_view.file_name()
     if not file_path:
         # TODO create a temp file from unnamed buffer
-        sublime.error_message('Error. Unable to run query for this buffer')
+        sublime.error_message('RBQL Error. Unable to run query for this buffer')
         return
     input_delim = active_view.settings().get('rainbow_delim')
     input_policy = active_view.settings().get('rainbow_policy')
@@ -294,16 +294,16 @@ def on_query_done(input_line):
     output_format = active_view.settings().get('rbql_output_format', 'input')
     format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
-        sublime.error_message('Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
+        sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
         return
     output_delim, output_policy = format_map[output_format]
     query_result = sublime_rbql.converged_execute(meta_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy)
     error_type, error_details, warnings, dst_table_path = query_result
     if error_type is not None:
-        sublime.error_message('{}. {}'.format(error_type, error_details))
+        sublime.error_message('Unable to execute RBQL query :(\nEdit your query and try again!\n\n\n\n\n=============================\nDetails:\n{}\n{}'.format(error_type, error_details))
         return
     if not dst_table_path or not os.path.exists(dst_table_path):
-        sublime.error_message('Unknown Error: Unable to find destination file')
+        sublime.error_message('Unknown RBQL Error: Unable to find destination file')
         return
     if warnings is not None and len(warnings):
         warning_report = 'Warning!\n' + '\n'.join(warnings)

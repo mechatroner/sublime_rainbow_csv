@@ -54,7 +54,13 @@ def execute_js(src_table_path, rainbow_query, input_delim, input_policy, out_del
     except rbql.RBParsingError as e:
         return ('Parsing Error', str(e), warnings)
     cmd = ['node', meta_script_path]
-    pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if os.name == 'nt': # Windows
+        # Without startupinfo magic Windows will show console window for a longer period.
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=si)
+    else:
+        pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out_data, err_data = pobj.communicate()
     error_code = pobj.returncode
 
