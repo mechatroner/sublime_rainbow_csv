@@ -117,17 +117,9 @@ def sample_lines(view):
     return sampled_lines
 
 
-def guess_document_header(view, delim, policy):
-    sampled_lines = sample_lines(view)
-    if len(sampled_lines) < 10:
-        return None
-    header_line = sampled_lines[0]
-    body_lines = sampled_lines[1:]
-    sampled_records = [rainbow_utils.smart_split(l, delim, policy, False)[0] for l in body_lines]
-    potential_header = rainbow_utils.smart_split(header_line, delim, policy, False)[0]
-    has_header = rainbow_utils.guess_if_header(potential_header, sampled_records)
-    return potential_header if has_header else None
-        
+def get_document_header(view, delim, policy):
+    header_line = get_line_text(view, 0)
+    return rainbow_utils.smart_split(header_line, delim, policy, False)[0]
 
 
 def is_plain_text(view):
@@ -449,13 +441,18 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             lnum, cnum = self.view.rowcol(point)
             line_text = self.view.substr(self.view.line(point))
             hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
-            if warning or not len(hover_record):
-                return
             field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)
-            header = guess_document_header(self.view, delim, policy)
-            ui_text = 'col# {}'.format(field_num + 1)
-            if header is not None and len(header) == len(hover_record):
+            header = get_document_header(self.view, delim, policy)
+            ui_text = 'Col# {}'.format(field_num + 1)
+            if field_num < len(header):
                 column_name = header[field_num]
-                ui_text += ', "{}"'.format(column_name)
+                max_header_len = 30
+                if len(column_name) > max_header_len:
+                    column_name = column_name[:max_header_len] + '...'
+                ui_text += ', Header: "{}"'.format(column_name)
+            if len(header) != len(hover_record):
+                ui_text += '; WARN: num of fields in Header and this line differs'
+            if warning:
+                ui_text += '; This line has quoting error'
             ui_hex_color = rainbow_utils.color_entries[field_num % 10][1]
-            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb)
+            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)

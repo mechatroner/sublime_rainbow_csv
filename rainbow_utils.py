@@ -75,35 +75,6 @@ def get_field_by_line_position(fields, query_pos):
     return col_num
 
 
-def guess_if_header(potential_header, sampled_records):
-    # Single line - not header
-    if len(sampled_records) < 1:
-        return False
-
-    num_fields = len(potential_header)
-
-    # Different number of columns - not header
-    for sr in sampled_records:
-        if len(sr) != num_fields:
-            return False
-
-    # All sampled lines do not have any letters in a column and potential header does - header
-    optimistic_name_re = '^"?[a-zA-Z]{3,}'
-    pessimistic_name_re = '[a-zA-Z]'
-    for c in range(num_fields):
-        if re.match(optimistic_name_re, potential_header[c]) is None:
-            continue
-        all_numbers = True
-        for sr in sampled_records:
-            if re.match(pessimistic_name_re, sr[c]) is not None:
-                all_numbers = False
-                break
-        if all_numbers:
-            return True
-
-    return False
-
-
 def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
     # If separator is not tab, tabstop_val must be set to 1
     result = list()
