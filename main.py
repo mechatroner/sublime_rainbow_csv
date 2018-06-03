@@ -265,6 +265,15 @@ def on_set_table_name_done(input_line):
     write_index(records, table_names_path)
 
 
+def get_backend_language(view):
+    backend_language = view.settings().get('rbql_backend_language', None)
+    if backend_language is None:
+        backend_language = view.settings().get('rbql_meta_language', None) # Backward compatibility
+    if backend_language is None:
+        backend_language = 'python'
+    return backend_language
+
+
 def on_query_done(input_line):
     active_window = sublime.active_window()
     if not active_window:
@@ -282,14 +291,14 @@ def on_query_done(input_line):
         return
     input_delim = active_view.settings().get('rainbow_delim')
     input_policy = active_view.settings().get('rainbow_policy')
-    meta_language = active_view.settings().get('rbql_meta_language', 'python')
+    backend_language = get_backend_language(active_view)
     output_format = active_view.settings().get('rbql_output_format', 'input')
     format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
         return
     output_delim, output_policy = format_map[output_format]
-    query_result = sublime_rbql.converged_execute(meta_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy)
+    query_result = sublime_rbql.converged_execute(backend_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy)
     error_type, error_details, warnings, dst_table_path = query_result
     if error_type is not None:
         sublime.error_message('Unable to execute RBQL query :(\nEdit your query and try again!\n\n\n\n\n=============================\nDetails:\n{}\n{}'.format(error_type, error_details))
@@ -385,6 +394,15 @@ def is_delimited_table(sampled_lines, delim, policy):
     return True
 
 
+def autodetect_content_based(view):
+    sampled_lines = sample_lines(view)
+    autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
+    for delim, policy in autodetection_dialects:
+        if is_delimited_table(sampled_lines, delim, policy):
+            return (delim, policy)
+    return None
+
+
 def run_rainbow_init(view):
     if view.settings().get('rainbow_inited') is not None:
         return
@@ -399,12 +417,17 @@ def run_rainbow_init(view):
             return
     if not is_plain_text(view):
         return
-    sampled_lines = sample_lines(view)
-    autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
-    for delim, policy in autodetection_dialects:
-        if is_delimited_table(sampled_lines, delim, policy):
+    if view.settings().get('enable_rainbow_csv_autodetect', True):
+        csv_dialect = autodetect_content_based(view)
+        if csv_dialect is not None:
+            delim, policy = csv_dialect
             do_enable_rainbow(view, delim, policy)
-            break
+            return
+    if file_path is not None:
+        if file_path.endswith('.csv'):
+            do_enable_rainbow(view, ',', 'quoted')
+        elif file_path.endswith('.tsv'):
+            do_enable_rainbow(view, '\t', 'simple')
 
 
 class RainbowAutodetectListener(sublime_plugin.EventListener):

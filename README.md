@@ -40,7 +40,14 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 
 ### Configuration keys
 
-#### "rbql_meta_language"
+#### "enable_rainbow_csv_autodetect"
+Type: _bool_
+Default: _True_  
+
+Enable content-based separator autodetection
+
+
+#### "rbql_backend_language"
 Type: _string_  
 Default: _"python"_  
 Allowed values: _"python"_, _"js"_  
@@ -48,7 +55,7 @@ Allowed values: _"python"_, _"js"_
 RBQL host language.  
 In order to use RBQL with Java Script (js) you need to have Node JS installed and added to your system path.  
 
-To use Java Script add this line to your settings file: `"rbql_meta_language": "js",`  
+To use Java Script add this line to your settings file: `"rbql_backend_language": "js",`  
 
 
 #### "rbql_output_format"
