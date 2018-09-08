@@ -46,6 +46,12 @@ Default: _True_
 
 Enable content-based separator autodetection
 
+#### "rainbow_csv_max_file_size_bytes"
+Type: _int_  
+
+Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and sublime crashes on very large files.  
+Manual separator selection will override this setting for the current file.  
+E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
 #### "rbql_backend_language"
 Type: _string_  

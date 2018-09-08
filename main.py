@@ -406,6 +406,9 @@ def autodetect_content_based(view):
 def run_rainbow_init(view):
     if view.settings().get('rainbow_inited') is not None:
         return
+    max_file_size = view.settings().get('rainbow_csv_max_file_size_bytes', None)
+    if max_file_size is not None and view.size() > max_file_size:
+        return
     view.settings().set('rainbow_inited', True)
     file_path = view.file_name()
     if file_path is not None:
