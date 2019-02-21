@@ -13,11 +13,16 @@ user_home_dir = os.path.expanduser('~')
 table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
 table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
 
+SETTINGS_FILE = 'RainbowCSV.sublime-settings'
+
+# To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
+
 
 # TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
+
 
 def index_decode_delim(delim):
     if delim == 'TAB':
@@ -265,13 +270,24 @@ def on_set_table_name_done(input_line):
     write_index(records, table_names_path)
 
 
+def get_setting(view, key, default_value):
+    if view.settings().has(key):
+        return view.settings().get(key, default_value)
+    settings = sublime.load_settings(SETTINGS_FILE)
+    return settings.get(key, default_value)
+
+
 def get_backend_language(view):
-    backend_language = view.settings().get('rbql_backend_language', None)
-    if backend_language is None:
-        backend_language = view.settings().get('rbql_meta_language', None) # Backward compatibility
-    if backend_language is None:
-        backend_language = 'python'
-    return backend_language
+    backend_language = get_setting(view, 'rbql_backend_language', 'python')
+    return backend_language.lower()
+
+
+def prettify_language_name(language_id):
+    if language_id == 'python':
+        return 'Python'
+    if language_id == 'js':
+        return 'JS'
+    return '?'
 
 
 def on_query_done(input_line):
@@ -292,7 +308,7 @@ def on_query_done(input_line):
     input_delim = active_view.settings().get('rainbow_delim')
     input_policy = active_view.settings().get('rainbow_policy')
     backend_language = get_backend_language(active_view)
-    output_format = active_view.settings().get('rbql_output_format', 'input')
+    output_format = get_setting(active_view, 'rbql_output_format', 'input')
     format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
@@ -368,7 +384,9 @@ class RunQueryCommand(sublime_plugin.TextCommand):
             return
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
-        active_window.show_input_panel('Enter SQL-like RBQL query:', previous_query, on_query_done, None, on_query_cancel)
+        backend_language = get_backend_language(self.view)
+        pretty_language_name = prettify_language_name(backend_language)
+        active_window.show_input_panel('Enter SQL-like RBQL query ({}):'.format(pretty_language_name), previous_query, on_query_done, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
 
@@ -406,7 +424,9 @@ def autodetect_content_based(view):
 def run_rainbow_init(view):
     if view.settings().get('rainbow_inited') is not None:
         return
-    max_file_size = view.settings().get('rainbow_csv_max_file_size_bytes', None)
+
+    #print('hello world!') # Debug print example
+    max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', None)
     if max_file_size is not None and view.size() > max_file_size:
         return
     view.settings().set('rainbow_inited', True)
@@ -420,7 +440,7 @@ def run_rainbow_init(view):
             return
     if not is_plain_text(view):
         return
-    if view.settings().get('enable_rainbow_csv_autodetect', True):
+    if get_setting(view, 'enable_rainbow_csv_autodetect', True):
         csv_dialect = autodetect_content_based(view)
         if csv_dialect is not None:
             delim, policy = csv_dialect

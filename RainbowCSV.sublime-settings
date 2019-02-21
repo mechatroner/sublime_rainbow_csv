@@ -1,0 +1,4 @@
+{
+    "enable_rainbow_csv_autodetect": true,
+    "rbql_backend_language": "js"
+}
