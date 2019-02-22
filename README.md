@@ -42,14 +42,16 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 
 #### "enable_rainbow_csv_autodetect"
 Type: _bool_
-Default: _True_  
+Default: _true_  
 
-Enable content-based separator autodetection
+Enable content-based separator autodetection. 
+Setting this option to _false_ will affect only files that haven't been seen before by Rainbow CSV.
+Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
 
 #### "rainbow_csv_max_file_size_bytes"
 Type: _int_  
 
-Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and sublime crashes on very large files.  
+Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.  
 Manual separator selection will override this setting for the current file.  
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 

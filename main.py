@@ -273,6 +273,7 @@ def on_set_table_name_done(input_line):
 def get_setting(view, key, default_value):
     if view.settings().has(key):
         return view.settings().get(key, default_value)
+    # FIXME try to make "settings" global and check if they get automatically updated after SETTINGS_FILE get changed
     settings = sublime.load_settings(SETTINGS_FILE)
     return settings.get(key, default_value)
 
