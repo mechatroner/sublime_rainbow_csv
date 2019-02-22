@@ -197,6 +197,7 @@ def do_enable_rainbow(view, delim, policy):
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
     if file_path is not None:
+        # FIXME do not save for autodetected files
         save_rainbow_params(file_path, delim, policy)
 
 
