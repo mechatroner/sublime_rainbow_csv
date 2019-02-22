@@ -442,6 +442,7 @@ def run_rainbow_init(view):
     if not is_plain_text(view):
         return
     if get_setting(view, 'enable_rainbow_csv_autodetect', True):
+        # FIXME do not autodetect if files are too big.
         csv_dialect = autodetect_content_based(view)
         if csv_dialect is not None:
             delim, policy = csv_dialect
