@@ -221,10 +221,10 @@ There is no complex logic, even query parsing functions are very simple. If some
 You can also use two standalone RBQL Apps: with JavaScript and Python backends
 
 #### rbql-js
-Installation: `$ npm i rbql`
-Usage: `$ rbql-js --query "select a1, a2 order by a1" < input.tsv`
+Installation: `$ npm i rbql`  
+Usage: `$ rbql-js --query "select a1, a2 order by a1" < input.tsv`  
 
 #### rbql-py
-Installation: `$ pip install rbql`
-Usage: `$ rbql-py --query "select a1, a2 order by a1" < input.tsv`
+Installation: `$ pip install rbql`  
+Usage: `$ rbql-py --query "select a1, a2 order by a1" < input.tsv`  
 
