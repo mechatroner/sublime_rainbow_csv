@@ -30,16 +30,14 @@ def init_user_data_paths():
     global table_names_path
     if table_index_path is not None and table_names_path is not None:
         return
+    user_home_dir = os.path.expanduser('~')
     packages_path = sublime.packages_path()
-    print('sublime packages_path: "{}"'.format(packages_path))
     sublime_user_dir = os.path.join(packages_path, 'User')
     if os.path.exists(sublime_user_dir):
         table_index_path = os.path.join(sublime_user_dir, 'rbql_table_index')
-        table_names_path = os.path.join(sublime_user_dir, 'rbql_table_names')
     else:
-        user_home_dir = os.path.expanduser('~')
         table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
-        table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
+    table_names_path = os.path.join(user_home_dir, '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
 
 
 def index_decode_delim(delim):
