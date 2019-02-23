@@ -38,45 +38,40 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 |**F5**                    | Start query editing for the current csv file       |
 
 
-### Configuration keys
+### Configuration
+
+To adjust plugin configuration: 
+
+1. Go to "Preferences" -> "Package Settings" -> "Rainbow CSV" -> "Settings-Default" and copy it's content. Do not modify the file itself.
+2. Go to "Preferences" -> "Package Settings" -> "Rainbow CSV" -> "Settings-User" and paste json-like content from step 1.
+3. Alter the copied json-like config in "Settings-User" as you like and then save.
+
+
+### Configuration parameters
 
 #### "enable_rainbow_csv_autodetect"
-Type: _bool_
-Default: _true_  
-
 Enable content-based separator autodetection. 
 Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
 
 #### "rainbow_csv_max_file_size_bytes"
-Type: _int_  
-
 Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.  
 Manual separator selection will override this setting for the current file.  
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
 #### "rbql_backend_language"
-Type: _string_  
-Default: _"Python"_  
-Allowed values: _"Python"_, _"JS"_  
-
 RBQL backend language.  
+Allowed values: _"Python"_, _"JS"_  
 In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
 
-To use JavaScript add this line to your settings file: `"rbql_backend_language": "JS"`  
-
-
 #### "rbql_output_format"
-Type: _string_  
-Default: _"input"_  
-Allowed values: _"tsv"_, _"csv"_, _"input"_  
-
 Format of RBQL result set tables.  
-
+Allowed values: _"tsv"_, _"csv"_, _"input"_  
 * input: same format as the input table
 * tsv: tab separated values.
 * csv: is Excel-compatible and allows quoted commas.
 
 Example: to always use "tsv" as output format add this line to your settings file: `"rbql_output_format": "tsv",`
+
 
 ### References
 

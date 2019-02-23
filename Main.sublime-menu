@@ -12,7 +12,14 @@
                                 "args": {
                                     "file": "${packages}/rainbow_csv/RainbowCSV.sublime-settings"
                                 },
-                                "caption": "Settings",
+                                "caption": "Settings \u2013 Default",
+                                "command": "open_file"
+                            },
+                            {
+                                "args": {
+                                    "file": "${packages}/User/RainbowCSV.sublime-settings"
+                                },
+                                "caption": "Settings \u2013 User",
                                 "command": "open_file"
                             }
                         ],

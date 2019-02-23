@@ -17,8 +17,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
 
-# FIXME implement custom settings mechanism, add comments to the settings file.
-
 # TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
@@ -149,7 +147,6 @@ def is_plain_text(view):
 
 
 def name_normalize(delim):
-    # Same order as in https://stackoverflow.com/a/31976060/2898283
     name_map = dict()
     name_map['<'] = 'less-than'
     name_map['>'] = 'greater-than'
