@@ -9,14 +9,24 @@ import rainbow_csv.rainbow_utils as rainbow_utils
 import rainbow_csv.sublime_rbql as sublime_rbql
 
 
-user_home_dir = os.path.expanduser('~')
-table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
-table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
+sublime_user_dir = os.path.join(sublime.packages_path(), 'User')
+table_index_path = None
+table_names_path = None
+if os.path.exists(sublime_user_dir):
+    table_index_path = os.path.join(sublime_user_dir, 'rbql_table_index')
+    table_names_path = os.path.join(sublime_user_dir, 'rbql_table_names')
+else:
+    user_home_dir = os.path.expanduser('~')
+    table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
+    table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
+
 
 SETTINGS_FILE = 'RainbowCSV.sublime-settings'
+custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
 
+# FIXME implement custom settings mechanism, add comments to the settings file.
 
 # TODO implement CSVLint
 
@@ -180,7 +190,7 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
         do_enable_rainbow(view, delim, policy)
 
 
-def do_enable_rainbow(view, delim, policy):
+def do_enable_rainbow(view, delim, policy, store_settings=True):
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
@@ -197,7 +207,6 @@ def do_enable_rainbow(view, delim, policy):
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
     if file_path is not None:
-        # FIXME do not save for autodetected files
         save_rainbow_params(file_path, delim, policy)
 
 
@@ -274,9 +283,10 @@ def on_set_table_name_done(input_line):
 def get_setting(view, key, default_value):
     if view.settings().has(key):
         return view.settings().get(key, default_value)
-    # FIXME try to make "settings" global and check if they get automatically updated after SETTINGS_FILE get changed
-    settings = sublime.load_settings(SETTINGS_FILE)
-    return settings.get(key, default_value)
+    global custom_settings
+    if custom_settings is None:
+        custom_settings = sublime.load_settings(SETTINGS_FILE)
+    return custom_settings.get(key, default_value)
 
 
 def get_backend_language(view):
@@ -428,7 +438,7 @@ def run_rainbow_init(view):
         return
 
     #print('hello world!') # Debug print example
-    max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', None)
+    max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', 5000000)
     if max_file_size is not None and view.size() > max_file_size:
         return
     view.settings().set('rainbow_inited', True)
@@ -438,22 +448,21 @@ def run_rainbow_init(view):
         if delim == 'disabled':
             return
         if delim is not None:
-            do_enable_rainbow(view, delim, policy)
+            do_enable_rainbow(view, delim, policy, store_settings=False)
             return
     if not is_plain_text(view):
         return
     if get_setting(view, 'enable_rainbow_csv_autodetect', True):
-        # FIXME do not autodetect if files are too big.
         csv_dialect = autodetect_content_based(view)
         if csv_dialect is not None:
             delim, policy = csv_dialect
-            do_enable_rainbow(view, delim, policy)
+            do_enable_rainbow(view, delim, policy, store_settings=False)
             return
     if file_path is not None:
         if file_path.endswith('.csv'):
-            do_enable_rainbow(view, ',', 'quoted')
+            do_enable_rainbow(view, ',', 'quoted', store_settings=False)
         elif file_path.endswith('.tsv'):
-            do_enable_rainbow(view, '\t', 'simple')
+            do_enable_rainbow(view, '\t', 'simple', store_settings=False)
 
 
 class RainbowAutodetectListener(sublime_plugin.EventListener):
