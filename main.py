@@ -9,17 +9,8 @@ import rainbow_csv.rainbow_utils as rainbow_utils
 import rainbow_csv.sublime_rbql as sublime_rbql
 
 
-sublime_user_dir = os.path.join(sublime.packages_path(), 'User')
 table_index_path = None
 table_names_path = None
-if os.path.exists(sublime_user_dir):
-    table_index_path = os.path.join(sublime_user_dir, 'rbql_table_index')
-    table_names_path = os.path.join(sublime_user_dir, 'rbql_table_names')
-else:
-    user_home_dir = os.path.expanduser('~')
-    table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
-    table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
-
 
 SETTINGS_FILE = 'RainbowCSV.sublime-settings'
 custom_settings = None # Gets auto updated on every SETTINGS_FILE write
@@ -32,6 +23,23 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
+
+
+def init_user_data_paths():
+    global table_index_path
+    global table_names_path
+    if table_index_path is not None and table_names_path is not None:
+        return
+    packages_path = sublime.packages_path()
+    print('sublime packages_path: "{}"'.format(packages_path))
+    sublime_user_dir = os.path.join(packages_path, 'User')
+    if os.path.exists(sublime_user_dir):
+        table_index_path = os.path.join(sublime_user_dir, 'rbql_table_index')
+        table_names_path = os.path.join(sublime_user_dir, 'rbql_table_names')
+    else:
+        user_home_dir = os.path.expanduser('~')
+        table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
+        table_names_path = os.path.join(user_home_dir, '.rbql_table_names')
 
 
 def index_decode_delim(delim):
@@ -436,6 +444,7 @@ def autodetect_content_based(view):
 def run_rainbow_init(view):
     if view.settings().get('rainbow_inited') is not None:
         return
+    init_user_data_paths()
 
     #print('hello world!') # Debug print example
     max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', 5000000)
