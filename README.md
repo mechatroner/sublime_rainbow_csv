@@ -45,7 +45,6 @@ Type: _bool_
 Default: _true_  
 
 Enable content-based separator autodetection. 
-Setting this option to _false_ will affect only files that haven't been seen before by Rainbow CSV.
 Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
 
 #### "rainbow_csv_max_file_size_bytes"
@@ -57,13 +56,13 @@ E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_byt
 
 #### "rbql_backend_language"
 Type: _string_  
-Default: _"python"_  
-Allowed values: _"python"_, _"js"_  
+Default: _"Python"_  
+Allowed values: _"Python"_, _"JS"_  
 
-RBQL host language.  
-In order to use RBQL with Java Script (js) you need to have Node JS installed and added to your system path.  
+RBQL backend language.  
+In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
 
-To use Java Script add this line to your settings file: `"rbql_backend_language": "js",`  
+To use JavaScript add this line to your settings file: `"rbql_backend_language": "JS"`  
 
 
 #### "rbql_output_format"
@@ -90,7 +89,7 @@ RBQL is a technology which provides SQL-like language that supports _SELECT_ and
 [Official Site](https://rbql.org/)
 
 ### Main Features
-* Use Python or Java Script expressions inside _SELECT_, _UPDATE_, _WHERE_ and _ORDER BY_ statements
+* Use Python or JavaScript expressions inside _SELECT_, _UPDATE_, _WHERE_ and _ORDER BY_ statements
 * Result set of any query immediately becomes a first-class table on it's own.
 * Output entries appear in the same order as in input unless _ORDER BY_ is provided.
 * Input csv/tsv spreadsheet may contain varying number of entries (but select query must be written in a way that prevents output of missing values)
