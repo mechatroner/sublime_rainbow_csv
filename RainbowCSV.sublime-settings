@@ -1,21 +1,21 @@
 {
-    // Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.  
-    // Manual separator selection will override this setting for the current file.  
+    // Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.
+    // Manual separator selection will override this setting for the current file.
     "rainbow_csv_max_file_size_bytes": 5000000,
 
 
-    // Enable content-based separator autodetection. 
+    // Enable content-based separator autodetection.
     // Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
     "enable_rainbow_csv_autodetect": true,
 
 
-    // RBQL backend language.  
+    // RBQL backend language.
     // Supported values: "Python", "JS"
-    // In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
+    // In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.
     "rbql_backend_language": "Python",
 
 
-    // Format of RBQL result set tables.  
+    // Format of RBQL result set tables.
     // Supported values: "input", "tsv", "csv"
     // * input: same format as the input table
     // * tsv: tab separated values.
