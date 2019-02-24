@@ -23,6 +23,20 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
 
+rainbow_scope_names = [
+    'rainbow1',
+    'keyword.rainbow2',
+    'entity.name.rainbow3',
+    'comment.rainbow4',
+    'string.rainbow5',
+    'entity.name.tag.rainbow6',
+    'storage.type.rainbow7',
+    'support.rainbow8',
+    'constant.language.rainbow9',
+    'variable.language.rainbow10'
+]
+
+
 def init_user_data_paths():
     global table_index_path
     global table_names_path
@@ -352,6 +366,14 @@ def on_query_cancel():
     active_view.hide_popup()
 
 
+
+def get_column_color(view, col_num):
+    color_info = view.style_for_scope(rainbow_scope_names[col_num % 10])
+    if color_info and 'foreground' in color_info:
+        return color_info['foreground']
+    return '#FF0000' # Error handling, should never happen
+
+
 def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
@@ -370,7 +392,7 @@ def show_names_for_line(view, delim, policy, line_region):
     num_fields = len(status_labels) // 2
     html_text = ''
     for i in range(num_fields):
-        hex_color = rainbow_utils.color_entries[i % 10][1]
+        hex_color = get_column_color(view, i)
         column_name = status_labels[i * 2]
         space_filling = status_labels[i * 2 + 1].replace(' ', '&nbsp;')
         html_text += '<span style="color:{}">{}{}</span>'.format(hex_color, column_name, space_filling)
@@ -516,5 +538,5 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 ui_text += '; WARN: num of fields in Header and this line differs'
             if warning:
                 ui_text += '; This line has quoting error'
-            ui_hex_color = rainbow_utils.color_entries[field_num % 10][1]
+            ui_hex_color = get_column_color(self.view, field_num)
             self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)

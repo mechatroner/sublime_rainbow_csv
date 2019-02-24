@@ -11,7 +11,17 @@ import xml.dom.minidom
 plugin_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(plugin_directory)
 
-import rainbow_utils
+color_entries = list()
+color_entries.append(('rainbow1', '#E6194B', None))
+color_entries.append(('keyword.rainbow2', '#3CB44B', None))
+color_entries.append(('entity.name.rainbow3', '#FFE119', None))
+color_entries.append(('comment.rainbow4', '#0082C8', None))
+color_entries.append(('string.rainbow5', '#FABEBE', None))
+color_entries.append(('entity.name.tag.rainbow6', '#46F0F0', None))
+color_entries.append(('storage.type.rainbow7', '#F032E6', None))
+color_entries.append(('support.rainbow8', '#008080', None))
+color_entries.append(('constant.language.rainbow9', '#F58231', None))
+color_entries.append(('variable.language.rainbow10', '#FFFFFF', None))
 
 
 def remove_blanks_from_xml(xml_str):
@@ -63,7 +73,7 @@ def convert_colorscheme(root):
     if len(array_elem) != 1:
         return None
     array_elem = array_elem[0]
-    for entry in rainbow_utils.color_entries:
+    for entry in color_entries:
         array_elem.append(make_color_entry(*entry))
     return root
 

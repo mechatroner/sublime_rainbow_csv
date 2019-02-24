@@ -1,19 +1,5 @@
 import re
 
-# Colors were taken from here: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
-# TODO move into main
-color_entries = list()
-color_entries.append(('rainbow1', '#E6194B', None))
-color_entries.append(('keyword.rainbow2', '#3CB44B', None))
-color_entries.append(('entity.name.rainbow3', '#FFE119', None))
-color_entries.append(('comment.rainbow4', '#0082C8', None))
-color_entries.append(('string.rainbow5', '#FABEBE', None))
-color_entries.append(('entity.name.tag.rainbow6', '#46F0F0', None))
-color_entries.append(('storage.type.rainbow7', '#F032E6', None))
-color_entries.append(('support.rainbow8', '#008080', None))
-color_entries.append(('constant.language.rainbow9', '#F58231', None))
-color_entries.append(('variable.language.rainbow10', '#FFFFFF', None))
-
 
 # Taken from rbql_utils.py:
 def split_quoted_str(src, dlm, preserve_quotes=False):
