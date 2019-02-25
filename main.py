@@ -23,6 +23,15 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
 
+
+# To set custom theme for rainbow csv files use this code:
+# sublime.active_window().active_view().settings().set("color_scheme", "Packages/User/RainbowCSV.tmTheme")
+# we can try to generate and update (if changed) the theme on each CSV open.
+
+
+# Another option is to create a color scheme: https://www.sublimetext.com/docs/3/color_schemes.html
+# To use it one doesn't need to specify the Package-relative path, only the filename, so users will be able to customize it.
+
 rainbow_scope_names = [
     'rainbow1',
     'keyword.rainbow2',
