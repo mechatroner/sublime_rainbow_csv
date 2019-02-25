@@ -30,7 +30,7 @@ rainbow_scope_names = [
     'comment.rainbow4',
     'string.rainbow5',
     'entity.name.tag.rainbow6',
-    'storage.type.rainbow7',
+    'variable.function.rainbow7',
     'support.rainbow8',
     'constant.language.rainbow9',
     'variable.language.rainbow10'
