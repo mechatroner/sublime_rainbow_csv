@@ -29,10 +29,10 @@ rainbow_scope_names = [
     'entity.name.rainbow3',
     'comment.rainbow4',
     'string.rainbow5',
-    'entity.name.tag.rainbow6',
-    'variable.function.rainbow7',
-    'support.rainbow8',
-    'constant.language.rainbow9',
+    'variable.function.rainbow6',
+    'markup.header.rainbow7',
+    'constant.language.rainbow8',
+    'entity.name.tag.rainbow9',
     'variable.language.rainbow10'
 ]
 
