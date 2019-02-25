@@ -31,6 +31,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # Another option is to create a color scheme: https://www.sublimetext.com/docs/3/color_schemes.html
 # To use it one doesn't need to specify the Package-relative path, only the filename, so users will be able to customize it.
+# It is possible to rewrite .tmTheme file in the new format
+# Actually we can still specify .tmTheme file in settings but Users would be able to customize this using an attached template .sublime-color-scheme file
 
 rainbow_scope_names = [
     'rainbow1',
