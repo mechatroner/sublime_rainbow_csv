@@ -1,0 +1,80 @@
+{
+    "globals":
+    {
+        "background": "#272822",
+        "caret": "#F8F8F0",
+        "foreground": "#F8F8F2",
+        "invisibles": "#3B3A32",
+        "lineHighlight": "#3E3D32",
+        "selection": "#49483E",
+        "findHighlight": "#FFE792",
+        "findHighlightForeground": "#000000",
+        "selectionBorder": "#222218",
+        "activeGuide": "#9D550FB0",
+        "misspelling": "#F92672",
+        "bracketsForeground": "#F8F8F2A5",
+        "bracketsOptions": "underline",
+        "bracketContentsForeground": "#F8F8F2A5",
+        "bracketContentsOptions": "underline",
+        "tagsOptions": "stippled_underline"
+    },
+    "rules":
+    [
+        {
+            "name": "rainbow csv rainbow1",
+            "scope": "rainbow1",
+            "foreground": "#E6194B"
+        },
+        {
+            "name": "rainbow csv rainbow2",
+            "scope": "keyword.rainbow2",
+            "foreground": "#3CB44B"
+        },
+        {
+            "name": "rainbow csv rainbow3",
+            "scope": "entity.name.rainbow3",
+            "foreground": "#FFE119"
+        },
+        {
+            "name": "rainbow csv rainbow4",
+            "scope": "comment.rainbow4",
+            "foreground": "#0082C8"
+        },
+        {
+            "name": "rainbow csv rainbow5",
+            "scope": "string.rainbow5",
+            "foreground": "#FABEBE"
+        },
+        {
+            "name": "rainbow csv rainbow6",
+            "scope": "entity.name.tag.rainbow6",
+            "foreground": "#46F0F0"
+        },
+        {
+            "name": "rainbow csv rainbow7",
+            "scope": "storage.type.rainbow7",
+            "foreground": "#F032E6"
+        },
+        {
+            "name": "rainbow csv rainbow8",
+            "scope": "support.rainbow8",
+            "foreground": "#008080"
+        },
+        {
+            "name": "rainbow csv rainbow9",
+            "scope": "constant.language.rainbow9",
+            "foreground": "#F58231"
+        },
+        {
+            "name": "rainbow csv rainbow10",
+            "scope": "variable.language.rainbow10",
+            "foreground": "#FFFFFF"
+        },
+        {
+            "name": "rainbow csv rainbowerror",
+            "scope": "invalid.rainbowerror",
+            "foreground": "#FFFFFF",
+            "background": "#FF0000"
+        }
+    ]
+}
