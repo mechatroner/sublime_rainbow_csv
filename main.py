@@ -22,17 +22,15 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
+# FIXME try to use "sublime-syntax" format
+
+# FIXME describe colors customization in readme
 
 
-# To set custom theme for rainbow csv files use this code:
-# sublime.active_window().active_view().settings().set("color_scheme", "Packages/User/RainbowCSV.tmTheme")
-# we can try to generate and update (if changed) the theme on each CSV open.
+# TODO automatic syntax generation roadmap:
+# 1. If current background doesn't match custom RainbowCSV background:
+# 2. Inside a try/catch block generate a new sublime-color-scheme with user background and put into User directory. Use more than 10 colors (11 ?) to find ones that are most further from user background. Or just simply choose between black and white foreground for the last color
 
-
-# Another option is to create a color scheme: https://www.sublimetext.com/docs/3/color_schemes.html
-# To use it one doesn't need to specify the Package-relative path, only the filename, so users will be able to customize it.
-# It is possible to rewrite .tmTheme file in the new format
-# Actually we can still specify .tmTheme file in settings but Users would be able to customize this using an attached template .sublime-color-scheme file
 
 rainbow_scope_names = [
     'rainbow1',
