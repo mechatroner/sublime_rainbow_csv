@@ -1,0 +1,36 @@
+%YAML 1.2
+---
+name: CSV (Rainbow new)
+file_extensions: [fixmecsv]
+scope: text.rbcst44
+
+
+
+contexts:
+    #prototype:
+    #    - match: "$"
+    #      set: rainbow1
+
+    main:
+        - match: "^"
+          push: rainbow1
+
+    rainbow1:
+        - meta_scope: rainbow1
+        - match: ","
+          set: rainbow2
+
+    rainbow2:
+        - meta_scope: keyword.rainbow2
+        - match: ","
+          set: rainbow3
+        - match: "$"
+          set: rainbow1
+
+    rainbow3:
+        - meta_scope: entity.name.rainbow3
+        - match: ","
+          set: rainbow1
+        - match: "$"
+          set: rainbow1
+
