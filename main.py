@@ -26,6 +26,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME describe colors customization in readme
 
+# FIXME set "hidden" flag for (all?) most of the new sublime-syntax files
+
 
 # TODO automatic syntax generation roadmap:
 # 1. If current background doesn't match custom RainbowCSV background:
@@ -217,6 +219,7 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
 
 
 def do_enable_rainbow(view, delim, policy, store_settings=True):
+    return #FIXME
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
