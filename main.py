@@ -28,6 +28,10 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME set "hidden" flag for (all?) most of the new sublime-syntax files
 
+# FIXME either use meta.rainbow scopes or delete them
+
+# TODO consider implementing syntax with newlines-in-fields support. measure performance.
+
 
 # TODO automatic syntax generation roadmap:
 # 1. If current background doesn't match custom RainbowCSV background:

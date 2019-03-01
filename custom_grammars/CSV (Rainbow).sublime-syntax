@@ -1,8 +1,8 @@
 %YAML 1.2
 ---
-name: CSV (Rainbow simple new)
-file_extensions: [rbcsmn44]
-scope: text.rbcsmn44
+name: CSV (Rainbow standard new)
+file_extensions: [rbcstn44]
+scope: text.rbcstn44
 
 
 contexts:
@@ -10,10 +10,19 @@ contexts:
         - match: "^"
           push: rainbow1
 
+    quoted_field:
+        - meta_scope: fixmescope
+        - match: '""'
+          scope: meta.rainbow.double-quote-in-field
+        - match: '"'
+          pop: true
+
     rainbow1:
         - meta_scope: rainbow1 meta.rainbow1
         - match: ","
           set: rainbow2
+        - match: '"'
+          push: quoted_field
 
     rainbow2:
         - meta_scope: keyword.rainbow2 meta.rainbow2
@@ -21,6 +30,8 @@ contexts:
           set: rainbow3
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow3:
         - meta_scope: entity.name.rainbow3 meta.rainbow3
@@ -28,6 +39,8 @@ contexts:
           set: rainbow4
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow4:
         - meta_scope: comment.rainbow4 meta.rainbow4
@@ -35,6 +48,8 @@ contexts:
           set: rainbow5
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow5:
         - meta_scope: string.rainbow5 meta.rainbow5
@@ -42,6 +57,8 @@ contexts:
           set: rainbow6
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow6:
         - meta_scope: entity.name.tag.rainbow6 meta.rainbow6
@@ -49,6 +66,8 @@ contexts:
           set: rainbow7
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow7:
         - meta_scope: storage.type.rainbow7 meta.rainbow7
@@ -56,6 +75,8 @@ contexts:
           set: rainbow8
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow8:
         - meta_scope: support.rainbow8 meta.rainbow8
@@ -63,6 +84,8 @@ contexts:
           set: rainbow9
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow9:
         - meta_scope: constant.language.rainbow9 meta.rainbow9
@@ -70,6 +93,8 @@ contexts:
           set: rainbow10
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
     rainbow10:
         - meta_scope: variable.language.rainbow10 meta.rainbow10
@@ -77,4 +102,6 @@ contexts:
           set: rainbow1
         - match: "$"
           pop: true
+        - match: '"'
+          push: quoted_field
 
