@@ -4,104 +4,52 @@ name: CSV (Rainbow standard new)
 file_extensions: [rbcstn44]
 scope: text.rbcstn44
 
+# FIXME maybe I can use push with two arguments and push string first and then field
 
 contexts:
     main:
-        - match: "^"
+        - match: '^ *"'
+          push: rainbow_quoted1
+        - match: '^'
           push: rainbow1
 
-    quoted_field:
-        - meta_scope: fixmescope
+    rainbow1:
+        - meta_scope: rainbow1
+        - match: "$"
+          pop: true
+        - match: ', *"'
+          set: rainbow_quoted2
+        - match: ','
+          set: rainbow2
+
+    rainbow_quoted1:
+        - meta_scope: rainbow1
+        - match: "$"
+          pop: true
         - match: '""'
           scope: meta.rainbow.double-quote-in-field
-        - match: '"'
-          pop: true
-
-    rainbow1:
-        - meta_scope: rainbow1 meta.rainbow1
-        - match: ","
+        - match: '" *, *"'
+          set: rainbow_quoted2
+        - match: '" *,'
           set: rainbow2
-        - match: '"'
-          push: quoted_field
 
     rainbow2:
-        - meta_scope: keyword.rainbow2 meta.rainbow2
-        - match: ","
-          set: rainbow3
+        - meta_scope: keyword.rainbow2
         - match: "$"
           pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow3:
-        - meta_scope: entity.name.rainbow3 meta.rainbow3
-        - match: ","
-          set: rainbow4
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow4:
-        - meta_scope: comment.rainbow4 meta.rainbow4
-        - match: ","
-          set: rainbow5
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow5:
-        - meta_scope: string.rainbow5 meta.rainbow5
-        - match: ","
-          set: rainbow6
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow6:
-        - meta_scope: entity.name.tag.rainbow6 meta.rainbow6
-        - match: ","
-          set: rainbow7
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow7:
-        - meta_scope: storage.type.rainbow7 meta.rainbow7
-        - match: ","
-          set: rainbow8
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow8:
-        - meta_scope: support.rainbow8 meta.rainbow8
-        - match: ","
-          set: rainbow9
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow9:
-        - meta_scope: constant.language.rainbow9 meta.rainbow9
-        - match: ","
-          set: rainbow10
-        - match: "$"
-          pop: true
-        - match: '"'
-          push: quoted_field
-
-    rainbow10:
-        - meta_scope: variable.language.rainbow10 meta.rainbow10
+        - match: ', *"'
+          set: rainbow_quoted1
         - match: ","
           set: rainbow1
+
+    rainbow_quoted2:
+        - meta_scope: keyword.rainbow2
         - match: "$"
           pop: true
-        - match: '"'
-          push: quoted_field
+        - match: '""'
+          scope: meta.rainbow.double-quote-in-field
+        - match: '" *, *"'
+          set: rainbow_quoted1
+        - match: '" *,'
+          set: rainbow1
 
