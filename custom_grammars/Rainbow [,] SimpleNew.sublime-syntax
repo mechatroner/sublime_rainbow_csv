@@ -14,6 +14,8 @@ contexts:
         - meta_scope: rainbow1 meta.rainbow1
         - match: ","
           set: rainbow2
+        - match: "$"
+          pop: true
 
     rainbow2:
         - meta_scope: keyword.rainbow2 meta.rainbow2

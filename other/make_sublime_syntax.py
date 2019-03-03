@@ -21,6 +21,20 @@ contexts:
 '''
 
 
+rainbow_scope_names = [
+    'rainbow1',
+    'keyword.rainbow2',
+    'entity.name.rainbow3',
+    'comment.rainbow4',
+    'string.rainbow5',
+    'entity.name.tag.rainbow6',
+    'storage.type.rainbow7',
+    'support.rainbow8',
+    'constant.language.rainbow9',
+    'variable.language.rainbow10'
+]
+
+
 def name_normalize(delim):
     if delim == '<':
         return 'less-than'
@@ -55,11 +69,38 @@ def get_syntax_name(delim, policy):
     return 'Rainbow {} {}'.format(name_normalize(delim), policy)
 
 
+def yaml_escape(data):
+    return data.replace("'", "''")
+
+
+def get_context_name(context_id):
+    return "rainbow{}".format(context_id + 1)
+
+
+def make_simple_context(delim, context_id, num_contexts, indent='    '):
+    result_lines = []
+    next_context_id = (context_id + 1) % num_contexts
+    context_header = "{}:".format(get_context_name(context_id))
+    result_lines.append("- meta_scope: {}".format(rainbow_scope_names[context_id]))
+    result_lines.append("- match: '{}'".format(yaml_escape(delim)))
+    result_lines.append("  set: {}".format(get_context_name(next_context_id)))
+    result_lines.append("- match: '$'")
+    result_lines.append("  pop: true")
+    result_lines = [indent + v for v in result_lines]
+    result_lines = [context_header] + result_lines
+    result_lines = [indent + v for v in result_lines]
+    return '\n'.join(result_lines) + '\n'
+
+
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn{}'.format(ord(delim))
     name = get_syntax_name(delim, 'simple')
     name += ' new' #FIXME
     result = simple_header_template.format(name, scope, scope)
+    num_contexts = len(rainbow_scope_names)
+    for context_id in range(num_contexts):
+        result += '\n'
+        result += make_simple_context(delim, context_id, num_contexts)
     return result
 
 
