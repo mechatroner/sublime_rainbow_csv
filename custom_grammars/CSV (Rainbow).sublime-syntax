@@ -8,16 +8,23 @@ scope: text.rbcstn44
 
 contexts:
     main:
-        - match: '^ *"'
+        - match: '^(?= *")'
           push: rainbow_quoted1
         - match: '^'
           push: rainbow1
+
+    quoted_field:
+        - meta_scope: fixmescope
+        - match: '""'
+          scope: meta.rainbow.double-quote-in-field
+        - match: '"(?= *,|$)'
+          pop: true
 
     rainbow1:
         - meta_scope: rainbow1
         - match: "$"
           pop: true
-        - match: ', *"'
+        - match: ',(?= *")'
           set: rainbow_quoted2
         - match: ','
           set: rainbow2
@@ -26,19 +33,21 @@ contexts:
         - meta_scope: rainbow1
         - match: "$"
           pop: true
-        - match: '""'
-          scope: meta.rainbow.double-quote-in-field
-        - match: '" *, *"'
+        - match: '"'
+          push: quoted_field
+        - match: ',(?= *")'
           set: rainbow_quoted2
-        - match: '" *,'
+        - match: ','
           set: rainbow2
 
     rainbow2:
         - meta_scope: keyword.rainbow2
         - match: "$"
           pop: true
-        - match: ', *"'
+        - match: ',(?= *")'
           set: rainbow_quoted1
+        - match: '"'
+          push: quoted_field
         - match: ","
           set: rainbow1
 
@@ -46,10 +55,10 @@ contexts:
         - meta_scope: keyword.rainbow2
         - match: "$"
           pop: true
-        - match: '""'
-          scope: meta.rainbow.double-quote-in-field
-        - match: '" *, *"'
+        - match: '"'
+          push: quoted_field
+        - match: ',(?= *")'
           set: rainbow_quoted1
-        - match: '" *,'
+        - match: ','
           set: rainbow1
 
