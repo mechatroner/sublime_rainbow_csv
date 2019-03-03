@@ -35,6 +35,15 @@ rainbow_scope_names = [
 ]
 
 
+def oniguruma_regular_escape(delim):
+    single_escape_chars = r'\/|.$^*()[]+?'
+    if single_escape_chars.find(delim) != -1:
+        return r'\{}'.format(delim)
+    if delim == '\t':
+        return r'\t'
+    return delim
+
+
 def name_normalize(delim):
     if delim == '<':
         return 'less-than'
@@ -82,7 +91,7 @@ def make_simple_context(delim, context_id, num_contexts, indent='    '):
     next_context_id = (context_id + 1) % num_contexts
     context_header = "{}:".format(get_context_name(context_id))
     result_lines.append("- meta_scope: {}".format(rainbow_scope_names[context_id]))
-    result_lines.append("- match: '{}'".format(yaml_escape(delim)))
+    result_lines.append("- match: '{}'".format(yaml_escape(oniguruma_regular_escape(delim))))
     result_lines.append("  set: {}".format(get_context_name(next_context_id)))
     result_lines.append("- match: '$'")
     result_lines.append("  pop: true")
