@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import random
+import re
 
 # TODO this code can be moved into sublime rainbow_csv plugin to generate syntaxes in runtime
 
@@ -124,14 +125,41 @@ def make_sublime_syntax(delim, policy):
         return make_sublime_syntax_simple(delim)
 
 
+def get_prod_delims():
+    delims = [chr(i) for i in range(32, 127)]
+    delims.append('\t')
+    delims = [delim for delim in delims if re.match('^[a-zA-Z0-9]$', delim) is None]
+    return delims
+            
+
+def write_sublime_syntax(delim, policy, dst_dir):
+    name = get_syntax_name(delim, policy) + '.sublime-syntax'
+    syntax_path = os.path.join(dst_dir, name)
+    syntax_text = make_sublime_syntax(delim, policy)
+    with open(syntax_path, 'w') as dst:
+        dst.write(syntax_text)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--delim', help='Delim')
     parser.add_argument('--policy', help='Policy')
+    parser.add_argument('--make_grammars_prod', help='make and put grammars into DIR')
     #parser.add_argument('--verbose', action='store_true', help='Run in verbose mode')
     #parser.add_argument('--num_iter', type=int, help='number of iterations option')
     #parser.add_argument('file_name', help='example of positional argument')
     args = parser.parse_args()
+
+
+    if args.make_grammars_prod:
+        dst_dir = args.make_grammars_prod
+        delims = get_prod_delims()
+        standard_delims = '\t|,;'
+        for delim in delims:
+            if standard_delims.find(delim) != -1:
+                pass #FIXME
+            write_sublime_syntax(delim, 'simple', dst_dir)
+        return
 
 
     delim = args.delim
@@ -139,6 +167,8 @@ def main():
 
     grammar = make_sublime_syntax(delim, policy)
     print grammar
+
+
 
 if __name__ == '__main__':
     main()
