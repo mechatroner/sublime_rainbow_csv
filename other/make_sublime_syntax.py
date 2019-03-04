@@ -105,7 +105,6 @@ def make_simple_context(delim, context_id, num_contexts, indent='    '):
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn{}'.format(ord(delim))
     name = get_syntax_name(delim, 'simple')
-    name += ' new' #FIXME
     result = simple_header_template.format(name, scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
