@@ -221,9 +221,9 @@ def do_enable_rainbow(view, delim, policy, store_settings=True):
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
-            sublime.error_message('Error. Unable to use this character with "Standard" dialect. Try "Simple" instead.')
+            sublime.error_message('Error: Only "Simple" dialect is available for this character')
         else:
-            sublime.error_message('Error. Unable to use this character as a separator.')
+            sublime.error_message('Error: Unable to use this character as a separator')
         return
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax') 
