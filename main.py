@@ -1,5 +1,4 @@
 import os
-import time
 from functools import partial
 
 import sublime_plugin
