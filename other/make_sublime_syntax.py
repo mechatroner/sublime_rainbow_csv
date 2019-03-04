@@ -10,15 +10,37 @@ import re
 
 simple_header_template = '''%YAML 1.2
 ---
-name: CSV ({})
+name: {}
 file_extensions: [{}]
 scope: text.{}
 
 
 contexts:
     main:
-        - match: "^"
+        - match: '^'
           push: rainbow1
+'''
+
+
+standard_header_template = '''%YAML 1.2
+---
+name: {}
+file_extensions: [{}]
+scope: text.{}
+
+
+contexts:
+    main:
+        - match: '^'
+          push: rainbow1
+
+    quoted_field:
+        - match: '""'
+          scope: meta.rainbow.double-quote-escaped
+        - match: '"'
+          pop: true
+        - match: '$'
+          pop: true
 '''
 
 
@@ -72,6 +94,7 @@ def name_normalize(delim):
 
 
 def get_syntax_name(delim, policy):
+    assert policy in ['Standard', 'Simple']
     if delim == '\t' and policy == 'Simple':
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
@@ -102,9 +125,26 @@ def make_simple_context(delim, context_id, num_contexts, indent='    '):
     return '\n'.join(result_lines) + '\n'
 
 
+def make_standard_context(delim, context_id, num_contexts, indent='    '):
+    result_lines = []
+    next_context_id = (context_id + 1) % num_contexts
+    context_header = "{}:".format(get_context_name(context_id))
+    result_lines.append("- meta_scope: {}".format(rainbow_scope_names[context_id]))
+    result_lines.append("- match: '{}'".format(yaml_escape(oniguruma_regular_escape(delim))))
+    result_lines.append("  set: {}".format(get_context_name(next_context_id)))
+    result_lines.append("- match: '$'")
+    result_lines.append("  pop: true")
+    result_lines.append("- match: '\"'")
+    result_lines.append("  push: quoted_field")
+    result_lines = [indent + v for v in result_lines]
+    result_lines = [context_header] + result_lines
+    result_lines = [indent + v for v in result_lines]
+    return '\n'.join(result_lines) + '\n'
+
+
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn{}'.format(ord(delim))
-    name = get_syntax_name(delim, 'simple')
+    name = get_syntax_name(delim, 'Simple')
     result = simple_header_template.format(name, scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
@@ -113,13 +153,21 @@ def make_sublime_syntax_simple(delim):
     return result
 
 
-
+def make_sublime_syntax_standard(delim):
+    scope = 'rbcstn{}'.format(ord(delim))
+    name = get_syntax_name(delim, 'Standard')
+    result = standard_header_template.format(name, scope, scope)
+    num_contexts = len(rainbow_scope_names)
+    for context_id in range(num_contexts):
+        result += '\n'
+        result += make_standard_context(delim, context_id, num_contexts)
+    return result
 
 
 def make_sublime_syntax(delim, policy):
-    assert policy in ['quoted', 'simple']
-    if policy == 'quoted':
-        return make_sublime_syntax_quoted(delim)
+    assert policy in ['Standard', 'Simple']
+    if policy == 'Standard':
+        return make_sublime_syntax_standard(delim)
     else:
         return make_sublime_syntax_simple(delim)
 
@@ -144,9 +192,6 @@ def main():
     parser.add_argument('--delim', help='Delim')
     parser.add_argument('--policy', help='Policy')
     parser.add_argument('--make_grammars_prod', help='make and put grammars into DIR')
-    #parser.add_argument('--verbose', action='store_true', help='Run in verbose mode')
-    #parser.add_argument('--num_iter', type=int, help='number of iterations option')
-    #parser.add_argument('file_name', help='example of positional argument')
     args = parser.parse_args()
 
 
@@ -156,8 +201,8 @@ def main():
         standard_delims = '\t|,;'
         for delim in delims:
             if standard_delims.find(delim) != -1:
-                pass #FIXME
-            write_sublime_syntax(delim, 'simple', dst_dir)
+                write_sublime_syntax(delim, 'Standard', dst_dir)
+            write_sublime_syntax(delim, 'Simple', dst_dir)
         return
 
 
