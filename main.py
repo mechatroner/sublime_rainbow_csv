@@ -22,16 +22,11 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
-# FIXME try to use "sublime-syntax" format
-
 # FIXME describe colors customization in readme
 
-# FIXME set "hidden" flag for (all?) most of the new sublime-syntax files
-
-# FIXME either use meta.rainbow scopes or delete them
+# TODO set "hidden" flag for (all?) most of the new sublime-syntax files
 
 # TODO consider implementing syntax with newlines-in-fields support. measure performance.
-
 
 # TODO automatic syntax generation roadmap:
 # 1. If current background doesn't match custom RainbowCSV background:
@@ -195,9 +190,9 @@ def name_normalize(delim):
 
 def get_grammar_basename(delim, policy):
     if delim == '\t' and policy == 'simple':
-        return 'TSV (Rainbow).tmLanguage'
+        return 'TSV (Rainbow).sublime-syntax'
     if delim == ',' and policy == 'quoted':
-        return 'CSV (Rainbow).tmLanguage'
+        return 'CSV (Rainbow).sublime-syntax'
     simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     standard_delims = '\t|,;'
     if policy == 'simple' and simple_delims.find(delim) == -1:
@@ -205,7 +200,7 @@ def get_grammar_basename(delim, policy):
     if policy == 'quoted' and standard_delims.find(delim) == -1:
         return None
     policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
-    return 'Rainbow {} {}.tmLanguage'.format(name_normalize(delim), policy_map[policy])
+    return 'Rainbow {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
 def idempotent_enable_rainbow(view, delim, policy, wait_time):
@@ -223,7 +218,6 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
 
 
 def do_enable_rainbow(view, delim, policy, store_settings=True):
-    return #FIXME
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
@@ -539,6 +533,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 return
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
+            # FIXME syntax has changed, 1-off error!
             line_text = self.view.substr(self.view.line(point))
             hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
             field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)
