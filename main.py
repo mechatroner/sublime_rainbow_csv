@@ -533,7 +533,6 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 return
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
-            # FIXME syntax has changed, 1-off error!
             line_text = self.view.substr(self.view.line(point))
             hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
             field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)

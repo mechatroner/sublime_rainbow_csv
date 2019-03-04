@@ -54,10 +54,10 @@ def get_field_by_line_position(fields, query_pos):
     if not len(fields):
         return None
     col_num = 0
-    cpos = len(fields[col_num]) + 1
+    cpos = len(fields[col_num])
     while query_pos > cpos and col_num + 1 < len(fields):
         col_num += 1
-        cpos = cpos + len(fields[col_num]) + 1
+        cpos = cpos + 1 + len(fields[col_num])
     return col_num
 
 
