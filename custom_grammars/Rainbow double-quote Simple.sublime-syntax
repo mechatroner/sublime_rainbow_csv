@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow double-quote Simple
+name: Rainbow CSV double-quote Simple
 file_extensions: [rbcsmn34]
 scope: text.rbcsmn34
 

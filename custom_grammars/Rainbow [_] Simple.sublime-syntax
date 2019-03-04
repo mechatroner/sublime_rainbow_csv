@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow [_] Simple
+name: Rainbow CSV [_] Simple
 file_extensions: [rbcsmn95]
 scope: text.rbcsmn95
 

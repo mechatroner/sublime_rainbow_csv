@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow colon Simple
+name: Rainbow CSV colon Simple
 file_extensions: [rbcsmn58]
 scope: text.rbcsmn58
 

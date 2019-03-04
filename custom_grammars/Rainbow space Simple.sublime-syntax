@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow space Simple
+name: Rainbow CSV space Simple
 file_extensions: [rbcsmn32]
 scope: text.rbcsmn32
 
