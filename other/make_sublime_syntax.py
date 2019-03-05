@@ -99,7 +99,7 @@ def get_syntax_name(delim, policy):
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
         return 'CSV (Rainbow)'
-    return 'Rainbow {} {}'.format(name_normalize(delim), policy)
+    return 'Rainbow CSV {} {}'.format(name_normalize(delim), policy)
 
 
 def yaml_escape(data):

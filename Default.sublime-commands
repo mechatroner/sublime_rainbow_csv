@@ -1,7 +1,7 @@
 [
     { "caption": "Rainbow CSV: Run RBQL query", "command": "run_query" },
     {
-      "caption": "Rainbow iCSV Settings",
+      "caption": "Rainbow CSV Settings",
       "command": "edit_settings",
       "args": {
           "base_file": "${packages}/rainbow_csv/RainbowCSV.sublime-settings",

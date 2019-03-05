@@ -43,7 +43,7 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 To adjust plugin configuration: 
 
 1. Go to "Preferences" -> "Package Settings" -> "Rainbow CSV" -> "Settings".
-2. On the right side change the setterin like you'd like.
+2. On the right side change the settings like you'd like.
 
 
 ### Configuration parameters
