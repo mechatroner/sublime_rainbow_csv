@@ -9,19 +9,13 @@
                         "caption": "Rainbow CSV",
                         "children": [
                             {
+                                "caption": "Settings",
+                                "command": "edit_settings",
                                 "args": {
-                                    "file": "${packages}/rainbow_csv/RainbowCSV.sublime-settings"
-                                },
-                                "caption": "Settings \u2013 Default",
-                                "command": "open_file"
+                                    "base_file": "${packages}/rainbow_csv/RainbowCSV.sublime-settings",
+                                    "default": "// Settings in here override those in \"RainbowCSV.sublime\",\n\n{\n\t$0\n}\n"
+                                }
                             },
-                            {
-                                "args": {
-                                    "file": "${packages}/User/RainbowCSV.sublime-settings"
-                                },
-                                "caption": "Settings \u2013 User",
-                                "command": "open_file"
-                            }
                         ],
                         "id": "rainbowcsv"
                     }

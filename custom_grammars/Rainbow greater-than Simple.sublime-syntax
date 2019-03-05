@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow greater-than Simple
+name: Rainbow CSV greater-than Simple
 file_extensions: [rbcsmn62]
 scope: text.rbcsmn62
 

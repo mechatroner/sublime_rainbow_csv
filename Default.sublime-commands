@@ -1,3 +1,11 @@
 [
-    { "caption": "Rainbow CSV: Run RBQL query", "command": "run_query" }
+    { "caption": "Rainbow CSV: Run RBQL query", "command": "run_query" },
+    {
+      "caption": "Rainbow iCSV Settings",
+      "command": "edit_settings",
+      "args": {
+          "base_file": "${packages}/rainbow_csv/RainbowCSV.sublime-settings",
+          "default": "// Settings in here override those in \"RainbowCSV.sublime\",\n\n{\n\t$0\n}\n"
+      }
+    },
 ]

@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow tab Standard
+name: Rainbow CSV tab Standard
 file_extensions: [rbcstn9]
 scope: text.rbcstn9
 

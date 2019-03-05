@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-name: Rainbow pipe Simple
+name: Rainbow CSV pipe Simple
 file_extensions: [rbcsmn124]
 scope: text.rbcsmn124
 
