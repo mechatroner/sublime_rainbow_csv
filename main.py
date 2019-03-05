@@ -31,6 +31,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # 1. If current background doesn't match custom RainbowCSV background:
 # 2. Inside a try/catch block generate a new sublime-color-scheme with user background and put into User directory. Use more than 10 colors (11 ?) to find ones that are most further from user background. Or just simply choose between black and white foreground for the last color
 
+# FIXME regenerate syntax files with new names
 
 rainbow_scope_names = [
     'rainbow1',
@@ -199,7 +200,7 @@ def get_grammar_basename(delim, policy):
     if policy == 'quoted' and standard_delims.find(delim) == -1:
         return None
     policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
-    return 'Rainbow {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
+    return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
 def idempotent_enable_rainbow(view, delim, policy, wait_time):
