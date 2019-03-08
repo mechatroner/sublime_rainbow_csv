@@ -1,4 +1,6 @@
 import os
+import re
+import json
 from functools import partial
 
 import sublime_plugin
@@ -31,8 +33,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # 1. If current background doesn't match custom RainbowCSV background:
 # 2. Inside a try/catch block generate a new sublime-color-scheme with user background and put into User directory. Use more than 10 colors (11 ?) to find ones that are most further from user background. Or just simply choose between black and white foreground for the last color
 
-# FIXME regenerate syntax files with new names
-
 rainbow_scope_names = [
     'rainbow1',
     'keyword.rainbow2',
@@ -60,6 +60,89 @@ def init_user_data_paths():
     else:
         table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
     table_names_path = os.path.join(user_home_dir, '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
+
+
+def get_user_color_scheme_path():
+    return os.path.join(sublime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
+
+
+def get_syntax_before():
+    try:
+        data = open(get_user_color_scheme_path()).read()
+        return data
+    except Exception:
+        return None
+
+
+def do_adjust_color_scheme(style):
+    color_scheme = dict() 
+    color_scheme['globals'] = dict()
+    color_scheme['rules'] = list()
+
+    if style is None or 'background' not in style:
+        return # Sanity check
+    background_color = style['background']
+    if not background_color.startswith('#'):
+        return
+
+    color_scheme['globals']["bracketContentsOptions"] = "underline"
+    color_scheme['globals']["tagsOptions"] = "stippled_underline"
+
+    color_keys = [
+        'background',
+        'caret',
+        'foreground',
+        'invisibles',
+        'lineHighlight',
+        'selection',
+        'findHighlight',
+        'findHighlightForeground',
+        'selectionBorder',
+        'activeGuide',
+        'misspelling',
+        'bracketsForeground',
+        'bracketsOptions',
+        'bracketContentsForeground'
+    ]
+
+    # FIXME choose different colors for light background
+    rainbow_colors = [
+        "#E6194B",
+        "#3CB44B",
+        "#FFE119",
+        "#0082C8",
+        "#FABEBE",
+        "#46F0F0",
+        "#F032E6",
+        "#008080",
+        "#F58231",
+        "#FFFFFF"
+    ]
+
+    for key in color_keys:
+        normalized_key = re.sub(r'([A-Z])', r'_\1', key).lower()
+        if normalized_key in style:
+            color_scheme['globals'][key] = style[normalized_key]
+
+    for i, scope_name in enumerate(rainbow_scope_names): 
+        color_scheme['rules'].append({'name': 'rainbow csv rainbow{}'.format(i + 1), 'scope': scope_name, 'foreground': rainbow_colors[i]})
+
+    syntax_data = json.dumps(color_scheme, indent=4, sort_keys=True)
+    syntax_data_before = get_syntax_before()
+    if syntax_data == syntax_data_before:
+        return
+
+    with open(get_user_color_scheme_path(), 'w') as dst:
+        dst.write(syntax_data)
+
+
+
+def adjust_color_scheme(view):
+    try:
+        do_adjust_color_scheme(view.style())
+    except Exception as e:
+        print('Unable to auto adjust color scheme. Unexpected Exception: {}'.format(e))
+
 
 
 def index_decode_delim(delim):
@@ -218,6 +301,10 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
 
 
 def do_enable_rainbow(view, delim, policy, store_settings=True):
+    # FIXME add auto_adjust_rainbow_colors setting to the config file
+    auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
+    if auto_adjust_rainbow_colors:
+        adjust_color_scheme(view)
     grammar_basename = get_grammar_basename(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
