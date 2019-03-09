@@ -74,6 +74,11 @@ def get_syntax_before():
         return None
 
 
+def hex_to_rgb(hex_value):
+    hex_value = hex_value.lstrip('#')
+    return tuple(int(hex_value[i:i+2], 16) for i in (0, 2 ,4))
+
+
 def do_adjust_color_scheme(style):
     color_scheme = dict() 
     color_scheme['globals'] = dict()
@@ -84,6 +89,8 @@ def do_adjust_color_scheme(style):
     background_color = style['background']
     if not background_color.startswith('#'):
         return
+    rgb_value = hex_to_rgb(background_color)
+    is_dark_theme = rgb_value[0] + rgb_value[1] + rgb_value[2] < 128 * 3
 
     color_scheme['globals']["bracketContentsOptions"] = "underline"
     color_scheme['globals']["tagsOptions"] = "stippled_underline"
@@ -105,8 +112,7 @@ def do_adjust_color_scheme(style):
         'bracketContentsForeground'
     ]
 
-    # FIXME choose different colors for light background
-    rainbow_colors = [
+    rainbow_colors_dark = [
         "#E6194B",
         "#3CB44B",
         "#FFE119",
@@ -118,6 +124,22 @@ def do_adjust_color_scheme(style):
         "#F58231",
         "#FFFFFF"
     ]
+
+    rainbow_colors_light = [
+        "#E6194B",
+        "#3CB44B",
+        "#B39B00",
+        "#0082C8",
+        "#0000CC",
+        "#663300",
+        "#0DA5A5",
+        "#F032E6",
+        "#008080",
+        "#F58231",
+        "#000000"
+    ]
+
+    rainbow_colors = rainbow_colors_dark if is_dark_theme else rainbow_colors_light
 
     for key in color_keys:
         normalized_key = re.sub(r'([A-Z])', r'_\1', key).lower()
