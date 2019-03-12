@@ -13,6 +13,7 @@
     // Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
     // Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
     // You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme
+    // Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling the setting, it will be rewritten by the plugin
     "auto_adjust_rainbow_colors": true,
 
 

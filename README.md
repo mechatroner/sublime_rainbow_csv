@@ -58,9 +58,10 @@ Manual separator selection will override this setting for the current file.
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
 #### "auto_adjust_rainbow_colors"
-Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
-Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
-You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme
+Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme  
+Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.  
+You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme  
+Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling the setting, it will be rewritten by the plugin  
 
 #### "rbql_backend_language"
 RBQL backend language.  
@@ -105,8 +106,8 @@ RBQL is a technology which provides SQL-like language that supports _SELECT_ and
 * LIMIT _N_
 
 #### Keywords rules
-All keywords have the same meaning as in SQL queries. You can check them [online](https://www.w3schools.com/sql/default.asp)
-But there are also two new keywords: _DISTINCT COUNT_ and _STRICT LEFT JOIN_:
+All keywords have the same meaning as in SQL queries. You can check them [online](https://www.w3schools.com/sql/default.asp)  
+But there are also two new keywords: _DISTINCT COUNT_ and _STRICT LEFT JOIN_:  
 * _DISTINCT COUNT_ is like _DISTINCT_, but adds a new column to the "distinct" result set: number of occurences of the entry, similar to _uniq -c_ unix command.
 * _STRICT LEFT JOIN_ is like _LEFT JOIN_, but generates an error if any key in left table "A" doesn't have exactly one matching key in the right table "B".
 
