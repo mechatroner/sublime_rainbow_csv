@@ -16,22 +16,16 @@ table_names_path = None
 SETTINGS_FILE = 'RainbowCSV.sublime-settings'
 custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
+
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
+
 
 # TODO implement CSVLint
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
-# FIXME describe colors customization in readme
-
-# TODO set "hidden" flag for (all?) most of the new sublime-syntax files
-
 # TODO consider implementing syntax with newlines-in-fields support. measure performance.
-
-# TODO automatic syntax generation roadmap:
-# 1. If current background doesn't match custom RainbowCSV background:
-# 2. Inside a try/catch block generate a new sublime-color-scheme with user background and put into User directory. Use more than 10 colors (11 ?) to find ones that are most further from user background. Or just simply choose between black and white foreground for the last color
 
 rainbow_scope_names = [
     'rainbow1',
@@ -323,7 +317,6 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
 
 
 def do_enable_rainbow(view, delim, policy, store_settings=True):
-    # FIXME add auto_adjust_rainbow_colors setting to the config file
     auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
     if auto_adjust_rainbow_colors:
         adjust_color_scheme(view)

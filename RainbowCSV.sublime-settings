@@ -10,6 +10,12 @@
     "enable_rainbow_csv_autodetect": true,
 
 
+    // Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
+    // Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
+    // You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme
+    "auto_adjust_rainbow_colors": true,
+
+
     // RBQL backend language.
     // Supported values: "Python", "JS"
     // In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.

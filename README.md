@@ -57,6 +57,11 @@ Disable Rainbow CSV for files bigger than the specified size. This can be helpfu
 Manual separator selection will override this setting for the current file.  
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
+#### "auto_adjust_rainbow_colors"
+Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
+Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
+You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme
+
 #### "rbql_backend_language"
 RBQL backend language.  
 Allowed values: _"Python"_, _"JS"_  
