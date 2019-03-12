@@ -1,7 +1,7 @@
 {
     // Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.
     // Manual separator selection will override this setting for the current file.
-    "rainbow_csv_max_file_size_bytes": 5000000,
+    "rainbow_csv_max_file_size_bytes": 20000000,
 
 
     // Enable content-based separator autodetection.
