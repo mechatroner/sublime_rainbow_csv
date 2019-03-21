@@ -5,18 +5,18 @@
         "caret": "#F8F8F0",
         "foreground": "#F8F8F2",
         "invisibles": "#3B3A32",
-        "lineHighlight": "#3E3D32",
+        "line_highlight": "#3E3D32",
         "selection": "#49483E",
-        "findHighlight": "#FFE792",
-        "findHighlightForeground": "#000000",
-        "selectionBorder": "#222218",
-        "activeGuide": "#9D550FB0",
+        "find_highlight": "#FFE792",
+        "find_highlight_foreground": "#000000",
+        "selection_border": "#222218",
+        "active_guide": "#9D550FB0",
         "misspelling": "#F92672",
-        "bracketsForeground": "#F8F8F2A5",
-        "bracketsOptions": "underline",
-        "bracketContentsForeground": "#F8F8F2A5",
-        "bracketContentsOptions": "underline",
-        "tagsOptions": "stippled_underline"
+        "brackets_foreground": "#F8F8F2A5",
+        "brackets_options": "underline",
+        "bracket_contents_foreground": "#F8F8F2A5",
+        "bracket_contents_options": "underline",
+        "tags_options": "stippled_underline"
     },
     "rules":
     [

@@ -86,24 +86,24 @@ def do_adjust_color_scheme(style):
     rgb_value = hex_to_rgb(background_color)
     is_dark_theme = rgb_value[0] + rgb_value[1] + rgb_value[2] < 128 * 3
 
-    color_scheme['globals']["bracketContentsOptions"] = "underline"
-    color_scheme['globals']["tagsOptions"] = "stippled_underline"
+    color_scheme['globals']["bracket_contents_options"] = "underline"
+    color_scheme['globals']["tags_options"] = "stippled_underline"
 
     color_keys = [
         'background',
         'caret',
         'foreground',
         'invisibles',
-        'lineHighlight',
+        'line_highlight',
         'selection',
-        'findHighlight',
-        'findHighlightForeground',
-        'selectionBorder',
-        'activeGuide',
+        'find_highlight',
+        'find_highlight_foreground',
+        'selection_border',
+        'active_guide',
         'misspelling',
-        'bracketsForeground',
-        'bracketsOptions',
-        'bracketContentsForeground'
+        'brackets_foreground',
+        'brackets_options',
+        'bracket_contents_foreground'
     ]
 
     rainbow_colors_dark = [
@@ -136,9 +136,8 @@ def do_adjust_color_scheme(style):
     rainbow_colors = rainbow_colors_dark if is_dark_theme else rainbow_colors_light
 
     for key in color_keys:
-        normalized_key = re.sub(r'([A-Z])', r'_\1', key).lower()
-        if normalized_key in style:
-            color_scheme['globals'][key] = style[normalized_key]
+        if key in style:
+            color_scheme['globals'][key] = style[key]
 
     for i, scope_name in enumerate(rainbow_scope_names): 
         color_scheme['rules'].append({'name': 'rainbow csv rainbow{}'.format(i + 1), 'scope': scope_name, 'foreground': rainbow_colors[i]})
