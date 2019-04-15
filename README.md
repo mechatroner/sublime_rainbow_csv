@@ -51,6 +51,10 @@ To adjust plugin configuration:
 Enable content-based separator autodetection. 
 Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
 
+#### "rainbow_csv_autodetect_dialects"
+List of CSV dialects to autodetect.  
+If "enable_rainbow_csv_autodetect" is set to false this setting is ignored  
+
 #### "rainbow_csv_max_file_size_bytes"
 Disable Rainbow CSV for files bigger than the specified size. This can be helpful to prevent poor performance and crashes with very large files.  
 Manual separator selection will override this setting for the current file.  

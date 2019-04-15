@@ -612,7 +612,8 @@ def is_delimited_table(sampled_lines, delim, policy):
 
 def autodetect_content_based(view):
     sampled_lines = sample_lines(view)
-    autodetection_dialects = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
+    autodetection_dialects_default = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
+    autodetection_dialects = get_setting(view, 'rainbow_csv_autodetect_dialects', autodetection_dialects_default)
     for delim, policy in autodetection_dialects:
         if is_delimited_table(sampled_lines, delim, policy):
             return (delim, policy)
