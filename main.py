@@ -41,6 +41,35 @@ rainbow_scope_names = [
 ]
 
 
+naughty_delims_map = {
+    '<': 'less-than',
+    '>': 'greater-than',
+    ':': 'colon',
+    '"': 'double-quote',
+    '/': 'slash',
+    '\\': 'backslash',
+    '|': 'pipe',
+    '?': 'question-mark',
+    '*': 'asterisk',
+    '\t': 'tab',
+    ' ': 'space'
+}
+
+
+legacy_syntax_names = {
+    ('\t', 'simple'): 'TSV (Rainbow).sublime-syntax',
+    (',', 'quoted'): 'CSV (Rainbow).sublime-syntax'
+}
+
+
+policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
+
+
+naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()}
+legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
+policy_map_inv = {v: k for k, v in policy_map.items()}
+
+
 def init_user_data_paths():
     global table_index_path
     global table_names_path
@@ -269,28 +298,22 @@ def is_plain_text(view):
 
 
 def name_normalize(delim):
-    name_map = dict()
-    name_map['<'] = 'less-than'
-    name_map['>'] = 'greater-than'
-    name_map[':'] = 'colon'
-    name_map['"'] = 'double-quote'
-    name_map['/'] = 'slash'
-    name_map['\\'] = 'backslash'
-    name_map['|'] = 'pipe'
-    name_map['?'] = 'question-mark'
-    name_map['*'] = 'asterisk'
-    name_map['\t'] = 'tab'
-    name_map[' '] = 'space'
-    if delim in name_map:
-        return name_map[delim]
+    if delim in naughty_delims_map:
+        return naughty_delims_map[delim]
     return '[{}]'.format(delim)
 
 
-def get_grammar_basename(delim, policy):
-    if delim == '\t' and policy == 'simple':
-        return 'TSV (Rainbow).sublime-syntax'
-    if delim == ',' and policy == 'quoted':
-        return 'CSV (Rainbow).sublime-syntax'
+def name_normalize_inv(name):
+    if name in naughty_delims_map_inv:
+        return naughty_delims_map_inv[name]
+    if name.startswith('[') and name.endswith(']'):
+        return name[1:-1]
+    return None
+
+
+def get_grammar_basename_from_dialect(delim, policy):
+    if (delim, policy) in legacy_syntax_names:
+        return legacy_syntax_names[(delim, policy)]
     simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     standard_delims = '\t|,;'
     if policy == 'simple' and simple_delims.find(delim) == -1:
@@ -301,6 +324,16 @@ def get_grammar_basename(delim, policy):
     return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
+def get_dialect_from_grammar_basename(grammar_basename):
+    if grammar_basename in legacy_syntax_names_inv:
+        return legacy_syntax_names_inv[grammar_basename]
+    start_marker = 'Rainbow CSV '
+    end_marker = '.sublime-syntax'
+    if not grammar_basename.startswith(start_marker) or not grammar_basename.endswith(end_marker):
+        return None
+    grammar_basename = grammar_basename[len(start_marker):-len(end_marker)]
+
+
 def idempotent_enable_rainbow(view, delim, policy, wait_time):
     if wait_time > 10000:
         return
@@ -308,6 +341,7 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
     if view.is_loading():
         sublime.set_timeout(done_loading_cb, wait_time)
     else:
+        # FIXME use syntax file name instead of view settings
         cur_delim = view.settings().get('rainbow_delim')
         cur_policy = view.settings().get('rainbow_policy')
         if cur_delim == delim and cur_policy == policy:
@@ -319,7 +353,7 @@ def do_enable_rainbow(view, delim, policy, store_settings=True):
     auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
     if auto_adjust_rainbow_colors:
         adjust_color_scheme(view)
-    grammar_basename = get_grammar_basename(delim, policy)
+    grammar_basename = get_grammar_basename_from_dialect(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
             sublime.error_message('Error: Only "Simple" dialect is available for this character')
