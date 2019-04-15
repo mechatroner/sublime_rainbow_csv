@@ -331,7 +331,23 @@ def get_dialect_from_grammar_basename(grammar_basename):
     end_marker = '.sublime-syntax'
     if not grammar_basename.startswith(start_marker) or not grammar_basename.endswith(end_marker):
         return None
-    grammar_basename = grammar_basename[len(start_marker):-len(end_marker)]
+    encoded_dialect = grammar_basename[len(start_marker):-len(end_marker)]
+    wpos = encoded_dialect.rfind(' ')
+    if wpos == -1:
+        return None
+    delim = name_normalize_inv(encoded_dialect[:wpos])
+    policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
+    if delim is None or policy is None:
+        return None
+    return (delim, policy)
+
+
+def get_dialect(settings):
+    syntax_name = settings.get('syntax')
+    if not syntax_name:
+        return None
+    grammar_basename = os.path.basename(syntax_name)
+    return get_dialect_from_grammar_basename(grammar_basename)
 
 
 def idempotent_enable_rainbow(view, delim, policy, wait_time):
@@ -341,9 +357,10 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
     if view.is_loading():
         sublime.set_timeout(done_loading_cb, wait_time)
     else:
-        # FIXME use syntax file name instead of view settings
-        cur_delim = view.settings().get('rainbow_delim')
-        cur_policy = view.settings().get('rainbow_policy')
+        cur_dialect = get_dialect(view.settings())
+        if cur_dialect is None:
+            return
+        cur_delim, cur_policy = cur_dialect
         if cur_delim == delim and cur_policy == policy:
             return
         do_enable_rainbow(view, delim, policy)
@@ -363,8 +380,6 @@ def do_enable_rainbow(view, delim, policy, store_settings=True):
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax') 
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
-        view.settings().set('rainbow_delim', delim)
-        view.settings().set('rainbow_policy', policy)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
@@ -378,8 +393,6 @@ def do_disable_rainbow(view):
         return
     view.set_syntax_file(pre_rainbow_syntax)
     view.settings().erase('pre_rainbow_syntax')
-    view.settings().erase('rainbow_delim')
-    view.settings().erase('rainbow_policy')
     view.settings().erase('rainbow_mode')
     file_path = view.file_name()
     if file_path is not None:
@@ -479,8 +492,11 @@ def on_query_done(input_line):
         # TODO create a temp file from unnamed buffer
         sublime.error_message('RBQL Error. Unable to run query for this buffer')
         return
-    input_delim = active_view.settings().get('rainbow_delim')
-    input_policy = active_view.settings().get('rainbow_policy')
+    input_dialect = get_dialect(active_view.settings())
+    if input_dialect is None:
+        sublime.error_message('Unexpected error: Rainbow syntax was just disabled?')
+        return
+    input_delim, input_policy = input_dialect
     backend_language = get_backend_language(active_view)
     output_format = get_setting(active_view, 'rbql_output_format', 'input')
     format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
@@ -559,11 +575,11 @@ def show_column_names(view, delim, policy):
 
 class RunQueryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        delim = self.view.settings().get('rainbow_delim')
-        policy = self.view.settings().get('rainbow_policy')
-        if delim is None or policy is None:
+        dialect = get_dialect(self.view.settings())
+        if not dialect:
             sublime.error_message('Error. You need to select a separator first')
             return
+        delim, policy = dialect
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
@@ -648,24 +664,24 @@ def hover_hide_cb():
     active_view = get_active_view()
     if not active_view.settings().get('rbql_mode', False):
         return
-    delim = active_view.settings().get('rainbow_delim')
-    policy = active_view.settings().get('rainbow_policy')
-    if delim is None or policy is None:
+    dialect = get_dialect(active_view.settings())
+    if not dialect:
         return
+    delim, policy = dialect
     show_column_names(active_view, delim, policy)
 
 
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
-        return settings.get('rainbow_delim', None) is not None
+        return get_dialect(settings) is not None
 
     def on_hover(self, point, hover_zone):
         if hover_zone == sublime.HOVER_TEXT:
-            delim = self.view.settings().get('rainbow_delim')
-            policy = self.view.settings().get('rainbow_policy')
-            if delim is None:
+            dialect = get_dialect(active_view.settings())
+            if not dialect:
                 return
+            delim, policy = dialect
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
             line_text = self.view.substr(self.view.line(point))
