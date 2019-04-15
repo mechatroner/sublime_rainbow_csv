@@ -678,7 +678,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
 
     def on_hover(self, point, hover_zone):
         if hover_zone == sublime.HOVER_TEXT:
-            dialect = get_dialect(active_view.settings())
+            dialect = get_dialect(self.view.settings())
             if not dialect:
                 return
             delim, policy = dialect
