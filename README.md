@@ -1,3 +1,5 @@
+![logo](https://i.imgur.com/jew2jBo.png)
+
 # Rainbow CSV
 
 ### Main features
