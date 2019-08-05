@@ -689,7 +689,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
             field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)
             header = get_document_header(self.view, delim, policy)
-            ui_text = 'Col# {}'.format(field_num + 1)
+            ui_text = 'Col #{}'.format(field_num + 1)
             if field_num < len(header):
                 column_name = header[field_num]
                 max_header_len = 30
