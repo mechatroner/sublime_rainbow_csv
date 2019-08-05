@@ -20,12 +20,17 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
 
 
-# TODO implement CSVLint
-
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
 # Problem with output format in this case - we don't want to use comma because in 99% output would be single column and comma would make it quoted. the optimal way is "lazy" csv: no quoting when output is single column, otherwise regular csv
 
 # TODO consider implementing syntax with newlines-in-fields support. measure performance.
+
+# FIXME add CSVLint
+# FIXME add Align/Shrink commands
+# FIXME improve autodetection algorithm, include pipe
+# FIXME switch to new RBQL
+# FIXME support multi-character separators
+
 
 rainbow_scope_names = [
     'rainbow1',
