@@ -605,14 +605,14 @@ class AlignCommand(sublime_plugin.TextCommand):
         delim, policy = dialect
         column_sizes, failed_line_num = calc_column_sizes(self.view, delim, policy)
         if failed_line_num is not None:
-            sublime.error_message('Error. Line {} has formatting error: double quote chars are not consistent'.format(failed_line_num + 1))
+            sublime.error_message('Unable to Align: line {} has formatting error: double quote chars are not consistent'.format(failed_line_num + 1))
             return
 
         aligned_lines = []
         has_edit = False
-        line_regions = view.lines(sublime.Region(0, view.size()))
+        line_regions = self.view.lines(sublime.Region(0, self.view.size()))
         for lr in line_regions:
-            line = view.substr(lr)
+            line = self.view.substr(lr)
             fields = rainbow_utils.smart_split(line, delim, policy, True)[0]
             for i in range(len(fields)):
                 if i >= len(column_sizes):
@@ -629,7 +629,7 @@ class AlignCommand(sublime_plugin.TextCommand):
             sublime.message_dialog('Table is already aligned, skipping')
             return
         aligned_content = '\n'.join(aligned_lines)
-        view.replace(edit, sublime.Region(0, view.size()), aligned_content)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), aligned_content)
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
