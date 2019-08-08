@@ -25,6 +25,9 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO consider implementing syntax with newlines-in-fields support. measure performance.
 
+# TODO CSVLint: warn about trailing spaces
+# TODO comments support
+
 # FIXME add CSVLint
 # FIXME add Align/Shrink commands
 # FIXME improve autodetection algorithm, include pipe
@@ -576,6 +579,57 @@ def show_column_names(view, delim, policy):
             if lr.a <= selection.a and lr.b >= selection.a:
                 info_line = lr
     show_names_for_line(view, delim, policy, info_line)
+
+
+def calc_column_sizes(view, delim, policy):
+    result = []
+    line_regions = view.lines(sublime.Region(0, view.size()))
+    for ln, lr in enumerate(line_regions):
+        line = view.substr(lr)
+        fields, warning = rainbow_utils.smart_split(line, delim, policy, True)
+        if warning:
+            return (None, ln)
+        for i in range(len(fields)):
+            if len(result) <= i:
+                result.append(0)
+            result[i] = max(result[i], len(fields[i].strip()))
+    return (result, None)
+
+
+class AlignCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        dialect = get_dialect(self.view.settings())
+        if not dialect:
+            sublime.error_message('Error. You need to select a separator first')
+            return
+        delim, policy = dialect
+        column_sizes, failed_line_num = calc_column_sizes(self.view, delim, policy)
+        if failed_line_num is not None:
+            sublime.error_message('Error. Line {} has formatting error: double quote chars are not consistent'.format(failed_line_num + 1))
+            return
+
+        aligned_lines = []
+        has_edit = False
+        line_regions = view.lines(sublime.Region(0, view.size()))
+        for lr in line_regions:
+            line = view.substr(lr)
+            fields = rainbow_utils.smart_split(line, delim, policy, True)[0]
+            for i in range(len(fields)):
+                if i >= len(column_sizes):
+                    break
+                adjusted = fields[i].strip()
+                delta_len = column_sizes[i] - len(adjusted)
+                if delta_len >= 0: # Safeguard against async doc edit
+                    adjusted += ' ' * (delta_len + 1)
+                if fields[i] != adjusted:
+                    fields[i] = adjusted
+                    has_edit = True
+            aligned_lines.append(delim.join(fields))
+        if not has_edit:
+            sublime.message_dialog('Table is already aligned, skipping')
+            return
+        aligned_content = '\n'.join(aligned_lines)
+        view.replace(edit, sublime.Region(0, view.size()), aligned_content)
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
