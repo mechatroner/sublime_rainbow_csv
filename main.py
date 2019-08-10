@@ -596,6 +596,35 @@ def calc_column_sizes(view, delim, policy):
     return (result, None)
 
 
+class ShrinkCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        dialect = get_dialect(self.view.settings())
+        if not dialect:
+            sublime.error_message('Error. You need to select a separator first')
+            return
+        delim, policy = dialect
+        adjusted_lines = []
+        has_edit = False
+        line_regions = self.view.lines(sublime.Region(0, self.view.size()))
+        for ln, lr in enumerate(line_regions):
+            line = self.view.substr(lr)
+            fields, warning = rainbow_utils.smart_split(line, delim, policy, True)
+            if warning:
+                sublime.error_message('Unable to Shrink: line {} has formatting error: double quote chars are not consistent'.format(ln + 1))
+                return
+            for i in range(len(fields)):
+                adjusted = fields[i].strip()
+                if len(adjusted) != len(fields[i]):
+                    fields[i] = adjusted
+                    has_edit = True
+            adjusted_lines.append(delim.join(fields))
+        if not has_edit:
+            sublime.message_dialog('Table is already shrinked, skipping')
+            return
+        adjusted_content = '\n'.join(adjusted_lines)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), adjusted_content)
+
+
 class AlignCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         dialect = get_dialect(self.view.settings())
@@ -608,7 +637,7 @@ class AlignCommand(sublime_plugin.TextCommand):
             sublime.error_message('Unable to Align: line {} has formatting error: double quote chars are not consistent'.format(failed_line_num + 1))
             return
 
-        aligned_lines = []
+        adjusted_lines = []
         has_edit = False
         line_regions = self.view.lines(sublime.Region(0, self.view.size()))
         for lr in line_regions:
@@ -624,12 +653,12 @@ class AlignCommand(sublime_plugin.TextCommand):
                 if fields[i] != adjusted:
                     fields[i] = adjusted
                     has_edit = True
-            aligned_lines.append(delim.join(fields))
+            adjusted_lines.append(delim.join(fields))
         if not has_edit:
             sublime.message_dialog('Table is already aligned, skipping')
             return
-        aligned_content = '\n'.join(aligned_lines)
-        self.view.replace(edit, sublime.Region(0, self.view.size()), aligned_content)
+        adjusted_content = '\n'.join(adjusted_lines)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), adjusted_content)
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
