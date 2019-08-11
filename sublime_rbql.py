@@ -6,56 +6,45 @@ import subprocess
 import tempfile
 import time
 
-import rainbow_csv.rbql_core
-from rainbow_csv.rbql_core import rbql
+import rbql
+from rbql import rbql_csv
+from rbql import csv_utils
 
 
-def get_random_suffix():
-    return str(time.time()).split('.')[0]
+def system_has_node_js():
+    exit_code = 0
+    out_data = ''
+    try:
+        cmd = ['node', '--version']
+        pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out_data, err_data = pobj.communicate()
+        exit_code = pobj.returncode
+    except OSError as e:
+        if e.errno == 2:
+            return False
+        raise
+    return exit_code == 0 and len(out_data) and len(err_data) == 0
 
 
 def execute_python(src_table_path, rainbow_query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
-    # Returns tuple: (error_type, error_details, warnings)
-    warnings = []
-    csv_encoding = rbql.default_csv_encoding
-    with rbql.RbqlPyEnv() as worker_env:
-        meta_script_path = worker_env.module_path
-        try:
-            rbql.parse_to_py([rainbow_query], meta_script_path, input_delim, input_policy, out_delim, out_policy, csv_encoding, None)
-        except rbql.RBParsingError as e:
-            worker_env.remove_env_dir()
-            return ('Parsing Error', str(e), warnings)
-        try:
-            rbconvert = worker_env.import_worker()
-            warnings = None
-            with codecs.open(src_table_path, encoding=csv_encoding) as src, codecs.open(dst_table_path, 'w', encoding=csv_encoding) as dst:
-                warnings = rbconvert.rb_transform(src, dst)
-            if warnings is not None:
-                warnings = rbql.make_warnings_human_readable(warnings)
-            worker_env.remove_env_dir()
-            return (None, None, warnings)
-        except Exception as e:
-            error_msg = 'Error: Unable to use generated python module.\n'
-            error_msg += 'Original python exception:\n{}\n'.format(str(e))
-            return ('Execution Error', error_msg, warnings)
+    csv_encoding = csv_utils.default_csv_encoding
+    error_info, warnings = rbql_csv.csv_run(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, csv_encoding)
+    if error_info is None:
+        return (None, None, warnings)
+    else:
+        return (error_info['type'], error_info['message'], warnings) 
 
 
 def execute_js(src_table_path, rainbow_query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
-    # Returns tuple: (error_type, error_details, warnings)
-    warnings = []
-    csv_encoding = rbql.default_csv_encoding
-    tmp_dir = tempfile.gettempdir()
-    meta_script_name = 'vim_rb_convert_{}.js'.format(get_random_suffix())
-    meta_script_path = os.path.join(tmp_dir, meta_script_name)
-    if not rbql.system_has_node_js():
-        return ('Execution Error', 'Node.js is not found, test command: "node --version"', warnings)
-    try:
-        rbql.parse_to_js(src_table_path, dst_table_path, [rainbow_query], meta_script_path, input_delim, input_policy, out_delim, out_policy, csv_encoding, None)
-    except rbql.RBParsingError as e:
-        return ('Parsing Error', str(e), warnings)
-    cmd = ['node', meta_script_path]
-    if os.name == 'nt': # Windows
-        # Without startupinfo magic Windows will show console window for a longer period.
+    import json
+    if not system_has_node_js():
+        return ('Execution Error', 'Node.js is not found in your OS, test command: "node --version"', [])
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    encoding = 'binary' # TODO make configurable
+    rbql_js_script_path = os.path.join(script_dir, 'rbql-js', 'cli_rbql.js')
+    cmd = ['node', rbql_js_script_path, '--query', rainbow_query, '--delim', input_delim, '--policy', input_policy, '--out-delim', out_delim, '--out-policy', out_policy, '--input', src_table_path, '--output', dst_table_path, '--encoding', encoding, '--error-format', 'json']
+    if os.name == 'nt':
+        # Without the startupinfo magic Windows will show console window for a longer period.
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=si)
@@ -63,16 +52,23 @@ def execute_js(src_table_path, rainbow_query, input_delim, input_policy, out_del
         pobj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out_data, err_data = pobj.communicate()
     error_code = pobj.returncode
-
-    operation_report = rbql.parse_json_report(error_code, err_data)
-    operation_error = operation_report.get('error')
-    if operation_error is not None:
-        return ('Execution Error', operation_error, warnings)
-    warnings = operation_report.get('warnings')
-    if warnings is not None:
-        warnings = rbql.make_warnings_human_readable(warnings)
-    rbql.remove_if_possible(meta_script_path)
-    return (None, None, warnings)
+    error_type = None
+    error_msg = None
+    warnings = []
+    err_data = err_data.strip()
+    if len(err_data):
+        try:
+            json_err = json.loads(err_data)
+            error_type = json_err.get('error_type', None)
+            error_msg = json_err.get('error_msg', None)
+            warnings = json_err.get('warnings', [])
+        except Exception as e:
+            error_type = 'Unexpected Error'
+            error_msg = 'Unable to parse rbql-js error report'
+    if error_type is None and error_code:
+        error_type = 'Unexpected Error'
+        error_msg = 'rbq-js failed with exit code: {}'.format(error_code)
+    return (error_type, error_msg, warnings)
 
 
 def converged_execute(meta_language, src_table_path, rainbow_query, input_delim, input_policy, out_delim, out_policy):

@@ -28,11 +28,17 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO CSVLint: warn about trailing spaces
 # TODO comments support
 
+# TODO support multi-character separators
+# TODO make RBQL encoding configurable
+
+
+# FIXME get rid of rainbow_utils
+
+# FIXME test Shrink command
 # FIXME add CSVLint
 # FIXME add Align/Shrink commands
 # FIXME improve autodetection algorithm, include pipe
 # FIXME switch to new RBQL
-# FIXME support multi-character separators
 
 
 rainbow_scope_names = [
