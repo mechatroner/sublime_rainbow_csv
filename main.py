@@ -32,7 +32,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO make RBQL encoding configurable
 
-# FIXME add CSVLint
 # FIXME improve autodetection algorithm, include pipe
 
 
@@ -700,13 +699,36 @@ class AlignCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, sublime.Region(0, self.view.size()), adjusted_content)
 
 
+def csv_lint(view, delim, policy):
+    num_fields = None
+    line_regions = view.lines(sublime.Region(0, view.size()))
+    for ln, lr in enumerate(line_regions):
+        line = view.substr(lr)
+        fields, warning = csv_utils.smart_split(line, delim, policy, True)
+        if warning:
+            sublime.error_message('CSVLint: line {} has formatting error: double quote chars are not consistent'.format(ln + 1))
+            return False
+        if num_fields is None:
+            num_fields = len(fields)
+        if num_fields != len(fields):
+            sublime.error_message('Number of fields is not consistent: e.g. line 1 has {} fields, and line {} has {} fields'.format(num_fields, ln + 1, len(fields)))
+            return False
+    return True
+
+
 class CsvLintCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        print('running CSVLINT') #FIXME
-        # FIXME impl
-        pass
-        # To show message in the statusline use this:
-        # sublime.active_window().active_view().set_status('csv_lint', 'CSVLint: OK')
+        dialect = get_dialect(self.view.settings())
+        if not dialect:
+            sublime.error_message('Error. You need to select a separator first')
+            return
+        delim, policy = dialect
+        file_is_ok = csv_lint(self.view, delim, policy)
+        # TODO implement processing -> OK switch with sublime.set_timeout function
+        if file_is_ok:
+            self.view.set_status('csv_lint', 'CSVLint: OK')
+        else:
+            self.view.set_status('csv_lint', 'CSVLint: Error')
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
