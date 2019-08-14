@@ -6,8 +6,8 @@ from functools import partial
 import sublime_plugin
 import sublime
 
-import rainbow_csv.rainbow_utils as rainbow_utils
 import rainbow_csv.sublime_rbql as sublime_rbql
+import rainbow_csv.rbql.csv_utils as csv_utils
 
 
 table_index_path = None
@@ -32,9 +32,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO make RBQL encoding configurable
 
 
-# FIXME get rid of rainbow_utils
-
-# FIXME test Shrink command
+# FIXME test Shrink command especially with fields with trailing spaces e.g. after Align command to test smart_split()
 # FIXME add CSVLint
 # FIXME add Align/Shrink commands
 # FIXME improve autodetection algorithm, include pipe
@@ -82,6 +80,44 @@ policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
 naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()}
 legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
 policy_map_inv = {v: k for k, v in policy_map.items()}
+
+
+def get_field_by_line_position(fields, query_pos):
+    if not len(fields):
+        return None
+    col_num = 0
+    cpos = len(fields[col_num])
+    while query_pos > cpos and col_num + 1 < len(fields):
+        col_num += 1
+        cpos = cpos + 1 + len(fields[col_num])
+    return col_num
+
+
+def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
+    # If separator is not tab, tabstop_val must be set to 1
+    result = list()
+    space_deficit = 0
+    cur_len = 0
+    for nf in range(len(template_fields)):
+        available_space = (1 + len(template_fields[nf]) // tabstop_val) * tabstop_val
+        column_name = 'a{}'.format(nf + 1)
+        extra_len = available_space - len(column_name) - 1
+        if extra_len < 0:
+            space_deficit += abs(extra_len)
+            extra_len = 0
+        else:
+            regained = min(space_deficit, extra_len)
+            space_deficit -= regained
+            extra_len -= regained
+        space_filling = ' ' * (1 + extra_len)
+        if max_output_len is not None and cur_len + len(column_name) > max_output_len:
+            break
+        result.append(column_name)
+        result.append(space_filling)
+        cur_len += len(column_name) + len(space_filling)
+    if len(result):
+        result[-1] = ''
+    return result
 
 
 def init_user_data_paths():
@@ -303,7 +339,7 @@ def sample_lines(view):
 
 def get_document_header(view, delim, policy):
     header_line = get_line_text(view, 0)
-    return rainbow_utils.smart_split(header_line, delim, policy, False)[0]
+    return csv_utils.smart_split(header_line, delim, policy, False)[0]
 
 
 def is_plain_text(view):
@@ -552,7 +588,7 @@ def get_column_color(view, col_num):
 def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
-    fields, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
+    fields, warning = csv_utils.smart_split(line_text, delim, policy, True)
     tab_stop = view.settings().get('tab_size', 4) if delim == '\t' else 1
     layout_width_dip = view.layout_extent()[0]
     font_char_width_dip = view.em_width()
@@ -561,7 +597,7 @@ def show_names_for_line(view, delim, policy, line_region):
     max_status_width = layout_width_dip - dip_reserve
     max_available_chars = max_status_width // font_char_width_dip - char_reserve
 
-    status_labels = rainbow_utils.generate_tab_statusline(tab_stop, fields, max_available_chars)
+    status_labels = generate_tab_statusline(tab_stop, fields, max_available_chars)
     if not len(status_labels):
         return
     num_fields = len(status_labels) // 2
@@ -592,7 +628,7 @@ def calc_column_sizes(view, delim, policy):
     line_regions = view.lines(sublime.Region(0, view.size()))
     for ln, lr in enumerate(line_regions):
         line = view.substr(lr)
-        fields, warning = rainbow_utils.smart_split(line, delim, policy, True)
+        fields, warning = csv_utils.smart_split(line, delim, policy, True)
         if warning:
             return (None, ln)
         for i in range(len(fields)):
@@ -614,7 +650,7 @@ class ShrinkCommand(sublime_plugin.TextCommand):
         line_regions = self.view.lines(sublime.Region(0, self.view.size()))
         for ln, lr in enumerate(line_regions):
             line = self.view.substr(lr)
-            fields, warning = rainbow_utils.smart_split(line, delim, policy, True)
+            fields, warning = csv_utils.smart_split(line, delim, policy, True)
             if warning:
                 sublime.error_message('Unable to Shrink: line {} has formatting error: double quote chars are not consistent'.format(ln + 1))
                 return
@@ -648,7 +684,7 @@ class AlignCommand(sublime_plugin.TextCommand):
         line_regions = self.view.lines(sublime.Region(0, self.view.size()))
         for lr in line_regions:
             line = self.view.substr(lr)
-            fields = rainbow_utils.smart_split(line, delim, policy, True)[0]
+            fields = csv_utils.smart_split(line, delim, policy, True)[0]
             for i in range(len(fields)):
                 if i >= len(column_sizes):
                     break
@@ -694,7 +730,7 @@ def is_delimited_table(sampled_lines, delim, policy):
         return False
     num_fields = None
     for sl in sampled_lines:
-        fields, warning = rainbow_utils.smart_split(sl, delim, policy, True)
+        fields, warning = csv_utils.smart_split(sl, delim, policy, True)
         if warning or len(fields) < 2:
             return False
         if num_fields is None:
@@ -780,8 +816,8 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             # lnum and cnum are 0-based
             lnum, cnum = self.view.rowcol(point)
             line_text = self.view.substr(self.view.line(point))
-            hover_record, warning = rainbow_utils.smart_split(line_text, delim, policy, True)
-            field_num = rainbow_utils.get_field_by_line_position(hover_record, cnum)
+            hover_record, warning = csv_utils.smart_split(line_text, delim, policy, True)
+            field_num = get_field_by_line_position(hover_record, cnum)
             header = get_document_header(self.view, delim, policy)
             ui_text = 'Col #{}'.format(field_num + 1)
             if field_num < len(header):
