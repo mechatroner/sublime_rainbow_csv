@@ -29,14 +29,11 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO comments support
 
 # TODO support multi-character separators
+
 # TODO make RBQL encoding configurable
 
-
-# FIXME test Shrink command especially with fields with trailing spaces e.g. after Align command to test smart_split()
 # FIXME add CSVLint
-# FIXME add Align/Shrink commands
 # FIXME improve autodetection algorithm, include pipe
-# FIXME switch to new RBQL
 
 
 rainbow_scope_names = [
@@ -701,6 +698,15 @@ class AlignCommand(sublime_plugin.TextCommand):
             return
         adjusted_content = '\n'.join(adjusted_lines)
         self.view.replace(edit, sublime.Region(0, self.view.size()), adjusted_content)
+
+
+class CsvLintCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        print('running CSVLINT') #FIXME
+        # FIXME impl
+        pass
+        # To show message in the statusline use this:
+        # sublime.active_window().active_view().set_status('csv_lint', 'CSVLint: OK')
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
