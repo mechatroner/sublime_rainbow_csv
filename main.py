@@ -30,8 +30,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO support multi-character separators
 
-# FIXME check RBQL both with latin-1 and utf-8
-
 
 rainbow_scope_names = [
     'rainbow1',
@@ -745,7 +743,7 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
         pretty_language_name = prettify_language_name(backend_language)
-        encoding = get_setting(active_view, 'rbql_encoding', 'latin-1')
+        encoding = get_setting(self.view, 'rbql_encoding', 'latin-1')
         active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_query_done, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
