@@ -32,8 +32,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO make RBQL encoding configurable
 
-# FIXME test freq-based autodetection algorithm
-
 
 rainbow_scope_names = [
     'rainbow1',
@@ -812,7 +810,7 @@ def run_rainbow_init(view):
     if not is_plain_text(view):
         return
     enable_autodetection = get_setting(view, 'enable_rainbow_csv_autodetect', True)
-    min_lines_to_check = 8
+    min_lines_to_check = 5
     autodetection_dialects_default = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted'), ('|', 'simple')]
     autodetection_dialects = get_setting(view, 'rainbow_csv_autodetect_dialects', autodetection_dialects_default)
     if enable_autodetection:
