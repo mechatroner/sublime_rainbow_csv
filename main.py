@@ -32,7 +32,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO make RBQL encoding configurable
 
-# FIXME improve autodetection algorithm, include pipe
+# FIXME test freq-based autodetection algorithm
 
 
 rainbow_scope_names = [
@@ -753,8 +753,8 @@ class SetTableNameCommand(sublime_plugin.TextCommand):
         active_window.show_input_panel('Set table name to use in RBQL JOIN queries:', '', on_set_table_name_done, None, None)
 
 
-def is_delimited_table(sampled_lines, delim, policy):
-    if len(sampled_lines) < 2:
+def is_delimited_table(sampled_lines, delim, policy, min_num_lines):
+    if len(sampled_lines) < min_num_lines:
         return False
     num_fields = None
     for sl in sampled_lines:
@@ -768,14 +768,28 @@ def is_delimited_table(sampled_lines, delim, policy):
     return True
 
 
-def autodetect_content_based(view):
+def autodetect_content_based(view, autodetection_dialects, min_num_lines):
     sampled_lines = sample_lines(view)
-    autodetection_dialects_default = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted')]
-    autodetection_dialects = get_setting(view, 'rainbow_csv_autodetect_dialects', autodetection_dialects_default)
     for delim, policy in autodetection_dialects:
-        if is_delimited_table(sampled_lines, delim, policy):
+        if is_delimited_table(sampled_lines, delim, policy, min_num_lines):
             return (delim, policy)
     return None
+
+
+def autodetect_frequency_based(view, autodetection_dialects):
+    region = sublime.Region(0, max(2000, view.size()))
+    sampled_text = view.substr(region)
+    best_dialect = (',', 'quoted')
+    best_dialect_frequency = 0
+    for dialect in autodetection_dialects:
+        delim = dialect[0]
+        if delim in [' ', '.']:
+            continue # Whitespace and dot have advantage over other separators in this algorithm, so we just skip them
+        frequency = sampled_text.count(delim)
+        if frequency > best_dialect_frequency:
+            best_dialect = dialect
+            best_dialect_frequency = frequency
+    return best_dialect
 
 
 def run_rainbow_init(view):
@@ -783,7 +797,6 @@ def run_rainbow_init(view):
         return
     init_user_data_paths()
 
-    #print('hello world!') # Debug print example
     max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', 5000000)
     if max_file_size is not None and view.size() > max_file_size:
         return
@@ -798,14 +811,28 @@ def run_rainbow_init(view):
             return
     if not is_plain_text(view):
         return
-    if get_setting(view, 'enable_rainbow_csv_autodetect', True):
-        csv_dialect = autodetect_content_based(view)
+    enable_autodetection = get_setting(view, 'enable_rainbow_csv_autodetect', True)
+    min_lines_to_check = 8
+    autodetection_dialects_default = [('\t', 'simple'), (',', 'quoted'), (';', 'quoted'), ('|', 'simple')]
+    autodetection_dialects = get_setting(view, 'rainbow_csv_autodetect_dialects', autodetection_dialects_default)
+    if enable_autodetection:
+        csv_dialect = autodetect_content_based(view, autodetection_dialects, min_lines_to_check)
         if csv_dialect is not None:
             delim, policy = csv_dialect
             do_enable_rainbow(view, delim, policy, store_settings=False)
             return
     if file_path is not None:
         if file_path.endswith('.csv'):
+            if enable_autodetection: 
+                csv_dialect = None
+                if get_file_line_count(view) <= min_lines_to_check:
+                    csv_dialect = autodetect_content_based(view, autodetection_dialects, 2)
+                if csv_dialect is None:
+                    csv_dialect = autodetect_frequency_based(view, autodetection_dialects)
+                if csv_dialect is not None:
+                    delim, policy = csv_dialect
+                    do_enable_rainbow(view, delim, policy, store_settings=False)
+                    return
             do_enable_rainbow(view, ',', 'quoted', store_settings=False)
         elif file_path.endswith('.tsv'):
             do_enable_rainbow(view, '\t', 'simple', store_settings=False)

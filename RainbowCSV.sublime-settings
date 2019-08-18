@@ -11,7 +11,7 @@
 
     // List of CSV dialects to autodetect.
     // If "enable_rainbow_csv_autodetect" is set to false this setting is ignored
-    "rainbow_csv_autodetect_dialects": [["\t", "simple"], [",", "quoted"], [";", "quoted"]],
+    "rainbow_csv_autodetect_dialects": [["\t", "simple"], [",", "quoted"], [";", "quoted"], ["|", "simple"]],
 
     // Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
     // Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
