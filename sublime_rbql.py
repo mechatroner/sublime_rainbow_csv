@@ -24,21 +24,19 @@ def system_has_node_js():
     return exit_code == 0 and len(out_data) and len(err_data) == 0
 
 
-def execute_python(src_table_path, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
-    csv_encoding = rbql_csv.default_csv_encoding
-    error_info, warnings = rbql_csv.csv_run(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, csv_encoding)
+def execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
+    error_info, warnings = rbql_csv.csv_run(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, encoding)
     if error_info is None:
         return (None, None, warnings)
     else:
         return (error_info['type'], error_info['message'], warnings) 
 
 
-def execute_js(src_table_path, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
+def execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
     import json
     if not system_has_node_js():
         return ('Execution Error', 'Node.js is not found in your OS, test command: "node --version"', [])
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    encoding = 'binary' # TODO make configurable
     rbql_js_script_path = os.path.join(script_dir, 'rbql-js', 'cli_rbql.js')
     cmd = ['node', rbql_js_script_path, '--query', query, '--delim', input_delim, '--policy', input_policy, '--out-delim', out_delim, '--out-policy', out_policy, '--input', src_table_path, '--output', dst_table_path, '--encoding', encoding, '--error-format', 'json']
     if os.name == 'nt':
@@ -70,7 +68,7 @@ def execute_js(src_table_path, query, input_delim, input_policy, out_delim, out_
     return (error_type, error_msg, warnings)
 
 
-def converged_execute(meta_language, src_table_path, query, input_delim, input_policy, out_delim, out_policy):
+def converged_execute(meta_language, src_table_path, query, input_delim, input_policy, out_delim, out_policy, encoding):
     try:
         tmp_dir = tempfile.gettempdir()
         table_name = os.path.basename(src_table_path)
@@ -80,9 +78,9 @@ def converged_execute(meta_language, src_table_path, query, input_delim, input_p
         dst_table_path = os.path.join(tmp_dir, dst_table_name)
         assert meta_language in ['python', 'js'], 'Meta language must be "python" or "js"'
         if meta_language == 'python':
-            exec_result = execute_python(src_table_path, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
+            exec_result = execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
         else:
-            exec_result = execute_js(src_table_path, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
+            exec_result = execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
         error_type, error_details, warnings = exec_result
         if error_type is not None:
             dst_table_path = None

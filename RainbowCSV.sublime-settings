@@ -26,6 +26,11 @@
     "rbql_backend_language": "Python",
 
 
+    // RBQL encoding for files and queries.
+    // Supported values: "latin-1", "utf-8"
+    "rbql_encoding": "latin-1",
+
+
     // Format of RBQL result set tables.
     // Supported values: "input", "tsv", "csv"
     // * input: same format as the input table

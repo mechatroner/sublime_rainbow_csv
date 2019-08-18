@@ -70,17 +70,21 @@ Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling
 
 #### "rbql_backend_language"
 RBQL backend language.  
-Allowed values: _"Python"_, _"JS"_  
+Supported values: _"Python"_, _"JS"_  
 In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
 
 #### "rbql_output_format"
 Format of RBQL result set tables.  
-Allowed values: _"tsv"_, _"csv"_, _"input"_  
+Supported values: _"tsv"_, _"csv"_, _"input"_  
 * input: same format as the input table
 * tsv: tab separated values.
 * csv: is Excel-compatible and allows quoted commas.
 
 Example: to always use "tsv" as output format add this line to your settings file: `"rbql_output_format": "tsv",`
+
+#### "rbql_encoding"
+RBQL encoding for files and queries.  
+Supported values: _"latin-1"_, _"utf-8"_  
 
 
 ### References

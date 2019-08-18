@@ -30,7 +30,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO support multi-character separators
 
-# TODO make RBQL encoding configurable
+# FIXME check RBQL both with latin-1 and utf-8
 
 
 rainbow_scope_names = [
@@ -543,12 +543,17 @@ def on_query_done(input_line):
     input_delim, input_policy = input_dialect
     backend_language = get_backend_language(active_view)
     output_format = get_setting(active_view, 'rbql_output_format', 'input')
+    encoding = get_setting(active_view, 'rbql_encoding', 'latin-1')
+    encoding = encoding.lower()
+    if encoding not in ['latin-1', 'utf-8']:
+        sublime.error_message('RBQL Error. Encoding "{}" is not supported'.format(encoding))
+        return
     format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
         return
     output_delim, output_policy = format_map[output_format]
-    query_result = sublime_rbql.converged_execute(backend_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy)
+    query_result = sublime_rbql.converged_execute(backend_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy, encoding)
     error_type, error_details, warnings, dst_table_path = query_result
     if error_type is not None:
         sublime.error_message('Unable to execute RBQL query :(\nEdit your query and try again!\n\n\n\n\n=============================\nDetails:\n{}\n{}'.format(error_type, error_details))
@@ -740,7 +745,8 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
         pretty_language_name = prettify_language_name(backend_language)
-        active_window.show_input_panel('Enter SQL-like RBQL query ({}):'.format(pretty_language_name), previous_query, on_query_done, None, on_query_cancel)
+        encoding = get_setting(active_view, 'rbql_encoding', 'latin-1')
+        active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_query_done, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
 
