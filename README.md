@@ -6,6 +6,7 @@
 
 * Highlight columns in *.csv, *.tsv and other separated files in different rainbow colors.
 * Provide info about columns on mouse hover.
+* Check consistency of CSV files (CSVLint)
 * Execute SQL-like RBQL queries.
 
 ![screenshot](https://i.imgur.com/UtGKbEg.png)
