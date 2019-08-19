@@ -1,5 +1,4 @@
 import os
-import re
 import json
 from functools import partial
 
@@ -362,7 +361,6 @@ def get_grammar_basename_from_dialect(delim, policy):
         return None
     if policy == 'quoted' and standard_delims.find(delim) == -1:
         return None
-    policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
     return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
@@ -392,23 +390,7 @@ def get_dialect(settings):
     return get_dialect_from_grammar_basename(grammar_basename)
 
 
-def idempotent_enable_rainbow(view, delim, policy, wait_time):
-    if wait_time > 10000:
-        return
-    done_loading_cb = partial(idempotent_enable_rainbow, view, delim, policy, wait_time * 2)
-    if view.is_loading():
-        sublime.set_timeout(done_loading_cb, wait_time)
-    else:
-        cur_dialect = get_dialect(view.settings())
-        if cur_dialect is None:
-            return
-        cur_delim, cur_policy = cur_dialect
-        if cur_delim == delim and cur_policy == policy:
-            return
-        do_enable_rainbow(view, delim, policy)
-
-
-def do_enable_rainbow(view, delim, policy, store_settings=True):
+def do_enable_rainbow(view, delim, policy, store_settings):
     auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
     if auto_adjust_rainbow_colors:
         adjust_color_scheme(view)
@@ -425,7 +407,7 @@ def do_enable_rainbow(view, delim, policy, store_settings=True):
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
     file_path = view.file_name()
-    if file_path is not None:
+    if file_path is not None and store_settings:
         save_rainbow_params(file_path, delim, policy)
 
 
@@ -451,21 +433,21 @@ def enable_generic_command(view, policy):
     if len(selection_text) != 1:
         sublime.error_message('Error. Exactly one separator character should be selected.')
         return
-    do_enable_rainbow(view, selection_text, policy)
+    do_enable_rainbow(view, selection_text, policy, store_settings=True)
 
 
 class EnableStandardCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         enable_generic_command(self.view, 'quoted')
 
 
 class EnableSimpleCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         enable_generic_command(self.view, 'simple')
 
 
 class DisableCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         do_disable_rainbow(self.view)
 
 
@@ -517,6 +499,22 @@ def prettify_language_name(language_id):
     if language_id == 'js':
         return 'JS'
     return '?'
+
+
+def idempotent_enable_rainbow(view, delim, policy, wait_time):
+    if wait_time > 10000:
+        return
+    done_loading_cb = partial(idempotent_enable_rainbow, view, delim, policy, wait_time * 2)
+    if view.is_loading():
+        sublime.set_timeout(done_loading_cb, wait_time)
+    else:
+        cur_dialect = get_dialect(view.settings())
+        if cur_dialect is None:
+            return
+        cur_delim, cur_policy = cur_dialect
+        if cur_delim == delim and cur_policy == policy:
+            return
+        do_enable_rainbow(view, delim, policy, store_settings=True)
 
 
 def on_query_done(input_line):
@@ -585,7 +583,7 @@ def get_column_color(view, col_num):
 def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
-    fields, warning = csv_utils.smart_split(line_text, delim, policy, True)
+    fields = csv_utils.smart_split(line_text, delim, policy, True)[0]
     tab_stop = view.settings().get('tab_size', 4) if delim == '\t' else 1
     layout_width_dip = view.layout_extent()[0]
     font_char_width_dip = view.em_width()
@@ -718,7 +716,7 @@ def csv_lint(view, delim, policy):
 
 
 class CsvLintCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         dialect = get_dialect(self.view.settings())
         if not dialect:
             sublime.error_message('Error. You need to select a separator first')
@@ -733,7 +731,7 @@ class CsvLintCommand(sublime_plugin.TextCommand):
 
 
 class RunQueryCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         dialect = get_dialect(self.view.settings())
         if not dialect:
             sublime.error_message('Error. You need to select a separator first')
@@ -750,7 +748,7 @@ class RunQueryCommand(sublime_plugin.TextCommand):
 
 
 class SetTableNameCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, _edit):
         active_window = sublime.active_window()
         active_window.show_input_panel('Set table name to use in RBQL JOIN queries:', '', on_set_table_name_done, None, None)
 
@@ -871,7 +869,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 return
             delim, policy = dialect
             # lnum and cnum are 0-based
-            lnum, cnum = self.view.rowcol(point)
+            cnum = self.view.rowcol(point)[1]
             line_text = self.view.substr(self.view.line(point))
             hover_record, warning = csv_utils.smart_split(line_text, delim, policy, True)
             field_num = get_field_by_line_position(hover_record, cnum)
