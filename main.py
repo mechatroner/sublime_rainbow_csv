@@ -539,7 +539,7 @@ def on_query_done(input_line):
     input_delim, input_policy = input_dialect
     backend_language = get_backend_language(active_view)
     output_format = get_setting(active_view, 'rbql_output_format', 'input')
-    encoding = get_setting(active_view, 'rbql_encoding', 'latin-1')
+    encoding = get_setting(active_view, 'rbql_encoding', 'utf-8')
     encoding = encoding.lower()
     if encoding not in ['latin-1', 'utf-8']:
         sublime.error_message('RBQL Error. Encoding "{}" is not supported'.format(encoding))

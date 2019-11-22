@@ -28,7 +28,7 @@
 
     // RBQL encoding for files and queries.
     // Supported values: "latin-1", "utf-8"
-    "rbql_encoding": "latin-1",
+    "rbql_encoding": "utf-8",
 
 
     // Format of RBQL result set tables.
