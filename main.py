@@ -144,7 +144,7 @@ def hex_to_rgb(hex_value):
 
 
 def do_adjust_color_scheme(style):
-    color_scheme = dict() 
+    color_scheme = dict()
     color_scheme['globals'] = dict()
     color_scheme['rules'] = list()
 
@@ -209,7 +209,7 @@ def do_adjust_color_scheme(style):
         if key in style:
             color_scheme['globals'][key] = style[key]
 
-    for i, scope_name in enumerate(rainbow_scope_names): 
+    for i, scope_name in enumerate(rainbow_scope_names):
         color_scheme['rules'].append({'name': 'rainbow csv rainbow{}'.format(i + 1), 'scope': scope_name, 'foreground': rainbow_colors[i]})
 
     syntax_data = json.dumps(color_scheme, indent=4, sort_keys=True)
@@ -405,7 +405,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
             sublime.error_message('Error: Unable to use this character as a separator')
         return
     if view.settings().get('pre_rainbow_syntax', None) is None:
-        pre_rainbow_syntax = view.settings().get('syntax') 
+        pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
     view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
@@ -820,7 +820,7 @@ def run_rainbow_init(view):
             return
     if file_path is not None:
         if file_path.endswith('.csv'):
-            if enable_autodetection: 
+            if enable_autodetection:
                 csv_dialect = None
                 if get_file_line_count(view) <= min_lines_to_check:
                     csv_dialect = autodetect_content_based(view, autodetection_dialects, 2)
