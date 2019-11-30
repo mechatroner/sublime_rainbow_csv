@@ -7,6 +7,7 @@
 * Highlight columns in *.csv, *.tsv and other separated files in different rainbow colors.
 * Provide info about columns on mouse hover.
 * Check consistency of CSV files (CSVLint)
+* Align columns with spaces and Shrink (trim spaces from fields)
 * Execute SQL-like RBQL queries.
 
 ![screenshot](https://i.imgur.com/UtGKbEg.png)
@@ -39,6 +40,23 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 |Key                       | Action                                             |
 |--------------------------|----------------------------------------------------|
 |**F5**                    | Start query editing for the current csv file       |
+
+### Commands
+
+#### Rainbow CSV: CSVLint
+The linter checks the following:  
+* consistency of double quotes usage in CSV rows  
+* consistency of number of fields per CSV row  
+
+#### Rainbow CSV: Run RBQL query
+Run RBQL query for the current file.  
+Unlike F5 button it will work even if the current file is not a CSV table: in this case only 2 variables "a1" and "NR" will be available.
+
+#### Rainbow CSV: Align CSV columns with spaces
+Align CSV columns with spaces in the current file
+
+#### Rainbow CSV: Shrink CSV table
+Remove leading and trailing spaces from all fields in the current file
 
 
 ### Configuration
