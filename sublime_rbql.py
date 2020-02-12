@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import time
 
-import rainbow_csv.rbql.rbql_csv as rbql_csv
+import rainbow_csv.rbql as rbql
 
 
 def system_has_node_js():
@@ -25,11 +25,13 @@ def system_has_node_js():
 
 
 def execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
-    error_info, warnings = rbql_csv.csv_run(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, encoding)
-    if error_info is None:
+    try:
+        warnings = []
+        rbql.query_csv(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, encoding, warnings)
         return (None, None, warnings)
-    else:
-        return (error_info['type'], error_info['message'], warnings) 
+    except Exception as e:
+        error_type, error_msg = rbql.exception_to_error_info(e)
+        return (error_type, error_msg, [])
 
 
 def execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
