@@ -1,4 +1,4 @@
-![logo](https://i.imgur.com/cJwEvyM.png)
+![rainbow_csv](https://i.imgur.com/EhV2niB.png)
 
 # Rainbow CSV
 
