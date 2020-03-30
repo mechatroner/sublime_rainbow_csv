@@ -16,7 +16,10 @@ SETTINGS_FILE = 'RainbowCSV.sublime-settings'
 custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 
+######## Test and Debug #########
+# To install this package in debug mode just copy it into "Sublime Text 3/Packages" folder as "rainbow_csv", e.g.: cp -r sublime_rainbow_csv "/mnt/c/Users/mecha/AppData/Roaming/Sublime Text 3/Packages/rainbow_csv"
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
+#################################
 
 
 # TODO allow monocolumn tables. This could be complicated because we will need to make sure that F5 button would pass context check
