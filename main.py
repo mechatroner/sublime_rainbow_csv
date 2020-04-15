@@ -32,6 +32,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO support multi-character separators
 
+prev_prefix = None
 
 rainbow_scope_names = [
     'rainbow1',
@@ -733,18 +734,42 @@ class CsvLintCommand(sublime_plugin.TextCommand):
             self.view.set_status('csv_lint', 'CSVLint: Error')
 
 
+def qp_on_done(idx):
+    print('qp:', idx)
+
+
+def on_change(query_prefix):
+    global prev_prefix
+    if query_prefix == prev_prefix:
+        return
+    prev_prefix = query_prefix
+    active_window = sublime.active_window()
+    active_window.show_quick_panel([], qp_on_done)
+    prefixes = ['hello', 'world', 'hero', 'help', 'hefty']
+    prefixes = [p for p in prefixes if p.startswith(query_prefix)]
+    active_window.show_quick_panel(prefixes, qp_on_done, sublime.KEEP_OPEN_ON_FOCUS_LOST)
+    print('showing the bar')
+    view = active_window.active_view()
+    previous_query = view.settings().get('rbql_previous_query', '')
+    backend_language = get_backend_language(view)
+    pretty_language_name = prettify_language_name(backend_language)
+    encoding = get_setting(view, 'rbql_encoding', 'latin-1')
+    active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), query_prefix, on_done_query_edit, on_change, on_query_cancel)
+
+
 class RunQueryCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
-        dialect = get_dialect(self.view.settings())
-        delim, policy = dialect
         active_window = sublime.active_window()
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
         pretty_language_name = prettify_language_name(backend_language)
         encoding = get_setting(self.view, 'rbql_encoding', 'latin-1')
-        active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_done_query_edit, None, on_query_cancel)
+        active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_done_query_edit, on_change, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
+        dialect = get_dialect(self.view.settings())
+        delim, policy = dialect
         show_column_names(self.view, delim, policy)
+        #active_window.show_quick_panel(['hello', 'world'], qp_on_done)
 
 
 class SetTableNameCommand(sublime_plugin.TextCommand):
