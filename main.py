@@ -535,9 +535,18 @@ def on_done_query_edit(input_line):
     active_view.hide_popup()
     file_path = active_view.file_name()
     if not file_path:
-        # FIXME create a temp file from unnamed buffer
-        sublime.error_message('RBQL Error. Unable to run query for this buffer')
-        return
+        try:
+            import tempfile
+            import io
+            whole_file_region = sublime.Region(0, active_view.size())
+            file_text = active_view.substr(whole_file_region)
+            tmp_dir = tempfile.gettempdir()
+            file_path = os.path.join(tmp_dir, 'rbql_sublime_scratch_buffer')
+            with io.open(file_path, 'w', encoding='utf-8') as f:
+                f.write(file_text)
+        except Exception as e:
+            sublime.error_message('Unable to run RBQL query for this temporary buffer')
+            return
     input_dialect = get_dialect(active_view.settings())
     input_delim, input_policy = input_dialect
     backend_language = get_backend_language(active_view)
@@ -741,7 +750,7 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
         pretty_language_name = prettify_language_name(backend_language)
-        encoding = get_setting(self.view, 'rbql_encoding', 'latin-1')
+        encoding = get_setting(self.view, 'rbql_encoding', 'utf-8')
         active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_done_query_edit, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
