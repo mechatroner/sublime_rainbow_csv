@@ -35,7 +35,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME support custom high-contrast color scheme
 # FIXME test multi-char separators
-# FIXME fix hover info for multi-char separators, currently it assumes that all separators' size is 1
+# FIXME try to get rid of the harmless error message about missing color scheme when it is just gets created
+# FIXME syntax generation error for: `?@[\]` - gets "Repeat operator is not specified in regex"
 
 
 legacy_syntax_names = {
@@ -76,14 +77,14 @@ def ensure_syntax_file(delim, policy):
     return name
 
 
-def get_field_by_line_position(fields, query_pos):
+def get_field_by_line_position(fields, delim_size, query_pos):
     if not len(fields):
         return None
     col_num = 0
     cpos = len(fields[col_num])
     while query_pos > cpos and col_num + 1 < len(fields):
         col_num += 1
-        cpos = cpos + 1 + len(fields[col_num])
+        cpos = cpos + delim_size + len(fields[col_num])
     return col_num
 
 
@@ -855,7 +856,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             cnum = self.view.rowcol(point)[1]
             line_text = self.view.substr(self.view.line(point))
             hover_record, warning = csv_utils.smart_split(line_text, delim, policy, True)
-            field_num = get_field_by_line_position(hover_record, cnum)
+            field_num = get_field_by_line_position(hover_record, len(delim), cnum)
             header = get_document_header(self.view, delim, policy)
             ui_text = 'Col #{}'.format(field_num + 1)
             if field_num < len(header):

@@ -66,8 +66,7 @@ def get_syntax_name(delim, policy):
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
         return 'CSV (Rainbow)'
-    #return 'Rainbow CSV {} {}'.format(delim, policy)
-    return 'Rainbow CSV {} {}'.format(urllib_quote(delim), policy) #FIXME try to use raw name without quoting (actually you should yaml-quote it)
+    return 'Rainbow CSV {} {}'.format(delim, policy)
 
 
 def yaml_escape(data):
