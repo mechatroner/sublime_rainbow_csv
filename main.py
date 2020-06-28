@@ -33,6 +33,10 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
 # TODO use user specified colorscheme by default, do not use high-contrast
 
+# FIXME support custom high-contrast color scheme
+# FIXME test multi-char separators
+# FIXME fix hover info for multi-char separators, currently it assumes that all separators' size is 1
+
 
 legacy_syntax_names = {
     ('\t', 'simple'): 'TSV (Rainbow).sublime-syntax',
@@ -402,6 +406,9 @@ def enable_generic_command(view, policy):
     selection_text = view.substr(region)
     if policy == 'quoted' and selection_text not in [';', ',']:
         sublime.error_message('Error: Standard dialect is supported only with comma [,] and semicolon [;] separators')
+        return
+    if selection_text.find('\n') != -1:
+        sublime.error_message('Error: newline can not be a part of field separator')
         return
     #if len(selection_text) != 1:
     #    sublime.error_message('Error. Exactly one separator character should be selected.')

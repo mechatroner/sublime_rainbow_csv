@@ -111,7 +111,7 @@ def make_standard_context(delim, context_id, num_contexts, indent='    '):
 
 
 def make_sublime_syntax_simple(delim):
-    scope = 'rbcsmn{}'.format(ord(delim))
+    scope = 'rbcsmn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, 'Simple')
     result = simple_header_template.format(name, scope, scope)
     num_contexts = len(rainbow_scope_names)
@@ -122,7 +122,7 @@ def make_sublime_syntax_simple(delim):
 
 
 def make_sublime_syntax_standard(delim):
-    scope = 'rbcstn{}'.format(ord(delim))
+    scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, 'Standard')
     result = standard_header_template.format(name, scope, scope)
     num_contexts = len(rainbow_scope_names)
