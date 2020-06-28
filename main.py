@@ -34,23 +34,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO use user specified colorscheme by default, do not use high-contrast
 
 
-
-# FIXME don't need this
-#naughty_delims_map = {
-#    '<': 'less-than',
-#    '>': 'greater-than',
-#    ':': 'colon',
-#    '"': 'double-quote',
-#    '/': 'slash',
-#    '\\': 'backslash',
-#    '|': 'pipe',
-#    '?': 'question-mark',
-#    '*': 'asterisk',
-#    '\t': 'tab',
-#    ' ': 'space'
-#}
-
-
 legacy_syntax_names = {
     ('\t', 'simple'): 'TSV (Rainbow).sublime-syntax',
     (',', 'quoted'): 'CSV (Rainbow).sublime-syntax'
@@ -60,10 +43,6 @@ legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
 
 policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
 policy_map_inv = {v: k for k, v in policy_map.items()}
-
-
-#naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()} #FIXME
-
 
 
 def get_syntax_file_basename(delim, policy):
@@ -356,33 +335,6 @@ def get_document_header(view, delim, policy):
 def is_plain_text(view):
     syntax = view.settings().get('syntax')
     return syntax.find('Plain text.tmLanguage') != -1
-
-
-#def name_normalize(delim):
-#    if delim in naughty_delims_map:
-#        return naughty_delims_map[delim]
-#    return '[{}]'.format(delim)
-
-
-#def name_normalize_inv(name):
-#    # FIXME
-#    if name in naughty_delims_map_inv:
-#        return naughty_delims_map_inv[name]
-#    if name.startswith('[') and name.endswith(']'):
-#        return name[1:-1]
-#    return None
-
-
-#def get_grammar_basename_from_dialect(delim, policy):
-#    if (delim, policy) in legacy_syntax_names:
-#        return legacy_syntax_names[(delim, policy)]
-#    simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
-#    standard_delims = '\t|,;'
-#    if policy == 'simple' and simple_delims.find(delim) == -1:
-#        return None
-#    if policy == 'quoted' and standard_delims.find(delim) == -1:
-#        return None
-#    return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
 def get_dialect_from_grammar_basename(grammar_basename):
