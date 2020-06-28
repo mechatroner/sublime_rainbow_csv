@@ -34,7 +34,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO use user specified colorscheme by default, do not use high-contrast
 
 # FIXME support custom high-contrast color scheme
-# FIXME test multi-char separators
+# FIXME test multi-char separators - RBQL
 # FIXME try to get rid of the harmless error message about missing color scheme when it is just gets created
 # FIXME syntax generation error for: `?@[\]` - gets "Repeat operator is not specified in regex"
 
@@ -51,12 +51,11 @@ policy_map_inv = {v: k for k, v in policy_map.items()}
 
 
 def get_syntax_file_basename(delim, policy):
-    #FIXME change name to underscore version if file name != name in the syntax
     assert policy in policy_map.keys()
     for k, v in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v
-    return 'Rainbow CSV {} {}.sublime-syntax'.format(urllib_quote(delim), policy_map[policy])
+    return 'Rainbow_CSV_{}_{}.sublime-syntax'.format(urllib_quote(delim), policy_map[policy])
 
 
 def ensure_syntax_file(delim, policy):
@@ -345,12 +344,12 @@ def is_plain_text(view):
 def get_dialect_from_grammar_basename(grammar_basename):
     if grammar_basename in legacy_syntax_names_inv:
         return legacy_syntax_names_inv[grammar_basename]
-    start_marker = 'Rainbow CSV '
+    start_marker = 'Rainbow_CSV_'
     end_marker = '.sublime-syntax'
     if not grammar_basename.startswith(start_marker) or not grammar_basename.endswith(end_marker):
         return None
     encoded_dialect = grammar_basename[len(start_marker):-len(end_marker)]
-    wpos = encoded_dialect.rfind(' ')
+    wpos = encoded_dialect.rfind('_')
     if wpos == -1:
         return None
     delim = urllib_unquote(encoded_dialect[:wpos])
