@@ -7,6 +7,7 @@ import sublime
 
 import rainbow_csv.sublime_rbql as sublime_rbql
 import rainbow_csv.rbql.csv_utils as csv_utils
+import rainbow_csv.auto_syntax as auto_syntax
 
 
 table_index_path = None
@@ -30,20 +31,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO use user specified colorscheme by default, do not use high-contrast
 
 
-rainbow_scope_names = [
-    'rainbow1',
-    'keyword.rainbow2',
-    'entity.name.rainbow3',
-    'comment.rainbow4',
-    'string.rainbow5',
-    'entity.name.tag.rainbow6',
-    'storage.type.rainbow7',
-    'support.rainbow8',
-    'constant.language.rainbow9',
-    'variable.language.rainbow10'
-]
 
-
+# FIXME don't need this
 naughty_delims_map = {
     '<': 'less-than',
     '>': 'greater-than',
@@ -68,9 +57,38 @@ legacy_syntax_names = {
 policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
 
 
-naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()}
+naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()} #FIXME
 legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
 policy_map_inv = {v: k for k, v in policy_map.items()}
+
+
+
+def get_syntax_name(delim, policy):
+    #FIXME change name to underscore version if file name != name in the syntax
+    assert policy in ['Standard', 'Simple']
+    if delim == '\t' and policy == 'Simple':
+        return 'TSV (Rainbow)'
+    if delim == ',' and policy == 'Standard':
+        return 'CSV (Rainbow)'
+    return 'Rainbow CSV {} {}'.format(urllib_quote(delim), policy)
+
+
+def ensure_syntax_file(delim, policy):
+    dst_dir = os.path.join(sublime.packages_path(), 'User')
+    name = get_syntax_name(delim, policy) + '.sublime-syntax'
+    syntax_path = os.path.join(dst_dir, name)
+    syntax_text = auto_syntax.make_sublime_syntax(delim, policy)
+    try:
+        with open(syntax_path) as f:
+            # FIXME test if this really works
+            old_syntax_text =  f.read()
+            if old_syntax_text == syntax_text:
+                return syntax_path
+    except Exception:
+        pass
+    with open(syntax_path, 'w') as dst:
+        dst.write(syntax_text)
+    return syntax_path
 
 
 def get_field_by_line_position(fields, query_pos):
@@ -209,7 +227,7 @@ def do_adjust_color_scheme(style):
         if key in style:
             color_scheme['globals'][key] = style[key]
 
-    for i, scope_name in enumerate(rainbow_scope_names):
+    for i, scope_name in enumerate(auto_syntax.rainbow_scope_names):
         color_scheme['rules'].append({'name': 'rainbow csv rainbow{}'.format(i + 1), 'scope': scope_name, 'foreground': rainbow_colors[i]})
 
     syntax_data = json.dumps(color_scheme, indent=4, sort_keys=True)
@@ -338,13 +356,14 @@ def is_plain_text(view):
     return syntax.find('Plain text.tmLanguage') != -1
 
 
-def name_normalize(delim):
-    if delim in naughty_delims_map:
-        return naughty_delims_map[delim]
-    return '[{}]'.format(delim)
+#def name_normalize(delim):
+#    if delim in naughty_delims_map:
+#        return naughty_delims_map[delim]
+#    return '[{}]'.format(delim)
 
 
 def name_normalize_inv(name):
+    # FIXME
     if name in naughty_delims_map_inv:
         return naughty_delims_map_inv[name]
     if name.startswith('[') and name.endswith(']'):
@@ -352,16 +371,16 @@ def name_normalize_inv(name):
     return None
 
 
-def get_grammar_basename_from_dialect(delim, policy):
-    if (delim, policy) in legacy_syntax_names:
-        return legacy_syntax_names[(delim, policy)]
-    simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
-    standard_delims = '\t|,;'
-    if policy == 'simple' and simple_delims.find(delim) == -1:
-        return None
-    if policy == 'quoted' and standard_delims.find(delim) == -1:
-        return None
-    return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
+#def get_grammar_basename_from_dialect(delim, policy):
+#    if (delim, policy) in legacy_syntax_names:
+#        return legacy_syntax_names[(delim, policy)]
+#    simple_delims = '\t !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+#    standard_delims = '\t|,;'
+#    if policy == 'simple' and simple_delims.find(delim) == -1:
+#        return None
+#    if policy == 'quoted' and standard_delims.find(delim) == -1:
+#        return None
+#    return 'Rainbow CSV {} {}.sublime-syntax'.format(name_normalize(delim), policy_map[policy])
 
 
 def get_dialect_from_grammar_basename(grammar_basename):
@@ -397,19 +416,12 @@ def do_enable_rainbow(view, delim, policy, store_settings):
     auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
     if auto_adjust_rainbow_colors:
         adjust_color_scheme(view)
-    # FIXME generate the grammar automatically
-    grammar_basename = get_grammar_basename_from_dialect(delim, policy)
-    if grammar_basename is None:
-        if policy == 'quoted':
-            sublime.error_message('Error: Only "Simple" dialect is available for this character')
-        else:
-            sublime.error_message('Error: Unable to use this character as a separator')
-        return
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
-    view.set_syntax_file('Packages/rainbow_csv/custom_grammars/{}'.format(grammar_basename))
+    syntax_file_path = ensure_syntax_file(delim, policy)
+    view.set_syntax_file(syntax_file_path)
     file_path = view.file_name()
     if file_path is not None and store_settings:
         save_rainbow_params(file_path, delim, policy)
@@ -434,9 +446,12 @@ def enable_generic_command(view, policy):
         return
     region = selection[0]
     selection_text = view.substr(region)
-    if len(selection_text) != 1:
-        sublime.error_message('Error. Exactly one separator character should be selected.')
+    if policy == 'quoted' and selection_text not in [';', ',']:
+        sublime.error_message('Error: Standard dialect is supported only with comma [,] and semicolon [;] separators')
         return
+    #if len(selection_text) != 1:
+    #    sublime.error_message('Error. Exactly one separator character should be selected.')
+    #    return
     do_enable_rainbow(view, selection_text, policy, store_settings=True)
 
 
@@ -584,7 +599,7 @@ def on_query_cancel():
 
 
 def get_column_color(view, col_num):
-    color_info = view.style_for_scope(rainbow_scope_names[col_num % 10])
+    color_info = view.style_for_scope(auto_syntax.rainbow_scope_names[col_num % 10])
     if color_info and 'foreground' in color_info:
         return color_info['foreground']
     return '#FF0000' # Error handling, should never happen
