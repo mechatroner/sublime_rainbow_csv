@@ -2,6 +2,9 @@ import os
 import json
 from functools import partial
 
+from urllib.parse import unquote as urllib_unquote
+from urllib.parse import quote as urllib_quote
+
 import sublime_plugin
 import sublime
 
@@ -33,62 +36,61 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 
 # FIXME don't need this
-naughty_delims_map = {
-    '<': 'less-than',
-    '>': 'greater-than',
-    ':': 'colon',
-    '"': 'double-quote',
-    '/': 'slash',
-    '\\': 'backslash',
-    '|': 'pipe',
-    '?': 'question-mark',
-    '*': 'asterisk',
-    '\t': 'tab',
-    ' ': 'space'
-}
+#naughty_delims_map = {
+#    '<': 'less-than',
+#    '>': 'greater-than',
+#    ':': 'colon',
+#    '"': 'double-quote',
+#    '/': 'slash',
+#    '\\': 'backslash',
+#    '|': 'pipe',
+#    '?': 'question-mark',
+#    '*': 'asterisk',
+#    '\t': 'tab',
+#    ' ': 'space'
+#}
 
 
 legacy_syntax_names = {
     ('\t', 'simple'): 'TSV (Rainbow).sublime-syntax',
     (',', 'quoted'): 'CSV (Rainbow).sublime-syntax'
 }
+legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
 
 
 policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
-
-
-naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()} #FIXME
-legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
 policy_map_inv = {v: k for k, v in policy_map.items()}
 
 
+#naughty_delims_map_inv = {v: k for k, v in naughty_delims_map.items()} #FIXME
 
-def get_syntax_name(delim, policy):
+
+
+def get_syntax_file_basename(delim, policy):
     #FIXME change name to underscore version if file name != name in the syntax
-    assert policy in ['Standard', 'Simple']
-    if delim == '\t' and policy == 'Simple':
-        return 'TSV (Rainbow)'
-    if delim == ',' and policy == 'Standard':
-        return 'CSV (Rainbow)'
-    return 'Rainbow CSV {} {}'.format(urllib_quote(delim), policy)
+    assert policy in policy_map.keys()
+    for k, v in legacy_syntax_names.items():
+        if (delim, policy) == k:
+            return v
+    return 'Rainbow CSV {} {}.sublime-syntax'.format(urllib_quote(delim), policy_map[policy])
 
 
 def ensure_syntax_file(delim, policy):
     dst_dir = os.path.join(sublime.packages_path(), 'User')
-    name = get_syntax_name(delim, policy) + '.sublime-syntax'
+    name = get_syntax_file_basename(delim, policy)
     syntax_path = os.path.join(dst_dir, name)
-    syntax_text = auto_syntax.make_sublime_syntax(delim, policy)
+    syntax_text = auto_syntax.make_sublime_syntax(delim, policy_map[policy])
     try:
         with open(syntax_path) as f:
             # FIXME test if this really works
             old_syntax_text =  f.read()
             if old_syntax_text == syntax_text:
-                return syntax_path
+                return name
     except Exception:
         pass
     with open(syntax_path, 'w') as dst:
         dst.write(syntax_text)
-    return syntax_path
+    return name
 
 
 def get_field_by_line_position(fields, query_pos):
@@ -362,13 +364,13 @@ def is_plain_text(view):
 #    return '[{}]'.format(delim)
 
 
-def name_normalize_inv(name):
-    # FIXME
-    if name in naughty_delims_map_inv:
-        return naughty_delims_map_inv[name]
-    if name.startswith('[') and name.endswith(']'):
-        return name[1:-1]
-    return None
+#def name_normalize_inv(name):
+#    # FIXME
+#    if name in naughty_delims_map_inv:
+#        return naughty_delims_map_inv[name]
+#    if name.startswith('[') and name.endswith(']'):
+#        return name[1:-1]
+#    return None
 
 
 #def get_grammar_basename_from_dialect(delim, policy):
@@ -394,7 +396,7 @@ def get_dialect_from_grammar_basename(grammar_basename):
     wpos = encoded_dialect.rfind(' ')
     if wpos == -1:
         return None
-    delim = name_normalize_inv(encoded_dialect[:wpos])
+    delim = urllib_unquote(encoded_dialect[:wpos])
     policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
     if delim is None or policy is None:
         return None
@@ -420,8 +422,8 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
-    syntax_file_path = ensure_syntax_file(delim, policy)
-    view.set_syntax_file(syntax_file_path)
+    syntax_file_basename = ensure_syntax_file(delim, policy)
+    view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
     file_path = view.file_name()
     if file_path is not None and store_settings:
         save_rainbow_params(file_path, delim, policy)
