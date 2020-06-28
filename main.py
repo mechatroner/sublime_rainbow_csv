@@ -27,6 +27,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO comments support
 # TODO support multi-character separators
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
+# TODO use user specified colorscheme by default, do not use high-contrast
 
 
 rainbow_scope_names = [
@@ -396,6 +397,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
     auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
     if auto_adjust_rainbow_colors:
         adjust_color_scheme(view)
+    # FIXME generate the grammar automatically
     grammar_basename = get_grammar_basename_from_dialect(delim, policy)
     if grammar_basename is None:
         if policy == 'quoted':
