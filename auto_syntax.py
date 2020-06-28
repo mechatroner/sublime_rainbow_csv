@@ -1,6 +1,3 @@
-from urllib.parse import quote as urllib_quote
-
-
 simple_header_template = '''%YAML 1.2
 ---
 name: {}
