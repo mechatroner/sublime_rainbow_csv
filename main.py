@@ -36,7 +36,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # FIXME support custom high-contrast color scheme
 # FIXME test multi-char separators - RBQL
 # FIXME try to get rid of the harmless error message about missing color scheme when it is just gets created
-# FIXME syntax generation error for: `?@[\]` - gets "Repeat operator is not specified in regex"
 
 
 legacy_syntax_names = {

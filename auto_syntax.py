@@ -48,13 +48,17 @@ rainbow_scope_names = [
 ]
 
 
-def oniguruma_regular_escape(delim):
+def oniguruma_regular_escape_single_char(delim_char):
     single_escape_chars = r'\/|.$^*()[]+?'
-    if single_escape_chars.find(delim) != -1:
-        return r'\{}'.format(delim)
-    if delim == '\t':
+    if single_escape_chars.find(delim_char) != -1:
+        return r'\{}'.format(delim_char)
+    if delim_char == '\t':
         return r'\t'
-    return delim
+    return delim_char
+
+
+def oniguruma_regular_escape(delim):
+    return ''.join([oniguruma_regular_escape_single_char(d) for d in delim])
 
 
 def get_syntax_name(delim, policy):
