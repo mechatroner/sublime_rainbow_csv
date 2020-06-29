@@ -487,8 +487,6 @@ def idempotent_enable_rainbow(view, delim, policy, wait_time):
         sublime.set_timeout(done_loading_cb, wait_time)
     else:
         cur_dialect = get_dialect(view.settings())
-        if cur_dialect[1] == 'monocolumn':
-            return
         cur_delim, cur_policy = cur_dialect
         if cur_delim == delim and cur_policy == policy:
             return
