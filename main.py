@@ -28,14 +28,11 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # TODO consider implementing syntax with newlines-in-fields support. measure performance.
 # TODO CSVLint: warn about trailing spaces
-# TODO comments support
-# TODO support multi-character separators
+# TODO support comment lines
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
-# TODO use user specified colorscheme by default, do not use high-contrast
+
 
 # FIXME support custom high-contrast color scheme
-# FIXME test multi-char separators - RBQL
-# FIXME try to get rid of the harmless error message about missing color scheme when it is just gets created
 
 
 legacy_syntax_names = {
@@ -66,12 +63,12 @@ def ensure_syntax_file(delim, policy):
         with open(syntax_path) as f:
             old_syntax_text =  f.read()
             if old_syntax_text == syntax_text:
-                return name
+                return (name, False)
     except Exception:
         pass
     with open(syntax_path, 'w') as dst:
         dst.write(syntax_text)
-    return name
+    return (name, True)
 
 
 def get_field_by_line_position(fields, delim_size, query_pos):
@@ -376,8 +373,15 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
-    syntax_file_basename = ensure_syntax_file(delim, policy)
-    view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
+    syntax_file_basename, created = ensure_syntax_file(delim, policy)
+    if created:
+        def set_syntax_async():
+            view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
+        # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
+        # And shows an error (highlighting would work though, but the error is really ugly and confusing)
+        sublime.set_timeout(set_syntax_async, 1000 * 2) # FIXME try to reduce the timeout - experiment
+    else:
+        view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
     file_path = view.file_name()
     if file_path is not None and store_settings:
         save_rainbow_params(file_path, delim, policy)
