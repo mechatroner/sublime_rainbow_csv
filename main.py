@@ -379,7 +379,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
             view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
-        sublime.set_timeout(set_syntax_async, 1000 * 2) # FIXME try to reduce the timeout - experiment
+        sublime.set_timeout(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
     else:
         view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))
     file_path = view.file_name()
