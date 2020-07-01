@@ -16,7 +16,7 @@
 Rainbow CSV has content-based csv/tsv autodetection mechanism. This means that package will analyze plain text files even if they do not have "*.csv" or "*.tsv" extension.  
 
 Rainbow highlighting can also be manually enabled from Sublime context menu (see the demo gif below):  
-1. Select a character that you want to use as a delimiter with mouse. Delimiter can be any non-alphanumeric printable ASCII symbol, e.g. semicolon  
+1. Select a character (or sequence of characters) that you want to use as a delimiter with the cursor
 2. Right mouse click: context menu -> Rainbow CSV -> Enable ...  
 
 You can also disable rainbow highlighting and go back to the original file highlighting using the same context menu.  
@@ -81,11 +81,15 @@ Disable Rainbow CSV for files bigger than the specified size. This can be helpfu
 Manual separator selection will override this setting for the current file.  
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
+#### "use_custom_rainbow_colors"
+Use custom high-contrast rainbow colors instead of colors provided by your current color scheme
+
 #### "auto_adjust_rainbow_colors"
 Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme  
 Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.  
 You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme  
 Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling the setting, it will be rewritten by the plugin  
+This option has effect only if "use_custom_rainbow_colors" is set to true
 
 #### "rbql_backend_language"
 RBQL backend language.  

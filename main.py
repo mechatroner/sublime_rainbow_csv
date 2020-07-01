@@ -31,8 +31,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO support comment lines
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
 
-
-# FIXME support custom high-contrast color scheme
+# FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
 
 legacy_syntax_names = {
@@ -46,6 +45,11 @@ policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
 policy_map_inv = {v: k for k, v in policy_map.items()}
 
 
+sublime_settings_text = '''{
+    "color_scheme": "RainbowCSV.sublime-color-scheme"
+}'''
+
+
 def get_syntax_file_basename(delim, policy):
     assert policy in policy_map.keys()
     for k, v in legacy_syntax_names.items():
@@ -55,9 +59,8 @@ def get_syntax_file_basename(delim, policy):
 
 
 def ensure_syntax_file(delim, policy):
-    dst_dir = os.path.join(sublime.packages_path(), 'User')
     name = get_syntax_file_basename(delim, policy)
-    syntax_path = os.path.join(dst_dir, name)
+    syntax_path = os.path.join(sublime.packages_path(), 'User', name)
     syntax_text = auto_syntax.make_sublime_syntax(delim, policy_map[policy])
     try:
         with open(syntax_path) as f:
@@ -365,15 +368,43 @@ def get_dialect(settings):
     return dialect
 
 
+def get_syntax_settings_file_basename(syntax_file_basename):
+    extension = '.sublime-syntax'
+    assert syntax_file_basename.endswith(extension)
+    return syntax_file_basename[:-len(extension)] + '.sublime-settings'
+
+
+def make_sublime_settings(syntax_settings_path):
+    if not os.path.exists(syntax_settings_path):
+        with open(syntax_settings_path, 'w') as f:
+            f.write('{\n    "color_scheme": "RainbowCSV.sublime-color-scheme"\n}')
+
+
+def remove_sublime_settings(syntax_settings_path):
+    try:
+        os.remove(syntax_settings_path)        
+    except Exception:
+        pass
+
+
 def do_enable_rainbow(view, delim, policy, store_settings):
-    auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
-    if auto_adjust_rainbow_colors:
-        adjust_color_scheme(view)
     if view.settings().get('pre_rainbow_syntax', None) is None:
         pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
     syntax_file_basename, created = ensure_syntax_file(delim, policy)
+    syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
+
+    use_custom_rainbow_colors = get_setting(view, 'use_custom_rainbow_colors', False)
+
+    if use_custom_rainbow_colors:
+        make_sublime_settings(syntax_settings_path)
+        auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
+        if auto_adjust_rainbow_colors:
+            adjust_color_scheme(view)
+    else:
+        remove_sublime_settings(syntax_settings_path)
+
     if created:
         def set_syntax_async():
             view.set_syntax_file(os.path.join('Packages/User/{}'.format(syntax_file_basename)))

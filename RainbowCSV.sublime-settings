@@ -13,10 +13,14 @@
     // If "enable_rainbow_csv_autodetect" is set to false this setting is ignored
     "rainbow_csv_autodetect_dialects": [["\t", "simple"], [",", "quoted"], [";", "quoted"], ["|", "simple"]],
 
+    // Use custom high-contrast rainbow colors instead of colors provided by your current color scheme
+    "use_custom_rainbow_colors": false,
+
     // Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
     // Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
     // You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme
     // Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling the setting, it will be rewritten by the plugin
+    // This option has effect only if "use_custom_rainbow_colors" is set to true
     "auto_adjust_rainbow_colors": true,
 
 
