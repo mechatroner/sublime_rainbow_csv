@@ -13,14 +13,14 @@
 ![screenshot](https://i.imgur.com/UtGKbEg.png)
 
 ### Usage
-Rainbow CSV has content-based csv/tsv autodetection mechanism. This means that package will analyze plain text files even if they do not have "*.csv" or "*.tsv" extension.  
+Rainbow CSV has content-based csv/tsv autodetection mechanism. This means that the package will analyze plain text files even if they do not have "*.csv" or "*.tsv" extension.  
 
 Rainbow highlighting can also be manually enabled from Sublime context menu (see the demo gif below):  
 1. Select a character (or sequence of characters) that you want to use as a delimiter with the cursor
 2. Right mouse click: context menu -> Rainbow CSV -> Enable ...  
 
 You can also disable rainbow highlighting and go back to the original file highlighting using the same context menu.  
-This feature can be used to temporary rainbow-highlight even non-table files.  
+This feature can be used to temporarily rainbow-highlight even non-table files.  
 
 Manual Rainbow Enabling/Disabling demo gif:  
 ![demo](https://i.imgur.com/7lSSMst.gif)
@@ -39,7 +39,7 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 
 |Key                       | Action                                             |
 |--------------------------|----------------------------------------------------|
-|**F5**                    | Start query editing for the current csv file       |
+|**F5**                    | Start query editing for the current CSV file       |
 
 ### Commands
 
@@ -94,7 +94,7 @@ This option has effect only if "use_custom_rainbow_colors" is set to true
 #### "rbql_backend_language"
 RBQL backend language.  
 Supported values: _"Python"_, _"JS"_  
-In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
+To use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.  
 
 #### "rbql_output_format"
 Format of RBQL result set tables.  
@@ -117,17 +117,17 @@ Supported values: _"latin-1"_, _"utf-8"_
 
 # RBQL (Rainbow Query Language) Description
 
-RBQL is a technology for (not only) CSV files processing. It provides SQL-like language that supports SELECT queries with Python or JavaScript expressions.  
+RBQL is a technology for (not only) CSV file processing. It provides SQL-like language that supports SELECT queries with Python or JavaScript expressions.  
 RBQL is distributed with CLI apps, text editor plugins, Python and JS libraries and can work in web browsers.  
-RBQL core module is very generic and can process all kind of objects and record formats, but most popular RBQL implementation works with CSV files.  
+RBQL core module is very generic and can process all kinds of objects and record formats, but the most popular RBQL implementation works with CSV files.  
 
 [Official Site](https://rbql.org/)
 
 ### Main Features
 
 * Use Python or JavaScript expressions inside _SELECT_, _UPDATE_, _WHERE_ and _ORDER BY_ statements
-* Result set of any query immediately becomes a first-class table on it's own
-* Supports input tables with inconsistent number of fields per record
+* Result set of any query immediately becomes a first-class table on its own
+* Supports input tables with an inconsistent number of fields per record
 * Output records appear in the same order as in input unless _ORDER BY_ is provided
 * Each record has a unique NR (record number) identifier
 * Supports all main SQL keywords
