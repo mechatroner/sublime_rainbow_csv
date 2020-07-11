@@ -34,6 +34,10 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
+# FIXME ?@[ - separator failure
+# FIXME ' - separator failure
+# FIXME parse error on hover
+
 
 def get_table_index_path():
     global table_index_path_cached
@@ -400,17 +404,29 @@ def remove_sublime_settings(syntax_settings_path):
         pass
 
 
+def dbg_log(logging_enabled, msg):
+    if logging_enabled:
+        print(msg)
+
+
 def do_enable_rainbow(view, delim, policy, store_settings):
+    file_path = view.file_name()
+    logging_enabled = get_setting(view, 'enable_debug_logging', False)
+    dbg_log(logging_enabled, 'Enabling rainbow higlighting for {}: "{}", {}'.format(file_path, delim, policy))
+
+    pre_rainbow_syntax = view.settings().get('syntax')
     if view.settings().get('pre_rainbow_syntax', None) is None:
-        pre_rainbow_syntax = view.settings().get('syntax')
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
+
     syntax_file_basename, created = ensure_syntax_file(delim, policy)
+    dbg_log(logging_enabled, 'Syntax file basename: "{}", Created: {}'.format(syntax_file_basename, created))
     syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
 
     use_custom_rainbow_colors = get_setting(view, 'use_custom_rainbow_colors', False)
 
     if use_custom_rainbow_colors:
+        dbg_log(logging_enabled, 'Using custom rainbow colors')
         make_sublime_settings(syntax_settings_path)
         auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
         if auto_adjust_rainbow_colors:
@@ -419,19 +435,23 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         remove_sublime_settings(syntax_settings_path)
 
     rainbow_syntax_file = 'Packages/User/{}'.format(syntax_file_basename)
+    dbg_log(logging_enabled, 'Current syntax file: "{}", New syntax file: "{}"'.format(pre_rainbow_syntax, rainbow_syntax_file))
     if pre_rainbow_syntax == rainbow_syntax_file:
         return
 
     if created:
         def set_syntax_async():
+            dbg_log(logging_enabled, 'In callback. Setting rainbow syntax file to: "{}"'.format(rainbow_syntax_file))
             view.set_syntax_file(rainbow_syntax_file)
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
+        dbg_log(logging_enabled, 'New syntax file created: "{}". Preparing to enable'.format(rainbow_syntax_file))
         sublime.set_timeout(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
     else:
+        dbg_log(logging_enabled, 'Setting existing syntax file: "{}"'.format(rainbow_syntax_file))
         view.set_syntax_file(rainbow_syntax_file)
-    file_path = view.file_name()
     if file_path is not None and store_settings:
+        dbg_log(logging_enabled, 'Saving rainbow params')
         save_rainbow_params(file_path, delim, policy)
 
 

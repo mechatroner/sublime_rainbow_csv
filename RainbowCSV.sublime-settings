@@ -40,5 +40,8 @@
     // * input: same format as the input table
     // * tsv: tab separated values.
     // * csv: is Excel-compatible and allows quoted commas.
-    "rbql_output_format": "input"
+    "rbql_output_format": "input",
+
+    // Enable logging to debug the extension
+    "enable_debug_logging": false,
 }
