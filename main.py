@@ -13,8 +13,9 @@ import rainbow_csv.rbql.csv_utils as csv_utils
 import rainbow_csv.auto_syntax as auto_syntax
 
 
-table_index_path = None
-table_names_path = None
+table_index_path_cached = None
+table_names_path_cached = None
+
 
 SETTINGS_FILE = 'RainbowCSV.sublime-settings'
 custom_settings = None # Gets auto updated on every SETTINGS_FILE write
@@ -32,6 +33,29 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
+
+
+def get_table_index_path():
+    global table_index_path_cached
+    if table_index_path_cached is not None:
+        table_index_path_cached
+    user_home_dir = os.path.expanduser('~')
+    packages_path = sublime.packages_path()
+    sublime_user_dir = os.path.join(packages_path, 'User')
+    if os.path.exists(sublime_user_dir):
+        table_index_path_cached = os.path.join(sublime_user_dir, 'rbql_table_index')
+    else:
+        table_index_path_cached = os.path.join(user_home_dir, '.rbql_table_index')
+    return table_index_path_cached
+
+
+def get_table_names_path():
+    global table_names_path_cached
+    if table_names_path_cached is not None:
+        return table_names_path_cached
+    user_home_dir = os.path.expanduser('~')
+    table_names_path_cached = os.path.join(user_home_dir, '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
+    return table_names_path_cached
 
 
 legacy_syntax_names = {
@@ -110,21 +134,6 @@ def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
     if len(result):
         result[-1] = ''
     return result
-
-
-def init_user_data_paths():
-    global table_index_path
-    global table_names_path
-    if table_index_path is not None and table_names_path is not None:
-        return
-    user_home_dir = os.path.expanduser('~')
-    packages_path = sublime.packages_path()
-    sublime_user_dir = os.path.join(packages_path, 'User')
-    if os.path.exists(sublime_user_dir):
-        table_index_path = os.path.join(sublime_user_dir, 'rbql_table_index')
-    else:
-        table_index_path = os.path.join(user_home_dir, '.rbql_table_index')
-    table_names_path = os.path.join(user_home_dir, '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
 
 
 def get_user_color_scheme_path():
@@ -261,9 +270,12 @@ def try_read_index(index_path):
 
 
 def write_index(records, index_path):
-    with open(index_path, 'w') as dst:
-        for record in records:
-            dst.write('\t'.join(record) + '\n')
+    try:
+        with open(index_path, 'w') as dst:
+            for record in records:
+                dst.write('\t'.join(record) + '\n')
+    except Exception:
+        pass
 
 
 def get_index_record(index_path, key):
@@ -275,7 +287,7 @@ def get_index_record(index_path, key):
 
 
 def load_rainbow_params(file_path):
-    record = get_index_record(table_index_path, file_path)
+    record = get_index_record(get_table_index_path(), file_path)
     if record is not None and len(record) >= 3:
         delim, policy = record[1:3]
         delim = index_decode_delim(delim)
@@ -292,6 +304,7 @@ def update_records(records, record_key, new_record):
 
 
 def save_rainbow_params(file_path, delim, policy):
+    table_index_path = get_table_index_path()
     records = try_read_index(table_index_path)
     new_record = [file_path, index_encode_delim(delim), policy, '']
     update_records(records, file_path, new_record)
@@ -443,9 +456,6 @@ def enable_generic_command(view, policy):
     if selection_text.find('\n') != -1:
         sublime.error_message('Error: newline can not be a part of field separator')
         return
-    #if len(selection_text) != 1:
-    #    sublime.error_message('Error. Exactly one separator character should be selected.')
-    #    return
     do_enable_rainbow(view, selection_text, policy, store_settings=True)
 
 
@@ -484,6 +494,7 @@ def on_set_table_name_done(input_line):
         return
     table_name = input_line.strip()
 
+    table_names_path = get_table_names_path()
     records = try_read_index(table_names_path)
     new_record = [table_name, file_path]
     update_records(records, table_name, new_record)
@@ -806,15 +817,14 @@ def autodetect_frequency_based(view, autodetection_dialects):
     return best_dialect
 
 
-def run_rainbow_init(view):
-    if view.settings().get('rainbow_inited') is not None:
+def run_rainbow_autodetect(view):
+    if view.settings().get('rainbow_checked') is not None:
         return
-    init_user_data_paths()
+    view.settings().set('rainbow_checked', True)
 
     max_file_size = get_setting(view, 'rainbow_csv_max_file_size_bytes', 5000000)
     if max_file_size is not None and view.size() > max_file_size:
         return
-    view.settings().set('rainbow_inited', True)
     file_path = view.file_name()
     if file_path is not None:
         delim, policy = load_rainbow_params(file_path)
@@ -854,10 +864,10 @@ def run_rainbow_init(view):
 
 class RainbowAutodetectListener(sublime_plugin.EventListener):
     def on_load(self, view):
-        run_rainbow_init(view)
+        run_rainbow_autodetect(view)
 
     def on_activated(self, view):
-        run_rainbow_init(view)
+        run_rainbow_autodetect(view)
 
 
 def hover_hide_cb():
