@@ -632,6 +632,10 @@ def get_column_color(view, col_num):
     return '#FF0000' # Error handling, should never happen
 
 
+def html_escape(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def show_names_for_line(view, delim, policy, line_region):
     point = line_region.a
     line_text = view.substr(line_region)
@@ -653,7 +657,7 @@ def show_names_for_line(view, delim, policy, line_region):
         hex_color = get_column_color(view, i)
         column_name = status_labels[i * 2]
         space_filling = status_labels[i * 2 + 1].replace(' ', '&nbsp;')
-        html_text += '<span style="color:{}">{}{}</span>'.format(hex_color, column_name, space_filling)
+        html_text += '<span style="color:{}">{}{}</span>'.format(hex_color, html_escape(column_name), space_filling)
     view.show_popup(html_text, location=point, max_width=max_status_width, max_height=100)
 
 
@@ -934,4 +938,4 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             if warning:
                 ui_text += '; This line has quoting error'
             ui_hex_color = get_column_color(self.view, field_num)
-            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, ui_text), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)
+            self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, html_escape(ui_text)), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)
