@@ -418,14 +418,18 @@ def do_enable_rainbow(view, delim, policy, store_settings):
     else:
         remove_sublime_settings(syntax_settings_path)
 
+    rainbow_syntax_file = 'Packages/User/{}'.format(syntax_file_basename)
+    if pre_rainbow_syntax == rainbow_syntax_file:
+        return
+
     if created:
         def set_syntax_async():
-            view.set_syntax_file('Packages/User/{}'.format(syntax_file_basename))
+            view.set_syntax_file(rainbow_syntax_file)
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
         sublime.set_timeout(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
     else:
-        view.set_syntax_file('Packages/User/{}'.format(syntax_file_basename))
+        view.set_syntax_file(rainbow_syntax_file)
     file_path = view.file_name()
     if file_path is not None and store_settings:
         save_rainbow_params(file_path, delim, policy)
