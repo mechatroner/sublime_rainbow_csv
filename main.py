@@ -2,8 +2,7 @@ import os
 import json
 from functools import partial
 
-from urllib.parse import unquote as urllib_unquote
-from urllib.parse import quote as urllib_quote
+import binascii
 
 import sublime_plugin
 import sublime
@@ -34,8 +33,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
-# FIXME slashes in syntax file names: encode with base64 or hex instead
-
+# FIXME tab char in multichar separators is getting saved as-is when saving to get_table_index_path()
 
 def get_table_index_path():
     global table_index_path_cached
@@ -81,7 +79,7 @@ def get_syntax_file_basename(delim, policy):
     for k, v in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v
-    return 'Rainbow_CSV_{}_{}.sublime-syntax'.format(urllib_quote(delim), policy_map[policy])
+    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(binascii.hexlify(delim.encode('utf-8')).decode('ascii'), policy_map[policy])
 
 
 def ensure_syntax_file(delim, policy):
@@ -243,12 +241,14 @@ def adjust_color_scheme(view):
 
 
 def index_decode_delim(delim):
+    # FIXME consider multichar delims
     if delim == 'TAB':
         return '\t'
     return delim
 
 
 def index_encode_delim(delim):
+    # FIXME consider multichar delims
     if delim == '\t':
         return 'TAB'
     return delim
@@ -292,6 +292,8 @@ def load_rainbow_params(file_path):
     record = get_index_record(get_table_index_path(), file_path)
     if record is not None and len(record) >= 3:
         delim, policy = record[1:3]
+        if policy not in ['simple', 'quoted']:
+            return (None, None)
         delim = index_decode_delim(delim)
         return (delim, policy)
     return (None, None)
@@ -357,7 +359,7 @@ def is_plain_text(view):
 def get_dialect_from_grammar_basename(grammar_basename):
     if grammar_basename in legacy_syntax_names_inv:
         return legacy_syntax_names_inv[grammar_basename]
-    start_marker = 'Rainbow_CSV_'
+    start_marker = 'Rainbow_CSV_hex_'
     end_marker = '.sublime-syntax'
     if not grammar_basename.startswith(start_marker) or not grammar_basename.endswith(end_marker):
         return None
@@ -365,7 +367,7 @@ def get_dialect_from_grammar_basename(grammar_basename):
     wpos = encoded_dialect.rfind('_')
     if wpos == -1:
         return None
-    delim = urllib_unquote(encoded_dialect[:wpos])
+    delim = (binascii.unhexlify(encoded_dialect[:wpos].encode('ascii'))).decode('utf-8')
     policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
     if delim is None or policy is None:
         return None
