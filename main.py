@@ -34,10 +34,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
-# FIXME ?@[ - separator failure
-# FIXME ' - separator failure
-# FIXME parse error on hover
-
 
 def get_table_index_path():
     global table_index_path_cached
