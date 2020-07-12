@@ -34,6 +34,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
+# FIXME slashes in syntax file names: encode with base64 or hex instead
+
 
 def get_table_index_path():
     global table_index_path_cached

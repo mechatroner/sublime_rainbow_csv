@@ -1,6 +1,6 @@
 simple_header_template = '''%YAML 1.2
 ---
-name: {}
+name: '{}'
 file_extensions: [{}]
 scope: text.{}
 
@@ -14,7 +14,7 @@ contexts:
 
 standard_header_template = '''%YAML 1.2
 ---
-name: {}
+name: '{}'
 file_extensions: [{}]
 scope: text.{}
 
@@ -67,7 +67,8 @@ def get_syntax_name(delim, policy):
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
         return 'CSV (Rainbow)'
-    return 'Rainbow CSV {} {}'.format(delim, policy)
+    ui_delim = delim.replace('\t', 'tab')
+    return 'Rainbow CSV {} {}'.format(ui_delim, policy)
 
 
 def yaml_escape(data):
@@ -113,7 +114,7 @@ def make_standard_context(delim, context_id, num_contexts, indent='    '):
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, 'Simple')
-    result = simple_header_template.format(name, scope, scope)
+    result = simple_header_template.format(yaml_escape(name), scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
         result += '\n'
@@ -124,7 +125,7 @@ def make_sublime_syntax_simple(delim):
 def make_sublime_syntax_standard(delim):
     scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, 'Standard')
-    result = standard_header_template.format(name, scope, scope)
+    result = standard_header_template.format(yaml_escape(name), scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
         result += '\n'
