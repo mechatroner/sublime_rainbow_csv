@@ -1,7 +1,6 @@
 import os
 import json
 from functools import partial
-
 import binascii
 
 import sublime_plugin
@@ -33,28 +32,18 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
-# FIXME tab char in multichar separators is getting saved as-is when saving to get_table_index_path()
 
 def get_table_index_path():
     global table_index_path_cached
-    if table_index_path_cached is not None:
-        table_index_path_cached
-    user_home_dir = os.path.expanduser('~')
-    packages_path = sublime.packages_path()
-    sublime_user_dir = os.path.join(packages_path, 'User')
-    if os.path.exists(sublime_user_dir):
-        table_index_path_cached = os.path.join(sublime_user_dir, 'rbql_table_index')
-    else:
-        table_index_path_cached = os.path.join(user_home_dir, '.rbql_table_index')
+    if table_index_path_cached is None:
+        table_index_path_cached = os.path.join(sublime.packages_path(), 'User', 'rbql_table_index_hex')
     return table_index_path_cached
 
 
 def get_table_names_path():
     global table_names_path_cached
-    if table_names_path_cached is not None:
-        return table_names_path_cached
-    user_home_dir = os.path.expanduser('~')
-    table_names_path_cached = os.path.join(user_home_dir, '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
+    if table_names_path_cached is None:
+        table_names_path_cached = os.path.join(os.path.expanduser('~'), '.rbql_table_names') # TODO move to Package/User after improving RBQL architecture
     return table_names_path_cached
 
 
@@ -74,12 +63,20 @@ sublime_settings_text = '''{
 }'''
 
 
+def encode_delim(delim):
+    return binascii.hexlify(delim.encode('utf-8')).decode('ascii')
+
+
+def decode_delim(delim):
+    return binascii.unhexlify(delim.encode('ascii')).decode('utf-8')
+
+
 def get_syntax_file_basename(delim, policy):
     assert policy in policy_map.keys()
     for k, v in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v
-    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(binascii.hexlify(delim.encode('utf-8')).decode('ascii'), policy_map[policy])
+    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), policy_map[policy])
 
 
 def ensure_syntax_file(delim, policy):
@@ -231,27 +228,11 @@ def do_adjust_color_scheme(style):
         dst.write(syntax_data)
 
 
-
 def adjust_color_scheme(view):
     try:
         do_adjust_color_scheme(view.style())
     except Exception as e:
         print('Unable to auto adjust color scheme. Unexpected Exception: {}'.format(e))
-
-
-
-def index_decode_delim(delim):
-    # FIXME consider multichar delims
-    if delim == 'TAB':
-        return '\t'
-    return delim
-
-
-def index_encode_delim(delim):
-    # FIXME consider multichar delims
-    if delim == '\t':
-        return 'TAB'
-    return delim
 
 
 def try_read_index(index_path):
@@ -294,7 +275,7 @@ def load_rainbow_params(file_path):
         delim, policy = record[1:3]
         if policy not in ['simple', 'quoted']:
             return (None, None)
-        delim = index_decode_delim(delim)
+        delim = decode_delim(delim)
         return (delim, policy)
     return (None, None)
 
@@ -310,7 +291,7 @@ def update_records(records, record_key, new_record):
 def save_rainbow_params(file_path, delim, policy):
     table_index_path = get_table_index_path()
     records = try_read_index(table_index_path)
-    new_record = [file_path, index_encode_delim(delim), policy, '']
+    new_record = [file_path, encode_delim(delim), policy, '']
     update_records(records, file_path, new_record)
     if len(records) > 100:
         records.pop(0)
@@ -367,7 +348,7 @@ def get_dialect_from_grammar_basename(grammar_basename):
     wpos = encoded_dialect.rfind('_')
     if wpos == -1:
         return None
-    delim = (binascii.unhexlify(encoded_dialect[:wpos].encode('ascii'))).decode('utf-8')
+    delim = decode_delim(encoded_dialect[:wpos])
     policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
     if delim is None or policy is None:
         return None
