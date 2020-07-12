@@ -85,7 +85,7 @@ def ensure_syntax_file(delim, policy):
     syntax_text = auto_syntax.make_sublime_syntax(delim, policy_map[policy])
     try:
         with open(syntax_path) as f:
-            old_syntax_text =  f.read()
+            old_syntax_text = f.read()
             if old_syntax_text == syntax_text:
                 return (name, False)
     except Exception:
