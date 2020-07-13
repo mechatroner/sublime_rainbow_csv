@@ -79,6 +79,10 @@ def get_syntax_file_basename(delim, policy):
     return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), policy_map[policy])
 
 
+def plugin_loaded():
+    pass # FIXME - generate all reasonable syntax files
+
+
 def ensure_syntax_file(delim, policy):
     name = get_syntax_file_basename(delim, policy)
     syntax_path = os.path.join(sublime.packages_path(), 'User', name)
@@ -412,8 +416,8 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
         if auto_adjust_rainbow_colors:
             adjust_color_scheme(view)
-    else:
-        remove_sublime_settings(syntax_settings_path)
+    #else: # FIXME enable after fixing #27
+    #    remove_sublime_settings(syntax_settings_path)
 
     rainbow_syntax_file = 'Packages/User/{}'.format(syntax_file_basename)
     dbg_log(logging_enabled, 'Current syntax file: "{}", New syntax file: "{}"'.format(pre_rainbow_syntax, rainbow_syntax_file))
@@ -427,7 +431,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
         dbg_log(logging_enabled, 'New syntax file created: "{}". Preparing to enable'.format(rainbow_syntax_file))
-        sublime.set_timeout(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
+        sublime.set_timeout_async(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
     else:
         dbg_log(logging_enabled, 'Setting existing syntax file: "{}"'.format(rainbow_syntax_file))
         view.set_syntax_file(rainbow_syntax_file)
