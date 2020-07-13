@@ -46,7 +46,7 @@ def name_normalize(delim):
 
 
 def get_syntax_file_name_old(delim, policy):
-    assert policy in ['Standard', 'Simple']
+    policy = auto_syntax.policy_map[policy]
     if delim == '\t' and policy == 'Simple':
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
@@ -54,8 +54,11 @@ def get_syntax_file_name_old(delim, policy):
     return 'Rainbow CSV {} {}'.format(name_normalize(delim), policy)
 
 
-def write_sublime_syntax(delim, policy, dst_dir):
-    syntax_file_name = get_syntax_file_name_old(delim, policy) + '.sublime-syntax'
+def write_sublime_syntax(delim, policy, dst_dir, old_names):
+    if old_names:
+        syntax_file_name = get_syntax_file_name_old(delim, policy) + '.sublime-syntax'
+    else:
+        syntax_file_name = auto_syntax.get_syntax_file_basename(delim, policy)
     syntax_path = os.path.join(dst_dir, syntax_file_name)
     syntax_text = auto_syntax.make_sublime_syntax(delim, policy)
     with open(syntax_path, 'w') as dst:
@@ -66,17 +69,28 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--delim', help='Delim')
     parser.add_argument('--policy', help='Policy')
+    parser.add_argument('--make_grammars_old', help='make and put grammars into DIR')
     parser.add_argument('--make_grammars_prod', help='make and put grammars into DIR')
     args = parser.parse_args()
 
-    if args.make_grammars_prod:
-        dst_dir = args.make_grammars_prod
+    if args.make_grammars_old:
+        dst_dir = args.make_grammars_old
         delims = get_prod_delims()
         standard_delims = '\t|,;'
         for delim in delims:
             if standard_delims.find(delim) != -1:
-                write_sublime_syntax(delim, 'Standard', dst_dir)
-            write_sublime_syntax(delim, 'Simple', dst_dir)
+                write_sublime_syntax(delim, 'quoted', dst_dir, old_names=True)
+            write_sublime_syntax(delim, 'simple', dst_dir, old_names=True)
+        return
+
+    if args.make_grammars_prod:
+        dst_dir = args.make_grammars_prod
+        delims = get_prod_delims()
+        standard_delims = ',;'
+        for delim in delims:
+            if standard_delims.find(delim) != -1:
+                write_sublime_syntax(delim, 'quoted', dst_dir, old_names=False)
+            write_sublime_syntax(delim, 'simple', dst_dir, old_names=False)
         return
 
     delim = args.delim

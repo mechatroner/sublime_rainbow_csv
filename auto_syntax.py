@@ -1,3 +1,30 @@
+import binascii
+
+
+legacy_syntax_names = {
+    ('\t', 'simple'): 'TSV (Rainbow)',
+    (',', 'quoted'): 'CSV (Rainbow)'
+}
+
+
+policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
+
+
+def encode_delim(delim):
+    return binascii.hexlify(delim.encode('utf-8')).decode('ascii')
+
+
+def decode_delim(delim):
+    return binascii.unhexlify(delim.encode('ascii')).decode('utf-8')
+
+
+def get_syntax_file_basename(delim, policy):
+    for k, v in legacy_syntax_names.items():
+        if (delim, policy) == k:
+            return v + '.sublime-syntax'
+    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), policy_map[policy])
+
+
 simple_header_template = '''%YAML 1.2
 ---
 name: '{}'
@@ -62,13 +89,11 @@ def oniguruma_regular_escape(delim):
 
 
 def get_syntax_name(delim, policy):
-    assert policy in ['Standard', 'Simple']
-    if delim == '\t' and policy == 'Simple':
-        return 'TSV (Rainbow)'
-    if delim == ',' and policy == 'Standard':
-        return 'CSV (Rainbow)'
+    for k, v in legacy_syntax_names.items():
+        if (delim, policy) == k:
+            return v
     ui_delim = delim.replace('\t', 'tab')
-    return 'Rainbow CSV {} {}'.format(ui_delim, policy)
+    return 'Rainbow CSV {} {}'.format(ui_delim, policy_map[policy])
 
 
 def yaml_escape(data):
@@ -113,7 +138,7 @@ def make_standard_context(delim, context_id, num_contexts, indent='    '):
 
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn' + ''.join([str(ord(d)) for d in delim])
-    name = get_syntax_name(delim, 'Simple')
+    name = get_syntax_name(delim, 'simple')
     result = simple_header_template.format(yaml_escape(name), scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
@@ -124,7 +149,7 @@ def make_sublime_syntax_simple(delim):
 
 def make_sublime_syntax_standard(delim):
     scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
-    name = get_syntax_name(delim, 'Standard')
+    name = get_syntax_name(delim, 'quoted')
     result = standard_header_template.format(yaml_escape(name), scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
@@ -134,8 +159,8 @@ def make_sublime_syntax_standard(delim):
 
 
 def make_sublime_syntax(delim, policy):
-    assert policy in ['Standard', 'Simple']
-    if policy == 'Standard':
+    assert policy in policy_map.keys()
+    if policy == 'quoted':
         return make_sublime_syntax_standard(delim)
     else:
         return make_sublime_syntax_simple(delim)

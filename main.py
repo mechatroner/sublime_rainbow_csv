@@ -1,7 +1,6 @@
 import os
 import json
 from functools import partial
-import binascii
 
 import sublime_plugin
 import sublime
@@ -47,15 +46,10 @@ def get_table_names_path():
     return table_names_path_cached
 
 
-legacy_syntax_names = {
-    ('\t', 'simple'): 'TSV (Rainbow).sublime-syntax',
-    (',', 'quoted'): 'CSV (Rainbow).sublime-syntax'
-}
-legacy_syntax_names_inv = {v: k for k, v in legacy_syntax_names.items()}
+legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, v in auto_syntax.legacy_syntax_names.items()}
 
 
-policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
-policy_map_inv = {v: k for k, v in policy_map.items()}
+policy_map_inv = {v: k for k, v in auto_syntax.policy_map.items()}
 
 
 sublime_settings_text = '''{
@@ -63,38 +57,18 @@ sublime_settings_text = '''{
 }'''
 
 
-def encode_delim(delim):
-    return binascii.hexlify(delim.encode('utf-8')).decode('ascii')
-
-
-def decode_delim(delim):
-    return binascii.unhexlify(delim.encode('ascii')).decode('utf-8')
-
-
-def get_syntax_file_basename(delim, policy):
-    assert policy in policy_map.keys()
-    for k, v in legacy_syntax_names.items():
-        if (delim, policy) == k:
-            return v
-    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), policy_map[policy])
-
-
-def plugin_loaded():
-    pass # FIXME - generate all reasonable syntax files
-
-
 def ensure_syntax_file(delim, policy):
-    name = get_syntax_file_basename(delim, policy)
+    name = auto_syntax.get_syntax_file_basename(delim, policy)
     syntax_path = os.path.join(sublime.packages_path(), 'User', name)
-    syntax_text = auto_syntax.make_sublime_syntax(delim, policy_map[policy])
+    syntax_text = auto_syntax.make_sublime_syntax(delim, policy).encode('utf-8')
     try:
-        with open(syntax_path) as f:
+        with open(syntax_path, 'rb') as f:
             old_syntax_text = f.read()
             if old_syntax_text == syntax_text:
                 return (name, False)
     except Exception:
         pass
-    with open(syntax_path, 'w') as dst:
+    with open(syntax_path, 'wb') as dst:
         dst.write(syntax_text)
     return (name, True)
 
@@ -279,7 +253,7 @@ def load_rainbow_params(file_path):
         delim, policy = record[1:3]
         if policy not in ['simple', 'quoted']:
             return (None, None)
-        delim = decode_delim(delim)
+        delim = auto_syntax.decode_delim(delim)
         return (delim, policy)
     return (None, None)
 
@@ -295,7 +269,7 @@ def update_records(records, record_key, new_record):
 def save_rainbow_params(file_path, delim, policy):
     table_index_path = get_table_index_path()
     records = try_read_index(table_index_path)
-    new_record = [file_path, encode_delim(delim), policy, '']
+    new_record = [file_path, auto_syntax.encode_delim(delim), policy, '']
     update_records(records, file_path, new_record)
     if len(records) > 100:
         records.pop(0)
@@ -352,7 +326,7 @@ def get_dialect_from_grammar_basename(grammar_basename):
     wpos = encoded_dialect.rfind('_')
     if wpos == -1:
         return None
-    delim = decode_delim(encoded_dialect[:wpos])
+    delim = auto_syntax.decode_delim(encoded_dialect[:wpos])
     policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
     if delim is None or policy is None:
         return None
@@ -392,6 +366,8 @@ def remove_sublime_settings(syntax_settings_path):
 def dbg_log(logging_enabled, msg):
     if logging_enabled:
         print(msg)
+    with open(os.path.join(sublime.packages_path(), 'User', 'rainbow_csv_debug.log'), 'a') as f:
+        f.write(msg + '\n')
 
 
 def do_enable_rainbow(view, delim, policy, store_settings):
@@ -431,7 +407,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
         dbg_log(logging_enabled, 'New syntax file created: "{}". Preparing to enable'.format(rainbow_syntax_file))
-        sublime.set_timeout_async(set_syntax_async, 1000 * 2) # We can actually decrease this to 1000 and it should be OK too
+        sublime.set_timeout_async(set_syntax_async, 2500) # We can actually decrease this to 1000 and it should be OK too
     else:
         dbg_log(logging_enabled, 'Setting existing syntax file: "{}"'.format(rainbow_syntax_file))
         view.set_syntax_file(rainbow_syntax_file)
@@ -924,3 +900,9 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 ui_text += '; This line has quoting error'
             ui_hex_color = get_column_color(self.view, field_num)
             self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, html_escape(ui_text)), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)
+
+
+def plugin_loaded():
+    pass # We can run some code here at the plugin initialization stage
+
+
