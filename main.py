@@ -48,13 +48,7 @@ def get_table_names_path():
 
 legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, v in auto_syntax.legacy_syntax_names.items()}
 
-
 policy_map_inv = {v: k for k, v in auto_syntax.policy_map.items()}
-
-
-sublime_settings_text = '''{
-    "color_scheme": "RainbowCSV.sublime-color-scheme"
-}'''
 
 
 def ensure_syntax_file(delim, policy):
@@ -366,8 +360,8 @@ def remove_sublime_settings(syntax_settings_path):
 def dbg_log(logging_enabled, msg):
     if logging_enabled:
         print(msg)
-    with open(os.path.join(sublime.packages_path(), 'User', 'rainbow_csv_debug.log'), 'a') as f:
-        f.write(msg + '\n')
+        with open(os.path.join(sublime.packages_path(), 'User', 'rainbow_csv_debug.log'), 'a') as f:
+            f.write(msg + '\n')
 
 
 def do_enable_rainbow(view, delim, policy, store_settings):
