@@ -1,0 +1,81 @@
+%YAML 1.2
+---
+name: 'TSV (Rainbow)'
+file_extensions: [rbcsmn9]
+scope: text.rbcsmn9
+
+
+contexts:
+    main:
+        - match: '^'
+          push: rainbow1
+
+    rainbow1:
+        - meta_scope: rainbow1
+        - match: '\t'
+          set: rainbow2
+        - match: '$'
+          pop: true
+
+    rainbow2:
+        - meta_scope: keyword.rainbow2
+        - match: '\t'
+          set: rainbow3
+        - match: '$'
+          pop: true
+
+    rainbow3:
+        - meta_scope: entity.name.rainbow3
+        - match: '\t'
+          set: rainbow4
+        - match: '$'
+          pop: true
+
+    rainbow4:
+        - meta_scope: comment.rainbow4
+        - match: '\t'
+          set: rainbow5
+        - match: '$'
+          pop: true
+
+    rainbow5:
+        - meta_scope: string.rainbow5
+        - match: '\t'
+          set: rainbow6
+        - match: '$'
+          pop: true
+
+    rainbow6:
+        - meta_scope: entity.name.tag.rainbow6
+        - match: '\t'
+          set: rainbow7
+        - match: '$'
+          pop: true
+
+    rainbow7:
+        - meta_scope: storage.type.rainbow7
+        - match: '\t'
+          set: rainbow8
+        - match: '$'
+          pop: true
+
+    rainbow8:
+        - meta_scope: support.rainbow8
+        - match: '\t'
+          set: rainbow9
+        - match: '$'
+          pop: true
+
+    rainbow9:
+        - meta_scope: constant.language.rainbow9
+        - match: '\t'
+          set: rainbow10
+        - match: '$'
+          pop: true
+
+    rainbow10:
+        - meta_scope: variable.language.rainbow10
+        - match: '\t'
+          set: rainbow1
+        - match: '$'
+          pop: true

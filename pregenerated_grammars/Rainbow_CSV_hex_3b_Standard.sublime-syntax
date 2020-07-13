@@ -1,0 +1,109 @@
+%YAML 1.2
+---
+name: 'Rainbow CSV ; Standard'
+file_extensions: [rbcstn59]
+scope: text.rbcstn59
+
+
+contexts:
+    main:
+        - match: '^'
+          push: rainbow1
+
+    quoted_field:
+        - match: '""'
+          scope: meta.rainbow.double-quote-escaped
+        - match: '"'
+          pop: true
+        - match: '$'
+          pop: true
+
+    rainbow1:
+        - meta_scope: rainbow1
+        - match: ';'
+          set: rainbow2
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow2:
+        - meta_scope: keyword.rainbow2
+        - match: ';'
+          set: rainbow3
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow3:
+        - meta_scope: entity.name.rainbow3
+        - match: ';'
+          set: rainbow4
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow4:
+        - meta_scope: comment.rainbow4
+        - match: ';'
+          set: rainbow5
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow5:
+        - meta_scope: string.rainbow5
+        - match: ';'
+          set: rainbow6
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow6:
+        - meta_scope: entity.name.tag.rainbow6
+        - match: ';'
+          set: rainbow7
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow7:
+        - meta_scope: storage.type.rainbow7
+        - match: ';'
+          set: rainbow8
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow8:
+        - meta_scope: support.rainbow8
+        - match: ';'
+          set: rainbow9
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow9:
+        - meta_scope: constant.language.rainbow9
+        - match: ';'
+          set: rainbow10
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
+
+    rainbow10:
+        - meta_scope: variable.language.rainbow10
+        - match: ';'
+          set: rainbow1
+        - match: '$'
+          pop: true
+        - match: '"'
+          push: quoted_field
