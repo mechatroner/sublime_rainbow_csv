@@ -52,19 +52,25 @@ policy_map_inv = {v: k for k, v in auto_syntax.policy_map.items()}
 
 
 def ensure_syntax_file(delim, policy):
+    pregenerated_delims = auto_syntax.get_pregenerated_delims()
     name = auto_syntax.get_syntax_file_basename(delim, policy)
+    if policy == 'simple' and delim in pregenerated_delims:
+        return (name, True, False)
+    if policy == 'quoted' and delim in [';', ',']:
+        return (name, True, False)
+
     syntax_path = os.path.join(sublime.packages_path(), 'User', name)
     syntax_text = auto_syntax.make_sublime_syntax(delim, policy).encode('utf-8')
     try:
         with open(syntax_path, 'rb') as f:
             old_syntax_text = f.read()
             if old_syntax_text == syntax_text:
-                return (name, False)
+                return (name, False, False)
     except Exception:
         pass
     with open(syntax_path, 'wb') as dst:
         dst.write(syntax_text)
-    return (name, True)
+    return (name, False, True)
 
 
 def get_field_by_line_position(fields, delim_size, query_pos):
@@ -374,9 +380,13 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         view.settings().set('pre_rainbow_syntax', pre_rainbow_syntax)
         view.settings().set('rainbow_mode', True) # We use this as F5 key condition
 
-    syntax_file_basename, created = ensure_syntax_file(delim, policy)
-    dbg_log(logging_enabled, 'Syntax file basename: "{}", Created: {}'.format(syntax_file_basename, created))
-    syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
+    syntax_file_basename, pregenerated, created = ensure_syntax_file(delim, policy)
+    dbg_log(logging_enabled, 'Syntax file basename: "{}", Pregenerated: {}, Created: {}'.format(syntax_file_basename, pregenerated, created))
+
+    if pregenerated:
+        syntax_settings_path = os.path.join(sublime.packages_path(), 'rainbow_csv', 'pregenerated_grammars', get_syntax_settings_file_basename(syntax_file_basename))
+    else:
+        syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
 
     use_custom_rainbow_colors = get_setting(view, 'use_custom_rainbow_colors', False)
 
@@ -389,7 +399,10 @@ def do_enable_rainbow(view, delim, policy, store_settings):
     #else: # FIXME enable after fixing #27
     #    remove_sublime_settings(syntax_settings_path)
 
-    rainbow_syntax_file = 'Packages/User/{}'.format(syntax_file_basename)
+    if pregenerated:
+        rainbow_syntax_file = 'Packages/rainbow_csv/pregenerated_grammars/{}'.format(syntax_file_basename)
+    else:
+        rainbow_syntax_file = 'Packages/User/{}'.format(syntax_file_basename)
     dbg_log(logging_enabled, 'Current syntax file: "{}", New syntax file: "{}"'.format(pre_rainbow_syntax, rainbow_syntax_file))
     if pre_rainbow_syntax == rainbow_syntax_file:
         return

@@ -1,4 +1,5 @@
 import binascii
+import re
 
 
 legacy_syntax_names = {
@@ -165,3 +166,9 @@ def make_sublime_syntax(delim, policy):
     else:
         return make_sublime_syntax_simple(delim)
 
+
+def get_pregenerated_delims():
+    delims = [chr(i) for i in range(32, 127)]
+    delims.append('\t')
+    delims = [delim for delim in delims if re.match('^[a-zA-Z0-9]$', delim) is None]
+    return delims

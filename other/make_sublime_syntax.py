@@ -12,13 +12,6 @@ sys.path.insert(0, parent_dir)
 import auto_syntax
 
 
-def get_prod_delims():
-    delims = [chr(i) for i in range(32, 127)]
-    delims.append('\t')
-    delims = [delim for delim in delims if re.match('^[a-zA-Z0-9]$', delim) is None]
-    return delims
-            
-
 def name_normalize(delim):
     if delim == '<':
         return 'less-than'
@@ -75,7 +68,7 @@ def main():
 
     if args.make_grammars_old:
         dst_dir = args.make_grammars_old
-        delims = get_prod_delims()
+        delims = auto_syntax.get_pregenerated_delims()
         standard_delims = '\t|,;'
         for delim in delims:
             if standard_delims.find(delim) != -1:
@@ -85,7 +78,7 @@ def main():
 
     if args.make_grammars_prod:
         dst_dir = args.make_grammars_prod
-        delims = get_prod_delims()
+        delims = auto_syntax.get_pregenerated_delims()
         standard_delims = ',;'
         for delim in delims:
             if standard_delims.find(delim) != -1:
