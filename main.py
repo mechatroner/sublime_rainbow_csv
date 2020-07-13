@@ -373,6 +373,7 @@ def dbg_log(logging_enabled, msg):
 def do_enable_rainbow(view, delim, policy, store_settings):
     file_path = view.file_name()
     logging_enabled = get_setting(view, 'enable_debug_logging', False)
+    dbg_log(logging_enabled, '=======================================')
     dbg_log(logging_enabled, 'Enabling rainbow higlighting for {}: "{}", {}'.format(file_path, delim, policy))
 
     pre_rainbow_syntax = view.settings().get('syntax')
