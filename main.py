@@ -31,6 +31,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
+# FIXME merge Enable Standard and Enable Simple into Enable [Auto] button. leave simple/standard as commands and update the docs, document Standard/Simple as Commands
+
 
 def get_table_index_path():
     global table_index_path_cached
@@ -371,6 +373,8 @@ def dbg_log(logging_enabled, msg):
 
 
 def do_enable_rainbow(view, delim, policy, store_settings):
+    if not delim or not len(delim):
+        return
     file_path = view.file_name()
     logging_enabled = get_setting(view, 'enable_debug_logging', False)
     dbg_log(logging_enabled, '=======================================')
@@ -443,6 +447,9 @@ def enable_generic_command(view, policy):
         return
     region = selection[0]
     selection_text = view.substr(region)
+    if not selection_text or not len(selection_text):
+        sublime.error_message('Error: Unable to use an empty string as a separator')
+        return
     if policy == 'quoted' and selection_text not in [';', ',']:
         sublime.error_message('Error: Standard dialect is supported only with comma [,] and semicolon [;] separators')
         return
