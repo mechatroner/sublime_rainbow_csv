@@ -33,6 +33,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME merge Enable Standard and Enable Simple into Enable [Auto] button. leave simple/standard as commands and update the docs, document Standard/Simple as Commands
 
+# FIXME in the plugin_loaded() method - check if custom colors were enabled and if they were - create custom settings file, otherwise - delete them
 
 def get_table_index_path():
     global table_index_path_cached
@@ -450,7 +451,13 @@ def enable_generic_command(view, policy):
     if not selection_text or not len(selection_text):
         sublime.error_message('Error: Unable to use an empty string as a separator')
         return
+    if policy == 'auto':
+        if selection_text in [';', ',']:
+            policy = 'quoted'
+        else:
+            policy = 'simple'
     if policy == 'quoted' and selection_text not in [';', ',']:
+        # TODO We can actually get rid of this check, since the policy is now "auto" by default
         sublime.error_message('Error: Standard dialect is supported only with comma [,] and semicolon [;] separators')
         return
     if selection_text.find('\n') != -1:
@@ -459,7 +466,7 @@ def enable_generic_command(view, policy):
     do_enable_rainbow(view, selection_text, policy, store_settings=True)
 
 
-class EnableStandardCommand(sublime_plugin.TextCommand):
+class EnableQuotedCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         enable_generic_command(self.view, 'quoted')
 
@@ -467,6 +474,11 @@ class EnableStandardCommand(sublime_plugin.TextCommand):
 class EnableSimpleCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         enable_generic_command(self.view, 'simple')
+
+
+class EnableAutoCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        enable_generic_command(self.view, 'auto')
 
 
 class DisableCommand(sublime_plugin.TextCommand):

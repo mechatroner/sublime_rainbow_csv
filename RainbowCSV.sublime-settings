@@ -9,12 +9,18 @@
     // Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
     "enable_rainbow_csv_autodetect": true,
 
+
     // List of CSV dialects to autodetect.
+    // "simple" - separators CAN NOT be escaped in a double quoted field, double quotes are ignored
+    // "quoted" - separators CAN be escaped in a double quoted field.
+    // Separators can consist of more than one character, e.g. ": " or "~#~"
     // If "enable_rainbow_csv_autodetect" is set to false this setting is ignored
     "rainbow_csv_autodetect_dialects": [["\t", "simple"], [",", "quoted"], [";", "quoted"], ["|", "simple"]],
 
+
     // Use custom high-contrast rainbow colors instead of colors provided by your current color scheme
     "use_custom_rainbow_colors": false,
+
 
     // Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme
     // Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.
@@ -42,6 +48,9 @@
     // * csv: is Excel-compatible and allows quoted commas.
     "rbql_output_format": "input",
 
-    // Enable logging to debug the extension
+
+    // Enable logging to debug the extension. To view the output you can either
+    // 1. Click "View" -> "Show Console"
+    // 2. Click "Preferences" -> "Browse Packages...", And then open "User/rainbow_csv_debug.log"
     "enable_debug_logging": false,
 }

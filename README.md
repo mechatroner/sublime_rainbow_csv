@@ -30,10 +30,6 @@ Rainbow CSV also lets you execute SQL-like queries in RBQL language, see the dem
 
 To Run RBQL query press **F5** or select "Rainbow CSV" -> "Run RBQL query" option from the file context menu.  
 
-#### Difference between "Standard" and "Simple" dialects
-When manually enabling rainbow highlighting from the context menu, you have to choose between "Standard" and "Simple" dialect.  
-* __Standard dialect__ will treat quoted separator as a single field. E.g. line `sell,"15,128",23%` will be treated as 3 columns, because the second comma is quoted. This dialect is used by Excel.  
-* __Simple dialect__ doesn't care about double quotes: the number of highlighted fields is always N + 1 where N is the number of separators.  
 
 ### Key mappings
 
@@ -42,6 +38,14 @@ When manually enabling rainbow highlighting from the context menu, you have to c
 |**F5**                    | Start query editing for the current CSV file       |
 
 ### Commands
+
+#### Rainbow CSV: Enable Simple
+Before running the command you need to select the separator (single or multiple characters) with your cursor
+Set the selected character as the separator and enables syntax highlighting. Sublime will generate the syntax file if it doesn't exist.
+Simple dialect completely ignores double quotes: i.e. separators can not be escaped in double quoted fields
+
+#### Rainbow CSV: Enable Standard
+Same as the _Enable Simple_ command, but separators CAN be escaped in double quoted fields.
 
 #### Rainbow CSV: CSVLint
 The linter checks the following:  
@@ -67,6 +71,8 @@ To adjust plugin configuration:
 
 
 ### Configuration parameters
+
+To configure the extension, click "Preferences" -> "Package Settings" -> "Rainbow CSV" -> "Settings"
 
 #### "enable_rainbow_csv_autodetect"
 Enable content-based separator autodetection. 

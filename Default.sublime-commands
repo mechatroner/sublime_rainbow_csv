@@ -3,6 +3,8 @@
     { "caption": "Rainbow CSV: Align CSV columns with spaces", "command": "align" },
     { "caption": "Rainbow CSV: Shrink CSV table by trimming spaces from fields", "command": "shrink" },
     { "caption": "Rainbow CSV: CSVLint", "command": "csv_lint" },
+    { "caption": "Rainbow CSV: Enable Simple", "command": "enable_simple" },
+    { "caption": "Rainbow CSV: Enable Quoted", "command": "enable_quoted" },
     {
       "caption": "Rainbow CSV Settings",
       "command": "edit_settings",
