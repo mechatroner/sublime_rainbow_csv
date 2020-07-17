@@ -254,7 +254,7 @@ def load_rainbow_params(file_path):
     record = get_index_record(get_table_index_path(), file_path)
     if record is not None and len(record) >= 3:
         delim, policy = record[1:3]
-        if policy not in ['simple', 'quoted']:
+        if policy not in ['simple', 'quoted', 'disabled']:
             return (None, None)
         delim = auto_syntax.decode_delim(delim)
         return (delim, policy)
@@ -438,7 +438,7 @@ def do_disable_rainbow(view):
     view.settings().erase('rainbow_mode')
     file_path = view.file_name()
     if file_path is not None:
-        save_rainbow_params(file_path, 'disabled', '')
+        save_rainbow_params(file_path, '', 'disabled')
 
 
 def enable_generic_command(view, policy):
@@ -844,7 +844,9 @@ def run_rainbow_autodetect(view):
     file_path = view.file_name()
     if file_path is not None:
         delim, policy = load_rainbow_params(file_path)
-        if delim == 'disabled':
+        if policy == 'disabled':
+            return
+        if delim == 'disabled': # Backward compatibility. TODO remove this condition after July 2021
             return
         if delim is not None:
             do_enable_rainbow(view, delim, policy, store_settings=False)
