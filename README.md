@@ -281,11 +281,13 @@ And if you are doing math operation you can modify your query like this, example
 
 RBQL parses SQL-like user query, generates new Python or JavaScript code and executes it.  
 
-Explanation of simplified Python version of RBQL algorithm by example.
-1. User enters the following query, which is stored as a string _Q_:
+Explanation of simplified Python version of RBQL algorithm by example:  
+
+1. User enters the following query, which is stored as a string _Q_  
 ```
     SELECT a3, int(a4) + 100, len(a2) WHERE a1 != 'SELL'
 ```
+
 2. RBQL replaces all `a{i}` substrings in the query string _Q_ with `a[{i - 1}]` substrings. The result is the following string:
 ```
     Q = "SELECT a[2], int(a[3]) + 100, len(a[1]) WHERE a[0] != 'SELL'"
