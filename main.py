@@ -376,6 +376,24 @@ def dbg_log(logging_enabled, msg):
             f.write(msg + '\n')
 
 
+
+def set_syntax_with_timeout(view, syntax_file, logging_enabled, timeout):
+    # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
+    # And shows an error (highlighting would work though, but the error is really ugly and confusing)
+    # Using workaround suggested here: https://github.com/sublimehq/sublime_text/issues/3477
+    if timeout > 2000:
+        sublime.error_message('Timeout. Unable to set the generated syntax: {}. You can try to re-open the file or restart Sublime. If it doesn\'t work please open a ticket'.format(syntax_file))
+        return
+    current_syntax_files = sublime.find_resources('*Rainbow_CSV_hex_*.sublime-syntax')
+    for f in current_syntax_files:
+        if f == syntax_file:
+            dbg_log(logging_enabled, 'Syntax file found: {}, enabling'.format(syntax_file))
+            view.set_syntax_file(syntax_file)
+            return
+    callback_fn = partial(set_syntax_with_timeout, view, syntax_file, logging_enabled, timeout * 2)
+    sublime.set_timeout(callback_fn, timeout)
+
+
 def do_enable_rainbow(view, delim, policy, store_settings):
     if not delim or not len(delim):
         return
@@ -417,13 +435,8 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         return
 
     if created:
-        def set_syntax_async():
-            dbg_log(logging_enabled, 'In callback. Setting rainbow syntax file to: "{}"'.format(rainbow_syntax_file))
-            view.set_syntax_file(rainbow_syntax_file)
-        # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
-        # And shows an error (highlighting would work though, but the error is really ugly and confusing)
         dbg_log(logging_enabled, 'New syntax file created: "{}". Preparing to enable'.format(rainbow_syntax_file))
-        sublime.set_timeout_async(set_syntax_async, 2500) # We can actually decrease this to 1000 and it should be OK too
+        set_syntax_with_timeout(view, rainbow_syntax_file, logging_enabled, 1)
     else:
         dbg_log(logging_enabled, 'Setting existing syntax file: "{}"'.format(rainbow_syntax_file))
         view.set_syntax_file(rainbow_syntax_file)
