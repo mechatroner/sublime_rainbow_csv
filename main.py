@@ -31,9 +31,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
 
-# FIXME merge Enable Standard and Enable Simple into Enable [Auto] button. leave simple/standard as commands and update the docs, document Standard/Simple as Commands
-
 # FIXME in the plugin_loaded() method - check if custom colors were enabled and if they were - create custom settings file, otherwise - delete them
+
 
 def get_table_index_path():
     global table_index_path_cached
@@ -315,7 +314,11 @@ def get_document_header(view, delim, policy):
 
 def is_plain_text(view):
     syntax = view.settings().get('syntax')
-    return syntax.find('Plain text.tmLanguage') != -1
+    if syntax.find('Plain text.tmLanguage') != -1:
+        return True
+    if syntax.find('Plain Text (CSV).sublime-syntax') != -1: # Provided by "A File Icon" package
+        return True
+    return False
 
 
 def get_dialect_from_grammar_basename(grammar_basename):
