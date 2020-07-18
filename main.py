@@ -423,7 +423,8 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
         # And shows an error (highlighting would work though, but the error is really ugly and confusing)
         dbg_log(logging_enabled, 'New syntax file created: "{}". Preparing to enable'.format(rainbow_syntax_file))
-        sublime.set_timeout_async(set_syntax_async, 2500) # We can actually decrease this to 1000 and it should be OK too
+        view.set_syntax_file(rainbow_syntax_file) # This will trigger an error
+        #sublime.set_timeout_async(set_syntax_async, 2500) # We can actually decrease this to 1000 and it should be OK too
     else:
         dbg_log(logging_enabled, 'Setting existing syntax file: "{}"'.format(rainbow_syntax_file))
         view.set_syntax_file(rainbow_syntax_file)
