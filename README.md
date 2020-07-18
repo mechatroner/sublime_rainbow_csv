@@ -45,7 +45,7 @@ Set the selected character as the separator and enables syntax highlighting. Sub
 Simple dialect completely ignores double quotes: i.e. separators can not be escaped in double quoted fields
 
 #### Rainbow CSV: Enable Standard
-Same as the _Enable Simple_ command, but separators CAN be escaped in double quoted fields.
+Same as the _Enable Simple_ command, but separators can be escaped in double quoted fields.
 
 #### Rainbow CSV: CSVLint
 The linter checks the following:  
@@ -180,10 +180,10 @@ RBQL for CSV files provides the following variables which you can use in your qu
    Description: Number of fields in the current record  
 * _a.name_, _b.Person_age_, ... _a.{Good_alphanumeric_column_name}_  
    Variable type: **string**  
-   Description: Value of the field referenced by it's "name". You can use this notation if the field in the first (header) CSV line has a "good" alphanumeric name  
+   Description: Value of the field referenced by its "name". You can use this notation if the field in the first (header) CSV line has a "good" alphanumeric name  
 * _a["object id"]_, _a['9.12341234']_, _b["%$ !! 10 20"]_ ... _a["Arbitrary column name!"]_  
    Variable type: **string**  
-   Description: Value of the field referenced by it's "name". You can use this notation to reference fields by arbitrary values in the first (header) CSV line, even when there is no header at all  
+   Description: Value of the field referenced by its "name". You can use this notation to reference fields by arbitrary values in the first (header) CSV line, even when there is no header at all  
 
 
 #### Notes:
@@ -212,7 +212,7 @@ There is a workaround for the limitation above for _ARRAY_AGG_ function which su
 
 ### JOIN statements
 
-Join table B can be referenced either by it's file path or by it's name - an arbitary string which user should provide before executing the JOIN query.  
+Join table B can be referenced either by its file path or by its name - an arbitrary string which the user should provide before executing the JOIN query.  
 RBQL supports _STRICT LEFT JOIN_ which is like _LEFT JOIN_, but generates an error if any key in left table "A" doesn't have exactly one matching key in the right table "B".  
 Limitation: _JOIN_ statements can't contain Python/JS expressions and must have the following form: _<JOIN\_KEYWORD> (/path/to/table.tsv | table_name ) ON a... == b... [AND a... == b... [AND ... ]]_
 
@@ -269,7 +269,7 @@ You can define custom functions and/or import libraries in two special files:
 
 ### FAQ
 
-#### How do I skip header record in CSV files?
+#### How do I skip the header record in a CSV file?
 
 You can use the following trick: add `... where NR > 1 ...` to your query  
 
@@ -283,7 +283,7 @@ RBQL parses SQL-like user query, generates new Python or JavaScript code and exe
 
 Explanation of simplified Python version of RBQL algorithm by example:  
 
-1. User enters the following query, which is stored as a string _Q_  
+1. The user enters the following query, which is stored as a string _Q_  
 ```
     SELECT a3, int(a4) + 100, len(a2) WHERE a1 != 'SELL'
 ```
@@ -327,6 +327,18 @@ Adding support of TOP/LIMIT keywords is trivial and to support "ORDER BY" we can
 
 
 ### References
+
+#### Rainbow CSV and similar plugins in other editors:
+
+* Rainbow CSV extension in [Vim](https://github.com/mechatroner/rainbow_csv)
+* Rainbow CSV extension in [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=mechatroner.rainbow-csv)
+* rainbow-csv package in [Atom](https://atom.io/packages/rainbow-csv)
+* rainbow_csv plugin in [gedit](https://github.com/mechatroner/gtk_gedit_rainbow_csv) - doesn't support quoted commas in csv
+* rainbow_csv_4_nedit in [NEdit](https://github.com/DmitTrix/rainbow_csv_4_nedit)
+* CSV highlighting in [Nano](https://github.com/scopatz/nanorc)
+* Rainbow CSV in [IntelliJ IDEA](https://plugins.jetbrains.com/plugin/12896-rainbow-csv/)
+
+#### RBQL:
 
 * [RBQL: Official Site](https://rbql.org/)
 * RBQL is integrated with Rainbow CSV extensions in [Vim](https://github.com/mechatroner/rainbow_csv), [VSCode](https://marketplace.visualstudio.com/items?itemName=mechatroner.rainbow-csv), [Sublime Text](https://packagecontrol.io/packages/rainbow_csv) and [Atom](https://atom.io/packages/rainbow-csv) editors.
