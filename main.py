@@ -382,7 +382,8 @@ def set_syntax_with_timeout(view, syntax_file, logging_enabled, timeout):
     # And shows an error (highlighting would work though, but the error is really ugly and confusing)
     # Using workaround suggested here: https://github.com/sublimehq/sublime_text/issues/3477
     if timeout > 2000:
-        sublime.error_message('Timeout. Unable to set the generated syntax: {}. You can try to re-open the file or restart Sublime. If it doesn\'t work please open a ticket'.format(syntax_file))
+        dbg_log(logging_enabled, 'Timeout exceeded. Setting the syntax file "{}" anyway.'.format(syntax_file))
+        view.set_syntax_file(syntax_file) # Try to set the syntax file anyway, this can actually work after producing an ugly error message
         return
     current_syntax_files = sublime.find_resources('*Rainbow_CSV_hex_*.sublime-syntax')
     for f in current_syntax_files:
