@@ -29,7 +29,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO support comment lines
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
 
-# FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator
+# FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator. Problem - will need to add 'whitespace' dialect everywhere
 
 # FIXME in the plugin_loaded() method - check if custom colors were enabled and if they were - create custom settings file, otherwise - delete them
 
@@ -50,7 +50,7 @@ def get_table_names_path():
 
 legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, v in auto_syntax.legacy_syntax_names.items()}
 
-policy_map_inv = {v: k for k, v in auto_syntax.policy_map.items()}
+filename_policy_map_inv = {v: k for k, v in auto_syntax.filename_policy_map.items()}
 
 
 def ensure_syntax_file(delim, policy):
@@ -333,7 +333,7 @@ def get_dialect_from_grammar_basename(grammar_basename):
     if wpos == -1:
         return None
     delim = auto_syntax.decode_delim(encoded_dialect[:wpos])
-    policy = policy_map_inv.get(encoded_dialect[wpos + 1:], None)
+    policy = filename_policy_map_inv.get(encoded_dialect[wpos + 1:], None)
     if delim is None or policy is None:
         return None
     return (delim, policy)

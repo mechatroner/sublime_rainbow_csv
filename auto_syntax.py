@@ -8,7 +8,7 @@ legacy_syntax_names = {
 }
 
 
-policy_map = {'simple': 'Simple', 'quoted': 'Standard'}
+filename_policy_map = {'simple': 'Simple', 'quoted': 'Standard', 'quoted_rfc': 'quoted_rfc'}
 
 
 def encode_delim(delim):
@@ -23,7 +23,7 @@ def get_syntax_file_basename(delim, policy):
     for k, v in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v + '.sublime-syntax'
-    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), policy_map[policy])
+    return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), filename_policy_map[policy])
 
 
 simple_header_template = '''%YAML 1.2
@@ -94,7 +94,9 @@ def get_syntax_name(delim, policy):
         if (delim, policy) == k:
             return v
     ui_delim = delim.replace('\t', 'tab')
-    return 'Rainbow CSV {} {}'.format(ui_delim, policy_map[policy])
+
+    hr_policy_map = {'simple': 'Simple', 'quoted': 'Standard', 'quoted_rfc': 'RFC'}
+    return 'Rainbow CSV {} {}'.format(ui_delim, hr_policy_map[policy])
 
 
 def yaml_escape(data):
@@ -148,9 +150,9 @@ def make_sublime_syntax_simple(delim):
     return result
 
 
-def make_sublime_syntax_standard(delim):
+def make_sublime_syntax_standard(delim, policy):
     scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
-    name = get_syntax_name(delim, 'quoted')
+    name = get_syntax_name(delim, policy)
     result = standard_header_template.format(yaml_escape(name), scope, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
@@ -160,9 +162,11 @@ def make_sublime_syntax_standard(delim):
 
 
 def make_sublime_syntax(delim, policy):
-    assert policy in policy_map.keys()
+    assert policy in filename_policy_map.keys()
     if policy == 'quoted':
-        return make_sublime_syntax_standard(delim)
+        return make_sublime_syntax_standard(delim, policy)
+    elif policy == 'quoted_rfc':
+        return make_sublime_syntax_standard(delim, policy)
     else:
         return make_sublime_syntax_simple(delim)
 
