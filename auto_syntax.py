@@ -57,9 +57,9 @@ contexts:
           scope: meta.rainbow.double-quote-escaped
         - match: '"'
           pop: true
-        - match: '$'
-          pop: true
 '''
+
+non_rfc_endline_rule = '''        - match: '$'\n          pop: true\n'''
 
 
 rainbow_scope_names = [
@@ -151,9 +151,12 @@ def make_sublime_syntax_simple(delim):
 
 
 def make_sublime_syntax_standard(delim, policy):
+    assert policy in ['quoted', 'quoted_rfc']
     scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, policy)
     result = standard_header_template.format(yaml_escape(name), scope, scope)
+    if policy == 'quoted':
+        result += non_rfc_endline_rule
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
         result += '\n'

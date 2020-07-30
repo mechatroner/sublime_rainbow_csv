@@ -39,7 +39,7 @@ def name_normalize(delim):
 
 
 def get_syntax_file_name_old(delim, policy):
-    policy = auto_syntax.policy_map[policy]
+    policy = auto_syntax.filename_policy_map[policy]
     if delim == '\t' and policy == 'Simple':
         return 'TSV (Rainbow)'
     if delim == ',' and policy == 'Standard':
@@ -48,6 +48,7 @@ def get_syntax_file_name_old(delim, policy):
 
 
 def write_sublime_syntax(delim, policy, dst_dir, old_names):
+    # TODO get rid of this
     if old_names:
         syntax_file_name = get_syntax_file_name_old(delim, policy) + '.sublime-syntax'
     else:
@@ -83,6 +84,7 @@ def main():
         for delim in delims:
             if standard_delims.find(delim) != -1:
                 write_sublime_syntax(delim, 'quoted', dst_dir, old_names=False)
+                write_sublime_syntax(delim, 'quoted_rfc', dst_dir, old_names=False)
             write_sublime_syntax(delim, 'simple', dst_dir, old_names=False)
         return
 
