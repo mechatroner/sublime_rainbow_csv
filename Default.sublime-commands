@@ -5,6 +5,7 @@
     { "caption": "Rainbow CSV: CSVLint", "command": "csv_lint" },
     { "caption": "Rainbow CSV: Enable Simple", "command": "enable_simple" },
     { "caption": "Rainbow CSV: Enable Quoted", "command": "enable_quoted" },
+    { "caption": "Rainbow CSV: Enable RFC", "command": "enable_rfc" },
     {
       "caption": "Rainbow CSV Settings",
       "command": "edit_settings",

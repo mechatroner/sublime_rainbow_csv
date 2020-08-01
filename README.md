@@ -74,6 +74,9 @@ To adjust plugin configuration:
 
 To configure the extension, click "Preferences" -> "Package Settings" -> "Rainbow CSV" -> "Settings"
 
+#### "allow_newlines_in_fields"
+Allow quoted multiline fields as defined in [RFC-4180](https://tools.ietf.org/html/rfc4180)
+
 #### "enable_rainbow_csv_autodetect"
 Enable content-based separator autodetection. 
 Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.

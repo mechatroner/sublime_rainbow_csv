@@ -17,6 +17,8 @@
     // If "enable_rainbow_csv_autodetect" is set to false this setting is ignored
     "rainbow_csv_autodetect_dialects": [["\t", "simple"], [",", "quoted"], [";", "quoted"], ["|", "simple"]],
 
+    // Allow quoted multiline fields as defined in RFC-4180: https://tools.ietf.org/html/rfc4180
+    "allow_newlines_in_fields": false,
 
     // Use custom high-contrast rainbow colors instead of colors provided by your current color scheme
     "use_custom_rainbow_colors": false,

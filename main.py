@@ -50,15 +50,13 @@ def get_table_names_path():
 
 legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, v in auto_syntax.legacy_syntax_names.items()}
 
-filename_policy_map_inv = {v: k for k, v in auto_syntax.filename_policy_map.items()}
-
 
 def ensure_syntax_file(delim, policy):
     pregenerated_delims = auto_syntax.get_pregenerated_delims()
     name = auto_syntax.get_syntax_file_basename(delim, policy)
     if policy == 'simple' and delim in pregenerated_delims:
         return (name, True, False)
-    if policy == 'quoted' and delim in [';', ',']:
+    if policy in ['quoted', 'quoted_rfc'] and delim in [';', ',']:
         return (name, True, False)
 
     syntax_path = os.path.join(sublime.packages_path(), 'User', name)
@@ -253,7 +251,7 @@ def load_rainbow_params(file_path):
     record = get_index_record(get_table_index_path(), file_path)
     if record is not None and len(record) >= 3:
         delim, policy = record[1:3]
-        if policy not in ['simple', 'quoted', 'disabled']:
+        if policy not in ['simple', 'quoted', 'disabled', 'quoted_rfc']:
             return (None, None)
         delim = auto_syntax.decode_delim(delim)
         return (delim, policy)
@@ -329,14 +327,11 @@ def get_dialect_from_grammar_basename(grammar_basename):
     if not grammar_basename.startswith(start_marker) or not grammar_basename.endswith(end_marker):
         return None
     encoded_dialect = grammar_basename[len(start_marker):-len(end_marker)]
-    wpos = encoded_dialect.rfind('_')
-    if wpos == -1:
-        return None
-    delim = auto_syntax.decode_delim(encoded_dialect[:wpos])
-    policy = filename_policy_map_inv.get(encoded_dialect[wpos + 1:], None)
-    if delim is None or policy is None:
-        return None
-    return (delim, policy)
+    for policy, suffix in auto_syntax.filename_policy_map.items():
+        if encoded_dialect.endswith(suffix):
+            delim = auto_syntax.decode_delim(encoded_dialect[:-(len(suffix) + 1)])
+            return (delim, policy)
+    return None
 
 
 def get_dialect(settings):
@@ -398,6 +393,8 @@ def set_syntax_with_timeout(view, syntax_file, logging_enabled, timeout):
 def do_enable_rainbow(view, delim, policy, store_settings):
     if not delim or not len(delim):
         return
+    if policy == 'quoted' and get_setting(view, 'allow_newlines_in_fields', False):
+        policy = 'quoted_rfc'
     file_path = view.file_name()
     logging_enabled = get_setting(view, 'enable_debug_logging', False)
     dbg_log(logging_enabled, '=======================================')
@@ -424,8 +421,8 @@ def do_enable_rainbow(view, delim, policy, store_settings):
         auto_adjust_rainbow_colors = get_setting(view, 'auto_adjust_rainbow_colors', True)
         if auto_adjust_rainbow_colors:
             adjust_color_scheme(view)
-    #else: # FIXME enable after fixing #27
-    #    remove_sublime_settings(syntax_settings_path)
+    else:
+        remove_sublime_settings(syntax_settings_path)
 
     if pregenerated:
         rainbow_syntax_file = 'Packages/rainbow_csv/pregenerated_grammars/{}'.format(syntax_file_basename)
@@ -473,7 +470,7 @@ def enable_generic_command(view, policy):
             policy = 'quoted'
         else:
             policy = 'simple'
-    if policy == 'quoted' and selection_text not in [';', ',']:
+    if policy in ['quoted', 'quoted_rfc'] and selection_text not in [';', ',']:
         # TODO We can actually get rid of this check, since the policy is now "auto" by default
         sublime.error_message('Error: Standard dialect is supported only with comma [,] and semicolon [;] separators')
         return
@@ -487,11 +484,13 @@ class EnableQuotedCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         enable_generic_command(self.view, 'quoted')
 
+class EnableRfcCommand(sublime_plugin.TextCommand):
+    def run(self, _edit):
+        enable_generic_command(self.view, 'quoted_rfc')
 
 class EnableSimpleCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
         enable_generic_command(self.view, 'simple')
-
 
 class EnableAutoCommand(sublime_plugin.TextCommand):
     def run(self, _edit):
@@ -601,7 +600,8 @@ def on_done_query_edit(input_line):
     if encoding not in ['latin-1', 'utf-8']:
         sublime.error_message('RBQL Error. Encoding "{}" is not supported'.format(encoding))
         return
-    format_map = {'input': (input_delim, input_policy), 'csv': (',', 'quoted'), 'tsv': ('\t', 'simple')}
+    csv_policy = 'quoted_rfc' if get_setting(view, 'allow_newlines_in_fields', False) else 'quoted'
+    format_map = {'input': (input_delim, input_policy), 'csv': (',', csv_policy), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
         return
@@ -827,6 +827,7 @@ def is_delimited_table(sampled_lines, delim, policy, min_num_lines):
 
 
 def autodetect_content_based(view, autodetection_dialects, min_num_lines):
+    # TODO implement autodetection for RFC-compatible grammars. Current line-based algorithm is not good enough
     sampled_lines = sample_lines(view)
     for delim, policy in autodetection_dialects:
         if is_delimited_table(sampled_lines, delim, policy, min_num_lines):
