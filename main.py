@@ -30,8 +30,8 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
 
 # FIXME add special handling of whitespace-separated grammar. Treat consecutive whitespaces as a single separator. Problem - will need to add 'whitespace' dialect everywhere
-
 # FIXME in the plugin_loaded() method - check if custom colors were enabled and if they were - create custom settings file, otherwise - delete them
+# FIXME support csv_lint for rfc policy
 
 
 def get_table_index_path():
@@ -760,6 +760,10 @@ class AlignCommand(sublime_plugin.TextCommand):
 
 
 def csv_lint(view, delim, policy):
+    if policy == 'quoted_rfc':
+        # FIXME support csv_lint for rfc policy
+        sublime.error_message('CSVLint is not supported for RFC4180-compatible dialects')
+        return False
     num_fields = None
     line_regions = view.lines(sublime.Region(0, view.size()))
     for ln, lr in enumerate(line_regions):
