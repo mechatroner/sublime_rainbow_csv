@@ -73,11 +73,11 @@ def ensure_syntax_file(delim, policy):
     return (name, False, True)
 
 
-def get_field_by_line_position(fields, delim_size, query_pos):
+def get_col_num_single_line(fields, delim_size, query_pos, offset=0):
     if not len(fields):
         return None
     col_num = 0
-    cpos = len(fields[col_num])
+    cpos = len(fields[col_num]) + offset
     while query_pos > cpos and col_num + 1 < len(fields):
         col_num += 1
         cpos = cpos + delim_size + len(fields[col_num])
@@ -600,7 +600,7 @@ def on_done_query_edit(input_line):
     if encoding not in ['latin-1', 'utf-8']:
         sublime.error_message('RBQL Error. Encoding "{}" is not supported'.format(encoding))
         return
-    csv_policy = 'quoted_rfc' if get_setting(view, 'allow_newlines_in_fields', False) else 'quoted'
+    csv_policy = 'quoted_rfc' if get_setting(active_view, 'allow_newlines_in_fields', False) else 'quoted'
     format_map = {'input': (input_delim, input_policy), 'csv': (',', csv_policy), 'tsv': ('\t', 'simple')}
     if output_format not in format_map:
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
@@ -831,7 +831,7 @@ def is_delimited_table(sampled_lines, delim, policy, min_num_lines):
 
 
 def autodetect_content_based(view, autodetection_dialects, min_num_lines):
-    # TODO implement autodetection for RFC-compatible grammars. Current line-based algorithm is not good enough
+    # FIXME implement autodetection for RFC-compatible grammars. Current line-based algorithm is not good enough
     sampled_lines = sample_lines(view)
     for delim, policy in autodetection_dialects:
         if is_delimited_table(sampled_lines, delim, policy, min_num_lines):
@@ -921,6 +921,93 @@ def hover_hide_cb():
     show_column_names(active_view, delim, policy)
 
 
+def find_unbalanced_lines_around(view, center_line):
+    num_lines = get_file_line_count(view)
+    search_range = 10
+    search_begin = max(0, center_line - search_range)
+    search_end = min(num_lines, center_line + search_range)
+    start_line = None 
+    end_line = None
+    lines = []
+    for l in range(search_begin, search_end):
+        cur_line = get_line_text(view, l)
+        if start_line is not None or l >= center_line:
+            lines.append(cur_line)
+        if cur_line.count('"') % 2 == 1:
+            continue
+        if l < center_line:
+            lines = []
+            start_line = l
+        if l > center_line:
+            end_line = l
+            break
+    return (start_line, end_line, lines)
+
+
+def do_get_col_num_rfc_lines(view, cursor_line_offset, cnum, lines, delim, expected_num_fields):
+    record_str = '\n'.join(lines)
+    fields, has_warning = csv_utils.smart_split(record_str, delim, 'quoted_rfc', preserve_quotes_and_whitespaces=True)
+    if has_warning or len(fields) != expected_num_fields:
+        return None
+    current_line_offset = 0
+    col_num = 0
+    while col_num < len(fields):
+        current_line_offset += fields[col_num].count('\n')
+        if current_line_offset >= cursor_line_offset:
+            break
+        col_num += 1
+    if current_line_offset > cursor_line_offset:
+        # The cursor line is inside the multiline col_num field
+        return col_num
+    if current_line_offset < cursor_line_offset:
+        # Should never happend
+        return None
+    length_of_previous_field_segment_on_cursor_line = 0
+    if current_line_offset > 0:
+        length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1]) + len(delim)
+        if cnum <= length_of_previous_field_segment_on_cursor_line:
+            return col_num
+        col_num += 1
+    col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line)
+    return col_num
+
+
+def get_col_num_rfc_basic_even_case(line, cnum, delim, expected_num_fields):
+    fields, warning = csv_utils.smart_split(line, delim, 'quoted_rfc', preserve_quotes_and_whitespaces=True)
+    if warning or len(fields) != expected_num_fields:
+        return None
+    return get_col_num_single_line(fields, len(delim), cnum)
+
+
+def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
+    # This logic mirrors the vimscript implementation from https://github.com/mechatroner/rainbow_csv
+    # Do we need to optimize this? Converting back and forth between line numbers and text regions could be a slow operation. Check with a large file
+    lnum, cnum = view.rowcol(point)
+    start_line, end_line, lines = find_unbalanced_lines_around(lnum, lnum)
+    cur_line = get_line_text(view, lnum)
+    if cur_line.count('"') % 2 == 0:
+        if start_line is not None and end_line is not None:
+            field_num = do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
+            if field_num is not None:
+                return field_num
+            return get_col_num_rfc_basic_even_case(cur_line, cnum, delim, expected_num_fields)
+    elif start_line is not None:
+        return do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
+    elif end_line is not None:
+        return do_get_col_num_rfc_lines(view, 0, cnum, lines, delim, expected_num_fields)
+    return None
+
+
+#def get_lines_around(view, point):
+#    search_range = 20000
+#    begin_offset = max(0, point - search_range)
+#    end_offset = min(view.size(), point + search_range)
+#    search_region = sublime.Region(begin_offset, end_offset)
+#    search_str = view.substr(search_region)
+#    search_lines = view.split('\n')
+#    center_line_num = 
+
+
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
     @classmethod
     def is_applicable(cls, settings):
@@ -932,12 +1019,21 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             if dialect[1] == 'monocolumn':
                 return
             delim, policy = dialect
+            header = get_document_header(self.view, delim, policy)
             # lnum and cnum are 0-based
             cnum = self.view.rowcol(point)[1]
-            line_text = self.view.substr(self.view.line(point))
-            hover_record, warning = csv_utils.smart_split(line_text, delim, policy, True)
-            field_num = get_field_by_line_position(hover_record, len(delim), cnum)
-            header = get_document_header(self.view, delim, policy)
+            quoting_warning = False
+            inconsistent_num_fields_warning = False
+            if policy == 'quoted_rfc':
+                field_num = get_col_num_rfc_lines(self.view, delim, point, len(header))
+                if field_num is None:
+                    return # Maybe show a warning instead? I.e. "Unable to infer column number and name"
+            else:
+                line_text = self.view.substr(self.view.line(point))
+                hover_record, quoting_warning = csv_utils.smart_split(line_text, delim, policy, True)
+                field_num = get_col_num_single_line(hover_record, len(delim), cnum)
+                if len(header) != len(hover_record):
+                    inconsistent_num_fields_warning = True
             ui_text = 'Col #{}'.format(field_num + 1)
             if field_num < len(header):
                 column_name = header[field_num]
@@ -945,9 +1041,9 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 if len(column_name) > max_header_len:
                     column_name = column_name[:max_header_len] + '...'
                 ui_text += ', Header: "{}"'.format(column_name)
-            if len(header) != len(hover_record):
+            if inconsistent_num_fields_warning:
                 ui_text += '; WARN: num of fields in Header and this line differs'
-            if warning:
+            if quoting_warning:
                 ui_text += '; This line has quoting error'
             ui_hex_color = get_column_color(self.view, field_num)
             self.view.show_popup('<span style="color:{}">{}</span>'.format(ui_hex_color, html_escape(ui_text)), sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)
