@@ -933,10 +933,10 @@ def find_unbalanced_lines_around(view, center_line):
         cur_line = get_line_text(view, l)
         if start_line is not None or l >= center_line:
             lines.append(cur_line)
-        if cur_line.count('"') % 2 == 1:
+        if cur_line.count('"') % 2 == 0:
             continue
         if l < center_line:
-            lines = []
+            lines = [cur_line]
             start_line = l
         if l > center_line:
             end_line = l
@@ -983,29 +983,20 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
     # This logic mirrors the vimscript implementation from https://github.com/mechatroner/rainbow_csv
     # Do we need to optimize this? Converting back and forth between line numbers and text regions could be a slow operation. Check with a large file
     lnum, cnum = view.rowcol(point)
-    start_line, end_line, lines = find_unbalanced_lines_around(lnum, lnum)
+    # FIXME some lines have off-by-one errors, e.g. line 5 in the test file at the separator
+    start_line, end_line, lines = find_unbalanced_lines_around(view, lnum)
     cur_line = get_line_text(view, lnum)
     if cur_line.count('"') % 2 == 0:
         if start_line is not None and end_line is not None:
             field_num = do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
             if field_num is not None:
                 return field_num
-            return get_col_num_rfc_basic_even_case(cur_line, cnum, delim, expected_num_fields)
+        return get_col_num_rfc_basic_even_case(cur_line, cnum, delim, expected_num_fields)
     elif start_line is not None:
         return do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
     elif end_line is not None:
         return do_get_col_num_rfc_lines(view, 0, cnum, lines, delim, expected_num_fields)
     return None
-
-
-#def get_lines_around(view, point):
-#    search_range = 20000
-#    begin_offset = max(0, point - search_range)
-#    end_offset = min(view.size(), point + search_range)
-#    search_region = sublime.Region(begin_offset, end_offset)
-#    search_str = view.substr(search_region)
-#    search_lines = view.split('\n')
-#    center_line_num = 
 
 
 class RainbowHoverListener(sublime_plugin.ViewEventListener):
@@ -1025,6 +1016,7 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             quoting_warning = False
             inconsistent_num_fields_warning = False
             if policy == 'quoted_rfc':
+                # FIXME wrap in try/catch block just in case?
                 field_num = get_col_num_rfc_lines(self.view, delim, point, len(header))
                 if field_num is None:
                     return # Maybe show a warning instead? I.e. "Unable to infer column number and name"
