@@ -941,18 +941,22 @@ def find_unbalanced_lines_around(view, center_line):
         if l > center_line:
             end_line = l
             break
+    # FIXME adjust lines list
     return (start_line, end_line, lines)
 
 
 def do_get_col_num_rfc_lines(view, cursor_line_offset, cnum, lines, delim, expected_num_fields):
     record_str = '\n'.join(lines)
+    print(''.join([ "record_str:", str(record_str)])) #FOR_DEBUG
     fields, has_warning = csv_utils.smart_split(record_str, delim, 'quoted_rfc', preserve_quotes_and_whitespaces=True)
     if has_warning or len(fields) != expected_num_fields:
         return None
+    print(''.join([ "fields:", str(fields)])) #FOR_DEBUG
     current_line_offset = 0
     col_num = 0
     while col_num < len(fields):
         current_line_offset += fields[col_num].count('\n')
+        print(''.join([ "col_num:", str(col_num), ",\tcurrent_line_offset:", str(current_line_offset), ",\tcursor_line_offset:", str(cursor_line_offset)])) #FOR_DEBUG
         if current_line_offset >= cursor_line_offset:
             break
         col_num += 1
@@ -985,6 +989,7 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
     lnum, cnum = view.rowcol(point)
     # FIXME some lines have off-by-one errors, e.g. line 5 in the test file at the separator
     start_line, end_line, lines = find_unbalanced_lines_around(view, lnum)
+    print(''.join([ "start_line:", str(start_line), ",\tend_line:", str(end_line), ",\tlen(lines):", str(len(lines))])) #FOR_DEBUG
     cur_line = get_line_text(view, lnum)
     if cur_line.count('"') % 2 == 0:
         if start_line is not None and end_line is not None:
@@ -992,10 +997,15 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
             if field_num is not None:
                 return field_num
         return get_col_num_rfc_basic_even_case(cur_line, cnum, delim, expected_num_fields)
-    elif start_line is not None:
-        return do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
-    elif end_line is not None:
-        return do_get_col_num_rfc_lines(view, 0, cnum, lines, delim, expected_num_fields)
+    else:
+        if start_line is not None:
+            field_num = do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
+            if field_num is not None:
+                return field_num
+        if end_line is not None:
+            field_num = do_get_col_num_rfc_lines(view, 0, cnum, lines, delim, expected_num_fields)
+            if field_num is not None:
+                return field_num
     return None
 
 
