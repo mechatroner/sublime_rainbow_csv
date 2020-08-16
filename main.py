@@ -967,8 +967,9 @@ def do_get_col_num_rfc_lines(view, cur_line, cnum, start_line, end_line, delim, 
         length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1])
         if cnum <= length_of_previous_field_segment_on_cursor_line:
             return col_num
+        length_of_previous_field_segment_on_cursor_line += len(delim)
         col_num += 1
-    col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line + len(delim))
+    col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line)
     return col_num
 
 
@@ -983,7 +984,6 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
     # This logic mirrors the vimscript implementation from https://github.com/mechatroner/rainbow_csv
     # Do we need to optimize this? Converting back and forth between line numbers and text regions could be a slow operation. Check with a large file
     lnum, cnum = view.rowcol(point)
-    # FIXME some lines have off-by-one errors, e.g. line 9 in the test file at the separator
     start_line, end_line = find_unbalanced_lines_around(view, lnum)
     cur_line = get_line_text(view, lnum)
     if cur_line.count('"') % 2 == 0:
