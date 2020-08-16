@@ -73,17 +73,6 @@ def ensure_syntax_file(delim, policy):
     return (name, False, True)
 
 
-def get_col_num_single_line(fields, delim_size, query_pos, offset=0):
-    if not len(fields):
-        return None
-    col_num = 0
-    cpos = len(fields[col_num]) + offset
-    while query_pos > cpos and col_num + 1 < len(fields):
-        col_num += 1
-        cpos = cpos + delim_size + len(fields[col_num])
-    return col_num
-
-
 def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
     # If separator is not tab, tabstop_val must be set to 1
     result = list()
@@ -940,6 +929,17 @@ def find_unbalanced_lines_around(view, center_line):
     return (start_line, end_line)
 
 
+def get_col_num_single_line(fields, delim_size, query_pos, offset=0):
+    if not len(fields):
+        return None
+    col_num = 0
+    cpos = len(fields[col_num]) + offset
+    while query_pos > cpos and col_num + 1 < len(fields):
+        col_num += 1
+        cpos = cpos + delim_size + len(fields[col_num])
+    return col_num
+
+
 def do_get_col_num_rfc_lines(view, cur_line, cnum, start_line, end_line, delim, expected_num_fields):
     cursor_line_offset = cur_line - start_line
     lines = []
@@ -964,11 +964,11 @@ def do_get_col_num_rfc_lines(view, cur_line, cnum, start_line, end_line, delim, 
         return None
     length_of_previous_field_segment_on_cursor_line = 0
     if current_line_offset > 0:
-        length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1]) + len(delim)
+        length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1])
         if cnum <= length_of_previous_field_segment_on_cursor_line:
             return col_num
         col_num += 1
-    col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line)
+    col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line + len(delim))
     return col_num
 
 
@@ -983,7 +983,7 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
     # This logic mirrors the vimscript implementation from https://github.com/mechatroner/rainbow_csv
     # Do we need to optimize this? Converting back and forth between line numbers and text regions could be a slow operation. Check with a large file
     lnum, cnum = view.rowcol(point)
-    # FIXME some lines have off-by-one errors, e.g. line 5 in the test file at the separator
+    # FIXME some lines have off-by-one errors, e.g. line 9 in the test file at the separator
     start_line, end_line = find_unbalanced_lines_around(view, lnum)
     cur_line = get_line_text(view, lnum)
     if cur_line.count('"') % 2 == 0:
