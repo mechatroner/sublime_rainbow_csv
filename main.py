@@ -928,35 +928,31 @@ def find_unbalanced_lines_around(view, center_line):
     search_end = min(num_lines, center_line + search_range)
     start_line = None 
     end_line = None
-    lines = []
     for l in range(search_begin, search_end):
         cur_line = get_line_text(view, l)
-        if start_line is not None or l >= center_line:
-            lines.append(cur_line)
         if cur_line.count('"') % 2 == 0:
             continue
         if l < center_line:
-            lines = [cur_line]
             start_line = l
         if l > center_line:
             end_line = l
             break
-    # FIXME adjust lines list
-    return (start_line, end_line, lines)
+    return (start_line, end_line)
 
 
-def do_get_col_num_rfc_lines(view, cursor_line_offset, cnum, lines, delim, expected_num_fields):
+def do_get_col_num_rfc_lines(view, cur_line, cnum, start_line, end_line, delim, expected_num_fields):
+    cursor_line_offset = cur_line - start_line
+    lines = []
+    for l in range(start_line, end_line + 1):
+        lines.append(get_line_text(view, l))
     record_str = '\n'.join(lines)
-    print(''.join([ "record_str:", str(record_str)])) #FOR_DEBUG
     fields, has_warning = csv_utils.smart_split(record_str, delim, 'quoted_rfc', preserve_quotes_and_whitespaces=True)
     if has_warning or len(fields) != expected_num_fields:
         return None
-    print(''.join([ "fields:", str(fields)])) #FOR_DEBUG
     current_line_offset = 0
     col_num = 0
     while col_num < len(fields):
         current_line_offset += fields[col_num].count('\n')
-        print(''.join([ "col_num:", str(col_num), ",\tcurrent_line_offset:", str(current_line_offset), ",\tcursor_line_offset:", str(cursor_line_offset)])) #FOR_DEBUG
         if current_line_offset >= cursor_line_offset:
             break
         col_num += 1
@@ -988,22 +984,21 @@ def get_col_num_rfc_lines(view, delim, point, expected_num_fields):
     # Do we need to optimize this? Converting back and forth between line numbers and text regions could be a slow operation. Check with a large file
     lnum, cnum = view.rowcol(point)
     # FIXME some lines have off-by-one errors, e.g. line 5 in the test file at the separator
-    start_line, end_line, lines = find_unbalanced_lines_around(view, lnum)
-    print(''.join([ "start_line:", str(start_line), ",\tend_line:", str(end_line), ",\tlen(lines):", str(len(lines))])) #FOR_DEBUG
+    start_line, end_line = find_unbalanced_lines_around(view, lnum)
     cur_line = get_line_text(view, lnum)
     if cur_line.count('"') % 2 == 0:
         if start_line is not None and end_line is not None:
-            field_num = do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
+            field_num = do_get_col_num_rfc_lines(view, lnum, cnum, start_line, end_line, delim, expected_num_fields)
             if field_num is not None:
                 return field_num
         return get_col_num_rfc_basic_even_case(cur_line, cnum, delim, expected_num_fields)
     else:
         if start_line is not None:
-            field_num = do_get_col_num_rfc_lines(view, lnum - start_line, cnum, lines, delim, expected_num_fields)
+            field_num = do_get_col_num_rfc_lines(view, lnum, cnum, start_line, lnum, delim, expected_num_fields)
             if field_num is not None:
                 return field_num
         if end_line is not None:
-            field_num = do_get_col_num_rfc_lines(view, 0, cnum, lines, delim, expected_num_fields)
+            field_num = do_get_col_num_rfc_lines(view, lnum, cnum, lnum, end_line, delim, expected_num_fields)
             if field_num is not None:
                 return field_num
     return None
