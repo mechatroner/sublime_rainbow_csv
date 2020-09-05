@@ -751,7 +751,7 @@ class AlignCommand(sublime_plugin.TextCommand):
 def csv_lint(view, delim, policy):
     if policy == 'quoted_rfc':
         # FIXME support csv_lint for rfc policy
-        sublime.error_message('CSVLint is not supported for RFC4180-compatible dialects')
+        sublime.error_message('CSVLint is currently not supported for RFC4180-compatible dialects')
         return False
     num_fields = None
     line_regions = view.lines(sublime.Region(0, view.size()))
@@ -1021,10 +1021,14 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
             quoting_warning = False
             inconsistent_num_fields_warning = False
             if policy == 'quoted_rfc':
-                # FIXME wrap in try/catch block just in case?
-                field_num = get_col_num_rfc_lines(self.view, delim, point, len(header))
-                if field_num is None:
-                    return # Maybe show a warning instead? I.e. "Unable to infer column number and name"
+                try:
+                    field_num = get_col_num_rfc_lines(self.view, delim, point, len(header))
+                    if field_num is None:
+                        self.view.show_popup('<span>Unable to infer column id</span>', sublime.HIDE_ON_MOUSE_MOVE_AWAY, point, on_hide=hover_hide_cb, max_width=1000)
+                        return
+                except Exception as e:
+                    print('Rainbow CSV: Unexpected Exception while showing column info: {}'.format(e))
+                    return
             else:
                 line_text = self.view.substr(self.view.line(point))
                 hover_record, quoting_warning = csv_utils.smart_split(line_text, delim, policy, True)
