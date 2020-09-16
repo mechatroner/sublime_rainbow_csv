@@ -730,7 +730,7 @@ class AlignCommand(sublime_plugin.TextCommand):
         for lr in line_regions:
             line = self.view.substr(lr)
             fields = csv_utils.smart_split(line, delim, policy, True)[0]
-            for i in range(len(fields)):
+            for i in range(0, len(fields) - 1):
                 if i >= len(column_sizes):
                     break
                 adjusted = fields[i].strip()
