@@ -1,7 +1,4 @@
 # Rainbow CSV
-[![Buy me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Donate-yellow.svg)](https://www.buymeacoffee.com/mechatroner)
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-yellow)](https://www.paypal.com/paypalme/mechatroner)  
-
 ![rainbow_csv](https://i.imgur.com/EhV2niB.png)
 
 ### Main features
@@ -302,7 +299,3 @@ And if you are doing math operation you can modify your query like this, example
 * [RBQL in npm](https://www.npmjs.com/package/rbql): `$ npm install -g rbql`
 * [RBQL in PyPI](https://pypi.org/project/rbql/): `$ pip install rbql`
 
-
-#### Support the project
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=mechatroner%40yandex.ru&item_name=Development+of+Rainbow+CSV+and+RBQL&currency_code=USD&source=url)
