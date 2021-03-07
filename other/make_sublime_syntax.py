@@ -61,10 +61,10 @@ def write_sublime_syntax(delim, policy, dst_dir, old_names):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--delim', help='Delim')
-    parser.add_argument('--policy', help='Policy')
-    parser.add_argument('--make_grammars_old', help='make and put grammars into DIR')
     parser.add_argument('--make_grammars_prod', help='make and put grammars into DIR')
+    parser.add_argument('--make_grammars_old', help='make and put grammars into DIR')
+    parser.add_argument('--dbg_delim', help='Run in debug mode: print single grammar with delim')
+    parser.add_argument('--dbg_policy', help='Run in debug mode: print single grammar with policy')
     args = parser.parse_args()
 
     if args.make_grammars_old:
@@ -88,8 +88,8 @@ def main():
             write_sublime_syntax(delim, 'simple', dst_dir, old_names=False)
         return
 
-    delim = args.delim
-    policy = args.policy
+    delim = args.dbg_delim
+    policy = args.dbg_policy
 
     grammar = auto_syntax.make_sublime_syntax(delim, policy)
     print(grammar)
