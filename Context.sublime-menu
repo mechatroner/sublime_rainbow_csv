@@ -4,7 +4,7 @@
         "id": "rainbow_csv",
         "children":
         [
-            { "command": "enable_auto", "caption": "Enable: separator = current selection" },
+            { "command": "enable_auto", "caption": "Enable: set selected character or text as separator" },
             { "command": "disable", "caption": "Disable" },
             { "command": "run_query", "caption": "Run RBQL query (F5)" },
             { "command": "set_table_name", "caption": "Set table name for RBQL" },

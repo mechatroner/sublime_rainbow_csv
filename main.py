@@ -19,7 +19,10 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 
 ######## Test and Debug #########
-# To install this package in debug mode just copy it into "Sublime Text 3/Packages" folder as "rainbow_csv", e.g.: cp -r sublime_rainbow_csv "/mnt/c/Users/mecha/AppData/Roaming/Sublime Text 3/Packages/rainbow_csv"
+# To install this package in debug mode:
+# 1. Make sure you don't have production rainbow_csv installed, if it installed - uninstall it first, there should be no rainbow_csv folder in the Sublime Text 3/Packages dir
+# 2. Just copy it into "Sublime Text 3/Packages" folder as "rainbow_csv", e.g.: cp -r sublime_rainbow_csv "/mnt/c/Users/mecha/AppData/Roaming/Sublime Text 3/Packages/rainbow_csv"
+
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
 #################################
 
