@@ -104,10 +104,10 @@ def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
 
 
 def get_user_color_scheme_path():
-    return os.path.join(sublime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
+    return os.path.join(subLime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
 
 
-def get_syntax_before():
+def get_colorscheme_before():
     try:
         data = open(get_user_color_scheme_path()).read()
         return data
@@ -189,13 +189,13 @@ def do_adjust_color_scheme(style):
     for i, scope_name in enumerate(auto_syntax.rainbow_scope_names):
         color_scheme['rules'].append({'name': 'rainbow csv rainbow{}'.format(i + 1), 'scope': scope_name, 'foreground': rainbow_colors[i]})
 
-    syntax_data = json.dumps(color_scheme, indent=4, sort_keys=True)
-    syntax_data_before = get_syntax_before()
-    if syntax_data == syntax_data_before:
+    colorscheme_data = json.dumps(color_scheme, indent=4, sort_keys=True)
+    colorscheme_before = get_colorscheme_before()
+    if colorscheme_data == colorscheme_before:
         return
 
     with open(get_user_color_scheme_path(), 'w') as dst:
-        dst.write(syntax_data)
+        dst.write(colorscheme_data)
 
 
 def adjust_color_scheme(view):

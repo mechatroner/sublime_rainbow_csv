@@ -90,13 +90,14 @@ Manual separator selection will override this setting for the current file.
 E.g. to disable on files larger than 100 MB, set `"rainbow_csv_max_file_size_bytes": 100000000`  
 
 #### "use_custom_rainbow_colors"
-Use custom high-contrast rainbow colors instead of colors provided by your current color scheme
+Use custom high-contrast rainbow colors instead of colors provided by your current color scheme. 
+When you enable this option, "auto_adjust_rainbow_colors" also gets enabled by default.
 
 #### "auto_adjust_rainbow_colors"
 Auto adjust rainbow colors for Packages/User/RainbowCSV.sublime-color-scheme  
 Rainbow CSV will auto-generate color theme with high-contrast colors to make CSV columns more distinguishable.  
-You can disable this setting and manually customize Rainbow CSV color scheme at Packages/User/RainbowCSV.sublime-color-scheme  
-Do not customize Packages/User/RainbowCSV.sublime-color-scheme without disabling the setting, it will be rewritten by the plugin  
+You can disable this setting and manually customize Rainbow CSV color scheme at `Packages/User/RainbowCSV.sublime-color-scheme`, you can use the following [RainbowCSV.sublime-color-scheme](https://github.com/mechatroner/sublime_rainbow_csv/blob/master/RainbowCSV.sublime-color-scheme) file as a starting point for your customizations. 
+Do NOT manually customize Packages/User/RainbowCSV.sublime-color-scheme without disabling this setting, the plugin will just rewrite it in that case.
 This option has effect only if "use_custom_rainbow_colors" is set to true
 
 #### "rbql_backend_language"
