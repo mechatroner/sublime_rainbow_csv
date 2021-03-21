@@ -27,7 +27,6 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 #################################
 
 
-# TODO consider implementing syntax with newlines-in-fields support. measure performance.
 # TODO CSVLint: warn about trailing spaces
 # TODO support comment lines
 # TODO autodetect CSV on copy into empty buffer, just like in VSCode
@@ -78,6 +77,7 @@ def ensure_syntax_file(delim, policy):
 
 def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
     # If separator is not tab, tabstop_val must be set to 1
+    # FIXME use len(delim) instead of 1 for mutichar separators
     result = list()
     space_deficit = 0
     cur_len = 0

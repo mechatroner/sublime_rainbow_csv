@@ -111,7 +111,8 @@ def make_simple_context(delim, context_id, num_contexts, indent='    '):
     result_lines = []
     next_context_id = (context_id + 1) % num_contexts
     context_header = "{}:".format(get_context_name(context_id))
-    result_lines.append("- meta_scope: {}".format(rainbow_scope_names[context_id]))
+    # We use `meta_content_scope` instead of `meta_scope` to prevent wrong separator color bug, see https://github.com/mechatroner/sublime_rainbow_csv/issues/31
+    result_lines.append("- meta_content_scope: {}".format(rainbow_scope_names[context_id]))
     result_lines.append("- match: '{}'".format(yaml_escape(oniguruma_regular_escape(delim))))
     result_lines.append("  set: {}".format(get_context_name(next_context_id)))
     result_lines.append("- match: '$'")
@@ -126,7 +127,8 @@ def make_standard_context(delim, context_id, num_contexts, indent='    '):
     result_lines = []
     next_context_id = (context_id + 1) % num_contexts
     context_header = "{}:".format(get_context_name(context_id))
-    result_lines.append("- meta_scope: {}".format(rainbow_scope_names[context_id]))
+    # We use `meta_content_scope` instead of `meta_scope` to prevent wrong separator color bug, see https://github.com/mechatroner/sublime_rainbow_csv/issues/31
+    result_lines.append("- meta_content_scope: {}".format(rainbow_scope_names[context_id]))
     result_lines.append("- match: '{}'".format(yaml_escape(oniguruma_regular_escape(delim))))
     result_lines.append("  set: {}".format(get_context_name(next_context_id)))
     result_lines.append("- match: '$'")
