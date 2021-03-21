@@ -13,7 +13,6 @@ contexts:
     rainbow1:
         - meta_content_scope: rainbow1
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow2
         - match: '$'
           pop: true
@@ -21,7 +20,6 @@ contexts:
     rainbow2:
         - meta_content_scope: keyword.rainbow2
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow3
         - match: '$'
           pop: true
@@ -29,7 +27,6 @@ contexts:
     rainbow3:
         - meta_content_scope: entity.name.rainbow3
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow4
         - match: '$'
           pop: true
@@ -37,7 +34,6 @@ contexts:
     rainbow4:
         - meta_content_scope: comment.rainbow4
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow5
         - match: '$'
           pop: true
@@ -45,7 +41,6 @@ contexts:
     rainbow5:
         - meta_content_scope: string.rainbow5
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow6
         - match: '$'
           pop: true
@@ -53,7 +48,6 @@ contexts:
     rainbow6:
         - meta_content_scope: entity.name.tag.rainbow6
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow7
         - match: '$'
           pop: true
@@ -61,7 +55,6 @@ contexts:
     rainbow7:
         - meta_content_scope: storage.type.rainbow7
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow8
         - match: '$'
           pop: true
@@ -69,7 +62,6 @@ contexts:
     rainbow8:
         - meta_content_scope: support.rainbow8
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow9
         - match: '$'
           pop: true
@@ -77,7 +69,6 @@ contexts:
     rainbow9:
         - meta_content_scope: constant.language.rainbow9
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow10
         - match: '$'
           pop: true
@@ -85,7 +76,6 @@ contexts:
     rainbow10:
         - meta_content_scope: variable.language.rainbow10
         - match: '\|'
-          scope: rainbow.separator
           set: rainbow1
         - match: '$'
           pop: true

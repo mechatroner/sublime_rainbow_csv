@@ -19,7 +19,7 @@ contexts:
           pop: true
 
     rainbow1:
-        - meta_scope: rainbow1
+        - meta_content_scope: rainbow1
         - match: ';'
           set: rainbow2
         - match: '$'
@@ -28,7 +28,7 @@ contexts:
           push: quoted_field
 
     rainbow2:
-        - meta_scope: keyword.rainbow2
+        - meta_content_scope: keyword.rainbow2
         - match: ';'
           set: rainbow3
         - match: '$'
@@ -37,7 +37,7 @@ contexts:
           push: quoted_field
 
     rainbow3:
-        - meta_scope: entity.name.rainbow3
+        - meta_content_scope: entity.name.rainbow3
         - match: ';'
           set: rainbow4
         - match: '$'
@@ -46,7 +46,7 @@ contexts:
           push: quoted_field
 
     rainbow4:
-        - meta_scope: comment.rainbow4
+        - meta_content_scope: comment.rainbow4
         - match: ';'
           set: rainbow5
         - match: '$'
@@ -55,7 +55,7 @@ contexts:
           push: quoted_field
 
     rainbow5:
-        - meta_scope: string.rainbow5
+        - meta_content_scope: string.rainbow5
         - match: ';'
           set: rainbow6
         - match: '$'
@@ -64,7 +64,7 @@ contexts:
           push: quoted_field
 
     rainbow6:
-        - meta_scope: entity.name.tag.rainbow6
+        - meta_content_scope: entity.name.tag.rainbow6
         - match: ';'
           set: rainbow7
         - match: '$'
@@ -73,7 +73,7 @@ contexts:
           push: quoted_field
 
     rainbow7:
-        - meta_scope: storage.type.rainbow7
+        - meta_content_scope: storage.type.rainbow7
         - match: ';'
           set: rainbow8
         - match: '$'
@@ -82,7 +82,7 @@ contexts:
           push: quoted_field
 
     rainbow8:
-        - meta_scope: support.rainbow8
+        - meta_content_scope: support.rainbow8
         - match: ';'
           set: rainbow9
         - match: '$'
@@ -91,7 +91,7 @@ contexts:
           push: quoted_field
 
     rainbow9:
-        - meta_scope: constant.language.rainbow9
+        - meta_content_scope: constant.language.rainbow9
         - match: ';'
           set: rainbow10
         - match: '$'
@@ -100,7 +100,7 @@ contexts:
           push: quoted_field
 
     rainbow10:
-        - meta_scope: variable.language.rainbow10
+        - meta_content_scope: variable.language.rainbow10
         - match: ';'
           set: rainbow1
         - match: '$'
