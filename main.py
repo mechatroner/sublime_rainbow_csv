@@ -75,14 +75,13 @@ def ensure_syntax_file(delim, policy):
     return (name, False, True)
 
 
-def generate_tab_statusline(tabstop_val, template_fields, max_output_len=None):
+def generate_tab_statusline(tabstop_val, delim_size, template_fields, max_output_len=None):
     # If separator is not tab, tabstop_val must be set to 1
-    # FIXME use len(delim) instead of 1 for mutichar separators
     result = list()
     space_deficit = 0
     cur_len = 0
     for nf in range(len(template_fields)):
-        available_space = (1 + len(template_fields[nf]) // tabstop_val) * tabstop_val
+        available_space = (delim_size + len(template_fields[nf]) // tabstop_val) * tabstop_val
         column_name = 'a{}'.format(nf + 1)
         extra_len = available_space - len(column_name) - 1
         if extra_len < 0:
@@ -645,7 +644,7 @@ def show_names_for_line(view, delim, policy, line_region):
     max_status_width = layout_width_dip - dip_reserve
     max_available_chars = max_status_width // font_char_width_dip - char_reserve
 
-    status_labels = generate_tab_statusline(tab_stop, fields, max_available_chars)
+    status_labels = generate_tab_statusline(tab_stop, len(delim), fields, max_available_chars)
     if not len(status_labels):
         return
     num_fields = len(status_labels) // 2
@@ -936,10 +935,10 @@ def get_col_num_single_line(fields, delim_size, query_pos, offset=0):
     if not len(fields):
         return None
     col_num = 0
-    cpos = len(fields[col_num]) + offset
-    while query_pos > cpos and col_num + 1 < len(fields):
+    cpos = offset + len(fields[col_num]) + delim_size
+    while query_pos >= cpos and col_num + 1 < len(fields):
         col_num += 1
-        cpos = cpos + delim_size + len(fields[col_num])
+        cpos += len(fields[col_num]) + delim_size
     return col_num
 
 
@@ -967,10 +966,9 @@ def do_get_col_num_rfc_lines(view, cur_line, cnum, start_line, end_line, delim, 
         return None
     length_of_previous_field_segment_on_cursor_line = 0
     if current_line_offset > 0:
-        length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1])
+        length_of_previous_field_segment_on_cursor_line = len(fields[col_num].split('\n')[-1]) + len(delim)
         if cnum <= length_of_previous_field_segment_on_cursor_line:
             return col_num
-        length_of_previous_field_segment_on_cursor_line += len(delim)
         col_num += 1
     col_num = col_num + get_col_num_single_line(fields[col_num:], len(delim), cnum, length_of_previous_field_segment_on_cursor_line)
     return col_num
