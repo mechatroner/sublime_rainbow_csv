@@ -20,7 +20,7 @@ custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 ######## Test and Debug #########
 # To install this package in debug mode:
-# 1. Make sure you don't have production rainbow_csv installed, if it installed - uninstall it first, there should be no rainbow_csv folder in the Sublime Text 3/Packages dir
+# 1. Make sure you don't have production rainbow_csv installed, if it is installed - uninstall it first, there should be no rainbow_csv folder in the Sublime Text 3/Packages dir
 # 2. Just copy it into "Sublime Text 3/Packages" folder as "rainbow_csv", e.g.: cp -r sublime_rainbow_csv "/mnt/c/Users/mecha/AppData/Roaming/Sublime Text 3/Packages/rainbow_csv"
 
 # To debug this package just use python's own print() function - all output would be redirected to sublime text console. View -> Show Console
@@ -586,6 +586,7 @@ def on_done_query_edit(input_line):
     input_delim, input_policy = input_dialect
     backend_language = get_backend_language(active_view)
     output_format = get_setting(active_view, 'rbql_output_format', 'input')
+    with_headers = get_setting(active_view, 'rbql_with_headers', False)
     encoding = get_setting(active_view, 'rbql_encoding', 'utf-8')
     encoding = encoding.lower()
     if encoding not in ['latin-1', 'utf-8']:
@@ -597,7 +598,7 @@ def on_done_query_edit(input_line):
         sublime.error_message('RBQL Error. "rbql_output_format" must be in [{}]'.format(', '.join(format_map.keys())))
         return
     output_delim, output_policy = format_map[output_format]
-    query_result = sublime_rbql.converged_execute(backend_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy, encoding)
+    query_result = sublime_rbql.converged_execute(backend_language, file_path, input_line, input_delim, input_policy, output_delim, output_policy, encoding, with_headers)
     error_type, error_details, warnings, dst_table_path = query_result
     if error_type is not None:
         sublime.error_message('Unable to execute RBQL query :(\nEdit your query and try again!\n\n\n\n\n=============================\nDetails:\n{}\n{}'.format(error_type, error_details))
@@ -794,8 +795,9 @@ class RunQueryCommand(sublime_plugin.TextCommand):
         previous_query = self.view.settings().get('rbql_previous_query', '')
         backend_language = get_backend_language(self.view)
         pretty_language_name = prettify_language_name(backend_language)
-        encoding = get_setting(self.view, 'rbql_encoding', 'utf-8')
-        active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, encoding), previous_query, on_done_query_edit, None, on_query_cancel)
+        with_headers = get_setting(self.view, 'rbql_with_headers', False)
+        headers_report = 'with header' if with_headers else 'no header'
+        active_window.show_input_panel('Enter SQL-like RBQL query ({}/{}):'.format(pretty_language_name, headers_report), previous_query, on_done_query_edit, None, on_query_cancel)
         self.view.settings().set('rbql_mode', True)
         show_column_names(self.view, delim, policy)
 

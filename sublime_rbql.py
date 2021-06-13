@@ -24,23 +24,25 @@ def system_has_node_js():
     return exit_code == 0 and len(out_data) and len(err_data) == 0
 
 
-def execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
+def execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path, with_headers):
     try:
         warnings = []
-        rbql.query_csv(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, encoding, warnings)
+        rbql.query_csv(query, src_table_path, input_delim, input_policy, dst_table_path, out_delim, out_policy, encoding, warnings, with_headers)
         return (None, None, warnings)
     except Exception as e:
         error_type, error_msg = rbql.exception_to_error_info(e)
         return (error_type, error_msg, [])
 
 
-def execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path):
+def execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path, with_headers):
     import json
     if not system_has_node_js():
         return ('Execution Error', 'Node.js is not found in your OS, test command: "node --version"', [])
     script_dir = os.path.dirname(os.path.realpath(__file__))
     rbql_js_script_path = os.path.join(script_dir, 'rbql-js', 'cli_rbql.js')
     cmd = ['node', rbql_js_script_path, '--query', query, '--delim', input_delim, '--policy', input_policy, '--out-delim', out_delim, '--out-policy', out_policy, '--input', src_table_path, '--output', dst_table_path, '--encoding', encoding, '--error-format', 'json']
+    if with_headers:
+        cmd.append('--with-headers')
     if os.name == 'nt':
         # Without the startupinfo magic Windows will show console window for a longer period.
         si = subprocess.STARTUPINFO()
@@ -70,7 +72,7 @@ def execute_js(src_table_path, encoding, query, input_delim, input_policy, out_d
     return (error_type, error_msg, warnings)
 
 
-def converged_execute(meta_language, src_table_path, query, input_delim, input_policy, out_delim, out_policy, encoding):
+def converged_execute(meta_language, src_table_path, query, input_delim, input_policy, out_delim, out_policy, encoding, with_headers):
     try:
         tmp_dir = tempfile.gettempdir()
         table_name = os.path.basename(src_table_path)
@@ -80,9 +82,9 @@ def converged_execute(meta_language, src_table_path, query, input_delim, input_p
         dst_table_path = os.path.join(tmp_dir, dst_table_name)
         assert meta_language in ['python', 'js'], 'Meta language must be "python" or "js"'
         if meta_language == 'python':
-            exec_result = execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
+            exec_result = execute_python(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path, with_headers)
         else:
-            exec_result = execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path)
+            exec_result = execute_js(src_table_path, encoding, query, input_delim, input_policy, out_delim, out_policy, dst_table_path, with_headers)
         error_type, error_details, warnings = exec_result
         if error_type is not None:
             dst_table_path = None

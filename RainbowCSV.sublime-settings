@@ -38,6 +38,10 @@
     // In order to use RBQL with JavaScript (JS) you need to have Node JS installed and added to your system path.
     "rbql_backend_language": "Python",
 
+    // RBQL will treat first records in all input and join files as headers.
+    // You can set this value to true if most of the CSV files you deal with have headers.
+    // You can override this setting on the query level by either adding `WITH (header)` or `WITH (noheader)` to the end of the query.
+    "rbql_with_headers": false,
 
     // RBQL encoding for files and queries.
     // Supported values: "latin-1", "utf-8"
