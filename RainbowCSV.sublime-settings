@@ -20,6 +20,10 @@
     // Allow quoted multiline fields as defined in RFC-4180: https://tools.ietf.org/html/rfc4180
     "allow_newlines_in_fields": false,
 
+    // Use zero-based column indices in hover column info.
+    // This doesn't affect column naming in RBQL queries.
+    "use_zero_based_column_indices": false,
+
     // Use custom high-contrast rainbow colors instead of colors provided by your current color scheme. 
     // When you enable this option, "auto_adjust_rainbow_colors" also gets enabled by default.
     "use_custom_rainbow_colors": false,

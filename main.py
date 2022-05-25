@@ -1038,13 +1038,14 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
                 field_num = get_col_num_single_line(hover_record, len(delim), cnum)
                 if len(header) != len(hover_record):
                     inconsistent_num_fields_warning = True
-            ui_text = 'Col #{}'.format(field_num + 1)
+            use_zero_based_column_indices = get_setting(self.view, 'use_zero_based_column_indices', False)
+            ui_text = 'Col {}'.format(field_num if use_zero_based_column_indices else field_num + 1)
             if field_num < len(header):
                 column_name = header[field_num]
                 max_header_len = 30
                 if len(column_name) > max_header_len:
                     column_name = column_name[:max_header_len] + '...'
-                ui_text += ', Header: "{}"'.format(column_name)
+                ui_text += ', {}'.format(column_name)
             if inconsistent_num_fields_warning:
                 ui_text += '; WARN: num of fields in Header and this line differs'
             if quoting_warning:
