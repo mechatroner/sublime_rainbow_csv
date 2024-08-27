@@ -2,7 +2,7 @@
 ---
 name: 'Rainbow CSV ~ Simple'
 file_extensions: [rbcsmn126]
-scope: text.rbcsmn126
+scope: text.csv.rbcsmn126
 
 
 contexts:

@@ -1,8 +1,8 @@
 %YAML 1.2
 ---
 name: 'CSV (Rainbow)'
-file_extensions: [rbcstn44]
-scope: text.rbcstn44
+file_extensions: [csv]
+scope: text.csv.rbcstn44
 
 
 contexts:

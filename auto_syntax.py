@@ -3,8 +3,8 @@ import re
 
 
 legacy_syntax_names = {
-    ('\t', 'simple'): 'TSV (Rainbow)',
-    (',', 'quoted'): 'CSV (Rainbow)'
+    ('\t', 'simple'): ('TSV (Rainbow)', 'tsv'),
+    (',', 'quoted'): ('CSV (Rainbow)', 'csv'),
 }
 
 
@@ -20,17 +20,24 @@ def decode_delim(delim):
 
 
 def get_syntax_file_basename(delim, policy):
-    for k, v in legacy_syntax_names.items():
+    for k, (v, _ext) in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v + '.sublime-syntax'
     return 'Rainbow_CSV_hex_{}_{}.sublime-syntax'.format(encode_delim(delim), filename_policy_map[policy])
+
+
+def get_syntax_file_ext(delim, policy):
+    for k, (_v, ext) in legacy_syntax_names.items():
+        if k == (delim, policy):
+            return ext
+    return None
 
 
 simple_header_template = '''%YAML 1.2
 ---
 name: '{}'
 file_extensions: [{}]
-scope: text.{}
+scope: text.csv.{}
 
 
 contexts:
@@ -44,7 +51,7 @@ standard_header_template = '''%YAML 1.2
 ---
 name: '{}'
 file_extensions: [{}]
-scope: text.{}
+scope: text.csv.{}
 
 
 contexts:
@@ -90,7 +97,7 @@ def oniguruma_regular_escape(delim):
 
 
 def get_syntax_name(delim, policy):
-    for k, v in legacy_syntax_names.items():
+    for k, (v, _ext) in legacy_syntax_names.items():
         if (delim, policy) == k:
             return v
     ui_delim = delim.replace('\t', 'tab')
@@ -144,7 +151,8 @@ def make_standard_context(delim, context_id, num_contexts, indent='    '):
 def make_sublime_syntax_simple(delim):
     scope = 'rbcsmn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, 'simple')
-    result = simple_header_template.format(yaml_escape(name), scope, scope)
+    ext = get_syntax_file_ext(delim, 'simple') or scope
+    result = simple_header_template.format(yaml_escape(name), ext, scope)
     num_contexts = len(rainbow_scope_names)
     for context_id in range(num_contexts):
         result += '\n'
@@ -156,7 +164,8 @@ def make_sublime_syntax_standard(delim, policy):
     assert policy in ['quoted', 'quoted_rfc']
     scope = 'rbcstn' + ''.join([str(ord(d)) for d in delim])
     name = get_syntax_name(delim, policy)
-    result = standard_header_template.format(yaml_escape(name), scope, scope)
+    ext = get_syntax_file_ext(delim, policy) or scope
+    result = standard_header_template.format(yaml_escape(name), ext, scope)
     if policy == 'quoted':
         result += non_rfc_endline_rule
     num_contexts = len(rainbow_scope_names)

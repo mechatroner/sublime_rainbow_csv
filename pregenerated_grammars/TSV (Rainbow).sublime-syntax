@@ -1,8 +1,8 @@
 %YAML 1.2
 ---
 name: 'TSV (Rainbow)'
-file_extensions: [rbcsmn9]
-scope: text.rbcsmn9
+file_extensions: [tsv]
+scope: text.csv.rbcsmn9
 
 
 contexts:
