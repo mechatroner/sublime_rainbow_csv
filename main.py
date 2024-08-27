@@ -8,6 +8,7 @@ import sublime
 import rainbow_csv.sublime_rbql as sublime_rbql
 import rainbow_csv.rbql.csv_utils as csv_utils
 import rainbow_csv.auto_syntax as auto_syntax
+import rainbow_csv.json5.json5 as json5
 
 
 table_index_path_cached = None
@@ -15,6 +16,7 @@ table_names_path_cached = None
 
 
 SETTINGS_FILE = 'RainbowCSV.sublime-settings'
+COLOR_SCHEME_FILE = 'RainbowCSV.sublime-color-scheme'
 custom_settings = None # Gets auto updated on every SETTINGS_FILE write
 
 
@@ -103,7 +105,7 @@ def generate_tab_statusline(tabstop_val, delim_size, template_fields, max_output
 
 
 def get_user_color_scheme_path():
-    return os.path.join(subLime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
+    return os.path.join(sublime.packages_path(), 'User', COLOR_SCHEME_FILE)
 
 
 def get_colorscheme_before():
@@ -307,6 +309,16 @@ def is_plain_text(view):
         return True
     if syntax.find('Plain Text (CSV).sublime-syntax') != -1: # Provided by "A File Icon" package
         return True
+
+
+def is_rainbow_csv(view):
+    syntax = view.settings().get('syntax')
+    if syntax.find('CSV (Rainbow).sublime-syntax') != 1:
+        return True
+    if syntax.find('TSV (Rainbow).sublime-syntax') != 1:
+        return True
+    if syntax.find('Rainbow_CSV_hex_') != 1:
+        return True
     return False
 
 
@@ -343,14 +355,27 @@ def get_syntax_settings_file_basename(syntax_file_basename):
 
 
 def make_sublime_settings(syntax_settings_path):
-    if not os.path.exists(syntax_settings_path):
+    try:
+        with open(syntax_settings_path, 'r') as f:
+            settings = json5.load(f)
+    except Exception:
+        settings = {}
+
+    if settings.get('color_scheme') != COLOR_SCHEME_FILE:
+        settings['color_scheme'] = COLOR_SCHEME_FILE
         with open(syntax_settings_path, 'w') as f:
-            f.write('{\n    "color_scheme": "RainbowCSV.sublime-color-scheme"\n}')
+            f.write(f'{json5.dumps(settings, quote_keys=True, indent=4)}\n')
 
 
 def remove_sublime_settings(syntax_settings_path):
     try:
-        os.remove(syntax_settings_path)        
+        with open(syntax_settings_path, 'r') as f:
+            settings = json5.load(f)
+
+        if settings.get('color_scheme') == COLOR_SCHEME_FILE:
+            del settings['color_scheme']
+            with open(syntax_settings_path, 'w') as f:
+                f.write(f'{json5.dumps(settings, quote_keys=True, indent=4)}\n')
     except Exception:
         pass
 
@@ -399,11 +424,7 @@ def do_enable_rainbow(view, delim, policy, store_settings):
     syntax_file_basename, pregenerated, created = ensure_syntax_file(delim, policy)
     dbg_log(logging_enabled, 'Syntax file basename: "{}", Pregenerated: {}, Created: {}'.format(syntax_file_basename, pregenerated, created))
 
-    if pregenerated:
-        syntax_settings_path = os.path.join(sublime.packages_path(), 'rainbow_csv', 'pregenerated_grammars', get_syntax_settings_file_basename(syntax_file_basename))
-    else:
-        syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
-
+    syntax_settings_path = os.path.join(sublime.packages_path(), 'User', get_syntax_settings_file_basename(syntax_file_basename))
     use_custom_rainbow_colors = get_setting(view, 'use_custom_rainbow_colors', False)
 
     if use_custom_rainbow_colors:
@@ -866,7 +887,7 @@ def run_rainbow_autodetect(view):
         if delim is not None:
             do_enable_rainbow(view, delim, policy, store_settings=False)
             return
-    if not is_plain_text(view):
+    if not is_plain_text(view) and not is_rainbow_csv(view):
         return
     enable_autodetection = get_setting(view, 'enable_rainbow_csv_autodetect', True)
     min_lines_to_check = 5
