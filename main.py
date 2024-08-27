@@ -50,7 +50,7 @@ def get_table_names_path():
     return table_names_path_cached
 
 
-legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, v in auto_syntax.legacy_syntax_names.items()}
+legacy_syntax_names_inv = {v + '.sublime-syntax': k for k, (v, _ext) in auto_syntax.legacy_syntax_names.items()}
 
 
 def ensure_syntax_file(delim, policy):

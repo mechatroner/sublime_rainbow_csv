@@ -2,7 +2,7 @@
 ---
 name: 'Rainbow CSV , RFC'
 file_extensions: [rbcstn44]
-scope: text.rbcstn44
+scope: text.csv.rbcstn44
 
 
 contexts:
