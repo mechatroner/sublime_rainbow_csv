@@ -1013,6 +1013,9 @@ class RainbowHoverListener(sublime_plugin.ViewEventListener):
         return get_dialect(settings)[1] != 'monocolumn'
 
     def on_hover(self, point, hover_zone):
+        if not get_setting(self.view, 'show_rainbow_hover', True):
+            return
+
         if hover_zone == sublime.HOVER_TEXT:
             dialect = get_dialect(self.view.settings())
             if dialect[1] == 'monocolumn':
