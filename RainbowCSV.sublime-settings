@@ -9,6 +9,8 @@
     // Files with ".csv" and ".tsv" extensions are always highlighted no matter what is the value of this option.
     "enable_rainbow_csv_autodetect": true,
 
+    // Enable the hover popup that shows additional Rainbow CSV context.
+    "show_rainbow_hover": true,
 
     // List of CSV dialects to autodetect.
     // "simple" - separators CAN NOT be escaped in a double quoted field, double quotes are ignored
