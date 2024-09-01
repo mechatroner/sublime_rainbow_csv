@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/dpranke/pyjson5.git
+	branch = main
+	commit = 43901a8f45579b6d987245edffd8c8fd5cb6a158
+	parent = eeab7cf4d42da9e30ba90ae9410aa8cf0b296872
+	method = merge
+	cmdver = 0.4.9
