@@ -350,7 +350,7 @@ def make_sublime_settings(syntax_settings_path):
 
 def remove_sublime_settings(syntax_settings_path):
     try:
-        os.remove(syntax_settings_path)        
+        os.remove(syntax_settings_path)
     except Exception:
         pass
 
@@ -364,7 +364,7 @@ def dbg_log(logging_enabled, msg):
 
 
 def set_syntax_with_timeout(view, syntax_file, logging_enabled, timeout):
-    # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation - 
+    # We use this callback with timeout because otherwise Sublime fails to find the brand new .sublime-syntax file right after it's generation -
     # And shows an error (highlighting would work though, but the error is really ugly and confusing)
     # Using workaround suggested here: https://github.com/sublimehq/sublime_text/issues/3477
     if timeout > 2000:
@@ -750,6 +750,60 @@ class AlignCommand(sublime_plugin.TextCommand):
         adjusted_content = '\n'.join(adjusted_lines)
         self.view.replace(edit, sublime.Region(0, self.view.size()), adjusted_content)
 
+class ToggleCsvAlignmentCommand(sublime_plugin.TextCommand):
+
+    def run(self, edit):
+        dialect = get_dialect(self.view.settings())
+        if dialect[1] == 'monocolumn':
+            sublime.error_message('Error. You need to select a separator first')
+            return
+
+        delim, policy = dialect
+
+        # Check if the CSV is currently aligned by examining the content
+        # We'll look at a few lines to determine the state
+        is_aligned = self.is_table_aligned(delim, policy)
+
+        if is_aligned:
+            self.view.run_command('shrink')
+        else:
+            self.view.run_command('align')
+
+    def is_table_aligned(self, delim, policy):
+        """
+        Determine if the table is currently aligned by checking if fields
+        have trailing spaces before delimiters
+        """
+        # Sample a few lines from the document
+        line_regions = self.view.lines(sublime.Region(0, self.view.size()))
+        sample_size = min(5, len(line_regions))
+
+        aligned_count = 0
+
+        for i in range(sample_size):
+            line = self.view.substr(line_regions[i])
+            fields, warning = csv_utils.smart_split(line, delim, policy, True)
+
+            if warning:
+                continue
+
+            # Check if any field (except the last one) has trailing spaces
+            for j in range(len(fields) - 1):
+                if fields[j] != fields[j].rstrip():
+                    aligned_count += 1
+                    break
+
+        # If more than half of the sampled lines show alignment, consider it aligned
+        return aligned_count >= (sample_size / 2)
+
+    def is_checked(self):
+        dialect = get_dialect(self.view.settings())
+        if dialect[1] == 'monocolumn':
+            return False
+
+        delim, policy = dialect
+        return self.is_table_aligned(delim, policy)
+
 
 def csv_lint(view, delim, policy):
     if policy == 'quoted_rfc':
@@ -919,7 +973,7 @@ def find_unbalanced_lines_around(view, center_line):
     search_range = 10
     search_begin = max(0, center_line - search_range)
     search_end = min(num_lines, center_line + search_range)
-    start_line = None 
+    start_line = None
     end_line = None
     for l in range(search_begin, search_end):
         cur_line = get_line_text(view, l)

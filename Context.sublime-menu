@@ -8,8 +8,7 @@
             { "command": "disable", "caption": "Disable" },
             { "command": "run_query", "caption": "Run RBQL query (F5)" },
             { "command": "set_table_name", "caption": "Set table name for RBQL" },
-            { "command": "align", "caption": "Align (with trailing spaces)" },
-            { "command": "shrink", "caption": "Shrink (trim spaces from fields)" },
+            { "command": "toggle_csv_alignment", "caption": "Align CSV columns with spaces", "checked": true },
             { "command": "csv_lint", "caption": "CSVLint" },
             { "command": "edit_settings", "caption": "Settings",
                 "args": {
