@@ -103,7 +103,7 @@ def generate_tab_statusline(tabstop_val, delim_size, template_fields, max_output
 
 
 def get_user_color_scheme_path():
-    return os.path.join(subLime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
+    return os.path.join(sublime.packages_path(), 'User', 'RainbowCSV.sublime-color-scheme')
 
 
 def get_colorscheme_before():
