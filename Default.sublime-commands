@@ -2,6 +2,7 @@
     { "caption": "Rainbow CSV: Run RBQL query", "command": "run_query" },
     { "caption": "Rainbow CSV: Align CSV columns with spaces", "command": "align" },
     { "caption": "Rainbow CSV: Shrink CSV table by trimming spaces from fields", "command": "shrink" },
+    { "caption": "Rainbow CSV: Toggle aligning CSV columns with spaces", "command": "toggle_csv_alignment" },
     { "caption": "Rainbow CSV: CSVLint", "command": "csv_lint" },
     { "caption": "Rainbow CSV: Enable Simple", "command": "enable_simple" },
     { "caption": "Rainbow CSV: Enable Quoted", "command": "enable_quoted" },

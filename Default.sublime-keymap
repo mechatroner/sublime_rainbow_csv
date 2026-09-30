@@ -1,3 +1,4 @@
 [
-    {"keys": ["f5"], "command": "run_query", "context": [{"key": "setting.rainbow_mode", "operator": "equal", "operand": true}]}
+    {"keys": ["f5"], "command": "run_query", "context": [{"key": "setting.rainbow_mode", "operator": "equal", "operand": true}]},
+    {"keys": ["ctrl+alt+a"], "command": "toggle_csv_alignment"}
 ]
